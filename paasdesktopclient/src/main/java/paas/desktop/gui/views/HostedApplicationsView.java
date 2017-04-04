@@ -17,16 +17,15 @@ import javax.swing.*;
 import static swingutils.EventListHelper.eventList;
 import static swingutils.background.BackgroundOperation.execute;
 import static swingutils.components.ComponentFactory.button;
-import static swingutils.components.ComponentFactory.icon;
 
 @Component
 public class HostedApplicationsView extends LazyInitRichAbstractView {
 
-    @Autowired private HttpPaasClient httpPaasClient;
-    @Autowired private EventBus eventBus;
-
     private final EventList<HostedAppInfo> apps = eventList();
-
+    @Autowired
+    private HttpPaasClient httpPaasClient;
+    @Autowired
+    private EventBus eventBus;
 
     @Override
     protected JComponent wireAndLayout() {
@@ -38,11 +37,10 @@ public class HostedApplicationsView extends LazyInitRichAbstractView {
                 .column("Jar file", String.class, HostedAppInfo::getJarFile)
                 .column("Command line", String.class, HostedAppInfo::getCommandLineArgs)
                 .column("Running", Boolean.class, HostedAppInfo::isRunning)
-                .actionable(icon("/img/tail.png"), "Tail", eventBus::showTailFor)
-                //todo: no icon, just text
-                //todo add actionable columns to restart/etc
-                ;
+                .actionable("Show tail", "Show", eventBus::showTailFor)
+                .actionable("Restart", "Restart", this::restart);
         TablePanel<HostedAppInfo> tablePanel = TableFactory.createTablePanel(apps, columns);
+        tablePanel.getToolbar().removeAll();
         tablePanel.getToolbar().add(button("Refresh", this::refreshApps));
 
         return tablePanel.getComponent();
@@ -59,5 +57,16 @@ public class HostedApplicationsView extends LazyInitRichAbstractView {
                 res -> EventListHelper.replaceContent(apps, res),
                 this::onException,
                 getParent());
+    }
+
+    private void restart(HostedAppInfo appInfo) {
+        execute(
+                () -> httpPaasClient.restart(appInfo.getId()),
+                res -> {
+                    getParent().showAndLock(res);
+                    refreshApps();
+                },
+                this::onException
+        );
     }
 }

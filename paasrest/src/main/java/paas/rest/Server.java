@@ -83,6 +83,8 @@ public class Server extends SpringBootServletInitializer {
             }
         }
 
+        //todo undeploy(int appId)
+
         @GetMapping(value = "/restart")
         public String restart(@RequestParam int appId) throws IOException, InterruptedException {
             HostedApp app = hostedAppManager.getApp(appId);

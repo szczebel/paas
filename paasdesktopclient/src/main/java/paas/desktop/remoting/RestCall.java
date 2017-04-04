@@ -11,13 +11,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.Base64;
+import java.util.List;
 import java.util.function.Supplier;
 
 import static java.util.Collections.singletonList;
 
 public abstract class RestCall<T> {
     final Class<T> expectedClass;
-    final String url;
+    final MultiValueMap<String, Object> params = new LinkedMultiValueMap<>();
+    private final String url;
     final HttpHeaders headers;
     private final ResponseErrorHandler errorHandler = new ErrorHandler();
     private Supplier<? extends RestTemplate> templateSupplier = RestTemplate::new;
@@ -67,6 +69,27 @@ public abstract class RestCall<T> {
         return this;
     }
 
+    public RestCall<T> param(String key, Object value) {
+        params.add(key, value);
+        return this;
+    }
+
+    final String originalUrl() {
+        return url;
+    }
+
+    String url() {
+        String retval = originalUrl();
+        if(!params.isEmpty()) retval += "?";
+        for (String key : params.keySet()) {
+            List<Object> values = params.get(key);
+            for (Object value : values) {
+                retval += key + "=" + String.valueOf(value) + "&";
+            }
+        }
+        return retval;
+    }
+
     RestTemplate template() {
         RestTemplate restTemplate = templateSupplier.get();
         restTemplate.setErrorHandler(errorHandler);
@@ -87,7 +110,6 @@ public abstract class RestCall<T> {
     }
 
     public static abstract class RestParametrizedCall<T> extends RestCall<T> {
-        final MultiValueMap<String, Object> params = new LinkedMultiValueMap<>();
 
         RestParametrizedCall(String url, Class<T> expectedClass) {
             super(url, expectedClass);
@@ -97,9 +119,9 @@ public abstract class RestCall<T> {
             return new HttpEntity<>(params, headers);
         }
 
-        public RestParametrizedCall<T> param(String key, Object value) {
-            params.add(key, value);
-            return this;
+        @Override
+        String url() {
+            return originalUrl();
         }
     }
 
@@ -112,7 +134,7 @@ public abstract class RestCall<T> {
         @Override
         public T[] execute() {
             return template().exchange(
-                    url,
+                    url(),
                     HttpMethod.GET,
                     req(),
                     expectedClass
@@ -127,7 +149,7 @@ public abstract class RestCall<T> {
         }
 
         public T execute() {
-            return template().exchange(url, HttpMethod.GET, req(), expectedClass).getBody();
+            return template().exchange(url(), HttpMethod.GET, req(), expectedClass).getBody();
         }
 
     }
@@ -156,7 +178,7 @@ public abstract class RestCall<T> {
         }
 
         public Void execute() {
-            template().exchange(url, HttpMethod.DELETE, req(), Void.class);
+            template().exchange(url(), HttpMethod.DELETE, req(), Void.class);
             return null;
         }
     }
@@ -168,7 +190,7 @@ public abstract class RestCall<T> {
         }
 
         public Void execute() {
-            template().postForEntity(url, req(), Void.class);
+            template().postForEntity(url(), req(), Void.class);
             return null;
         }
 

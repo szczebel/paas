@@ -11,6 +11,7 @@ import javax.swing.*;
 import java.util.HashMap;
 import java.util.Map;
 
+import static javax.swing.SwingConstants.TOP;
 import static swingutils.layout.LayoutBuilders.tabbedPane;
 
 @Component
@@ -21,13 +22,19 @@ public class TailViewsContainer extends LazyInitRichAbstractView {
 
     private JTabbedPane tabs;
     private Map<Integer, TailView> tabsMap = new HashMap<>();
+    Timer timer;
 
     //todo: on server change: close all
+    //todo: on apps change: close the ones that are no more
 
     @Override
     protected JComponent wireAndLayout() {
+        timer = new Timer(1000, e -> refreshAll());
+        timer.setInitialDelay(1000);
+        timer.setRepeats(true);
+        timer.start();
         eventBus.whenTailRequested(this::showTailFor);
-        tabs = tabbedPane(JTabbedPane.BOTTOM).build();
+        tabs = tabbedPane(TOP).build();
         return tabs;
     }
 
@@ -35,9 +42,14 @@ public class TailViewsContainer extends LazyInitRichAbstractView {
         if(tabsMap.containsKey(appInfo.getId())) {
             tabs.setSelectedComponent(tabsMap.get(appInfo.getId()).getComponent());
         } else {
-            TailView tailView = new TailView(appInfo);
+            TailView tailView = new TailView(appInfo, httpPaasClient);
             tabsMap.put(appInfo.getId(), tailView);
             tabs.addTab("App ID : " + appInfo.getId(), tailView.getComponent());
+            tabs.setSelectedComponent(tailView.getComponent());
         }
+    }
+
+    private void refreshAll() {
+        tabsMap.values().forEach(TailView::refresh);
     }
 }

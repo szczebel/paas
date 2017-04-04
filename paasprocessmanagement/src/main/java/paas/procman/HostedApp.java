@@ -24,7 +24,6 @@ public class HostedApp {
         this.id = id;
         this.jarFile = jarFile;
         this.commandLineArgs = commandLineArgs;
-        //todo: pass these in
         this.out = new File(workingDirectory, jarFile.getName() + ".out");
         this.err = new File(workingDirectory, jarFile.getName() + ".err");
         this.workingDirectory = workingDirectory;
