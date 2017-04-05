@@ -1,6 +1,7 @@
 package paas.rest;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
@@ -43,9 +44,12 @@ public class Server extends SpringBootServletInitializer {
     }
 
     @Bean
-    FileSystemStorageService fileSystemStorageService() {
-        //todo externalize storageRoot
-        return new FileSystemStorageService(System.getProperty("user.home") + "/hackathon-upload-dir/paas");
+    FileSystemStorageService fileSystemStorageService(
+            @Value("${storage.root}") String storageRoot,
+            @Value("${storage.root.is.relative.to.user.dir}") boolean relative) {
+        if(relative) storageRoot = System.getProperty("user.home") + storageRoot;
+        System.out.println("Storage path:" + storageRoot);
+        return new FileSystemStorageService(storageRoot);
     }
 
     @RestController

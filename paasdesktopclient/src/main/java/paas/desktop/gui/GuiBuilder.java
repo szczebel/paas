@@ -13,6 +13,11 @@ import java.awt.*;
 
 import static swingutils.components.ComponentFactory.decorate;
 
+//todo splashscreen
+//todo fix too long error messages not fitting overlays
+//todo redirect Syserr/out to  gui
+//todo local tomcat&paas forever
+
 @Component
 public class GuiBuilder {
 

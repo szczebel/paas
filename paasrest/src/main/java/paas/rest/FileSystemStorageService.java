@@ -26,7 +26,7 @@ class FileSystemStorageService {
     @SuppressWarnings("unused")
     @PostConstruct
     void init() throws IOException {
-        if(!uploads.exists()) Files.createDirectory(logs.toPath());
+        if(!logs.exists()) Files.createDirectory(logs.toPath());
     }
 
     private File save(MultipartFile file) throws IOException {
