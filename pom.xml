@@ -9,8 +9,8 @@
     <version>1.0</version>
     <modules>
         <module>paasprocessmanagement</module>
-        <module>paasrest</module>
         <module>paasdesktopclient</module>
+        <module>paasrest</module>
     </modules>
     <packaging>pom</packaging>
 
