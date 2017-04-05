@@ -35,7 +35,6 @@ class FileSystemStorageService {
         }
         if (!uploads.exists()) Files.createDirectory(uploads.toPath());
         Path target = uploads.toPath().resolve(file.getOriginalFilename());
-        System.out.println("Saving " + target);
         Files.copy(file.getInputStream(), target);
         return target.toFile();
     }
@@ -51,7 +50,6 @@ class FileSystemStorageService {
             throw new IOException("Empty file: " + file.getOriginalFilename());
         }
         Path target = uploads.toPath().resolve(file.getOriginalFilename());
-        System.out.println("Deleting " + target);
         Files.deleteIfExists(target);
         return save(file);
     }

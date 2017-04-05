@@ -8,8 +8,11 @@ import paas.desktop.remoting.HttpPaasClient;
 import swingutils.components.LazyInitRichAbstractView;
 
 import javax.swing.*;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static javax.swing.SwingConstants.TOP;
 import static swingutils.layout.LayoutBuilders.tabbedPane;
@@ -22,34 +25,46 @@ public class TailViewsContainer extends LazyInitRichAbstractView {
 
     private JTabbedPane tabs;
     private Map<Integer, TailView> tabsMap = new HashMap<>();
-    Timer timer;
-
-    //todo: on server change: close all
-    //todo: on apps change: close the ones that are no more
 
     @Override
     protected JComponent wireAndLayout() {
-        timer = new Timer(1000, e -> refreshAll());
-        timer.setInitialDelay(1000);
-        timer.setRepeats(true);
-        timer.start();
         eventBus.whenTailRequested(this::showTailFor);
+        eventBus.whenServerChanged(s -> closeAll());
+        eventBus.whenCurrentAppsChanged(this::currentAppsChanged);
         tabs = tabbedPane(TOP).build();
         return tabs;
     }
 
+    private void currentAppsChanged(Collection<HostedAppInfo> currentApps) {
+        List<Integer> currentAppIds = currentApps.stream().map(HostedAppInfo::getId).collect(Collectors.toList());
+        for (Integer appId : tabsMap.keySet()) {
+            if(!currentAppIds.contains(appId)) {
+                closeTailView(appId);
+            }
+        }
+    }
+
+    private void closeTailView(int appId) {
+        TailView removed = tabsMap.remove(appId);
+        removed.dispose();
+        tabs.remove(removed.getComponent());
+    }
+
+    private void closeAll() {
+        tabsMap.keySet().forEach(this::closeTailView);
+    }
+
     private void showTailFor(HostedAppInfo appInfo) {
         if(tabsMap.containsKey(appInfo.getId())) {
-            tabs.setSelectedComponent(tabsMap.get(appInfo.getId()).getComponent());
+            TailView tailView = tabsMap.get(appInfo.getId());
+            tabs.setSelectedComponent(tailView.getComponent());
+            tailView.refresh();
         } else {
             TailView tailView = new TailView(appInfo, httpPaasClient);
             tabsMap.put(appInfo.getId(), tailView);
             tabs.addTab("App ID : " + appInfo.getId(), tailView.getComponent());
             tabs.setSelectedComponent(tailView.getComponent());
+            tailView.refresh();
         }
-    }
-
-    private void refreshAll() {
-        tabsMap.values().forEach(TailView::refresh);
     }
 }

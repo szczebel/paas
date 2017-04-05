@@ -55,8 +55,16 @@ public class HttpPaasClient {
         );
     }
 
+    @MustBeInBackground
     public String restart(int appId) {
         return restGet(serverUrl + "/restart", String.class)
+                .param("appId", appId)
+                .execute();
+    }
+
+    @MustBeInBackground
+    public String undeploy(int appId) {
+        return restGet(serverUrl + "/undeploy", String.class)
                 .param("appId", appId)
                 .execute();
     }

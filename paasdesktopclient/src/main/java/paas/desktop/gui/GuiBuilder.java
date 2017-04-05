@@ -1,5 +1,6 @@
 package paas.desktop.gui;
 
+import com.jgoodies.forms.builder.FormBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import paas.desktop.gui.infra.EventBus;
@@ -8,11 +9,9 @@ import swingutils.components.ComponentFactory;
 import swingutils.components.IsComponent;
 
 import javax.swing.*;
+import java.awt.*;
 
 import static swingutils.components.ComponentFactory.decorate;
-import static swingutils.components.ComponentFactory.splitPane;
-import static swingutils.layout.LayoutBuilders.borderLayout;
-import static swingutils.layout.LayoutBuilders.vBox;
 
 @Component
 public class GuiBuilder {
@@ -30,24 +29,22 @@ public class GuiBuilder {
         ComponentFactory.initLAF();
         JFrame f = new JFrame("Tiniest PaaS desktop client");
         f.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        JSplitPane split = splitPane(JSplitPane.VERTICAL_SPLIT,
-                dec(hostedApplicationsView.getComponent(), "Hosted applications", 8, 4, 2, 8),
-                dec(tailViewsContainer.getComponent(), "Logs", 2, 4, 8, 8)
-        );
-        f.add(borderLayout()
-                .west(
-                        vBox(0,
-                                dec(serverUrlView.getComponent(), "Tiniest Paas Server", 8, 8, 4, 4),
-                                dec(deployView.getComponent(), "Deploy", 4, 8, 4, 4)
-                        )
-                )
-                .center(split)
-                .build()
-        );
+
+        JPanel north = FormBuilder.create()
+                .columns("pref:none, pref:grow")
+                .rows("pref:none, pref:none")
+                .add(dec(serverUrlView.getComponent(), "Tiniest Paas Server", 8, 8, 4, 4)).xy(1, 1)
+                .add(dec(deployView.getComponent(), "Deploy", 4, 8, 4, 4)).xy(1, 2)
+                .add(dec(hostedApplicationsView.getComponent(), "Hosted applications", 8, 4, 4, 8)).xywh(2, 1, 1, 2)
+                .build();
+        f.add(north, BorderLayout.NORTH);
+        JComponent center = dec(tailViewsContainer.getComponent(), "Logs", 4, 8, 8, 8);
+        center.setPreferredSize(new Dimension(1300, 600));
+        f.add(center);
+
         f.pack();
         f.setLocationRelativeTo(null);
         f.setVisible(true);
-        SwingUtilities.invokeLater(() -> split.setDividerLocation(0.5));
     }
 
     private JComponent dec(JComponent component, String title, int top, int left, int bottom, int right) {
@@ -57,5 +54,4 @@ public class GuiBuilder {
                 .withEmptyBorder(top, left, bottom, right)
                 .get();
     }
-
 }

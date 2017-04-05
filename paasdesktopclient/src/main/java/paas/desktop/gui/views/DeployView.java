@@ -1,21 +1,19 @@
 package paas.desktop.gui.views;
 
+import com.jgoodies.forms.builder.FormBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import paas.desktop.gui.infra.EventBus;
 import paas.desktop.remoting.HttpPaasClient;
-import swingutils.background.BackgroundOperation;
 import swingutils.components.LazyInitRichAbstractView;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
-import java.awt.*;
 import java.io.File;
 
+import static javax.swing.SwingConstants.RIGHT;
 import static swingutils.components.ComponentFactory.button;
-import static swingutils.layout.LayoutBuilders.borderLayout;
-import static swingutils.layout.LayoutBuilders.flowLayout;
-import static swingutils.layout.forms.FormLayoutBuilders.simpleForm;
+import static swingutils.components.ComponentFactory.label;
 
 @Component
 public class DeployView extends LazyInitRichAbstractView {
@@ -38,15 +36,16 @@ public class DeployView extends LazyInitRichAbstractView {
         fileName.setEditable(false);
         commandLine = new JTextField(10);
 
-        return simpleForm()
-                        .addRow("File to deploy:", borderLayout()
-                                .east(button("Change...", this::selectFile))
-                                .center(fileName)
-                                .build())
-                        .addRow("Command line:", commandLine)
-                        .addRow("", flowLayout(FlowLayout.RIGHT, button("Deploy", this::deploy)))
-                        .build()
-        ;
+        return FormBuilder.create()
+                .columns("pref:none, ${label-component-gap}, pref:grow, ${label-component-gap}, pref:none")
+                .rows("pref:none, $lg, pref:none, $lg, pref:none")
+                .add(label("File to deploy:", RIGHT))       .xy(1, 1)
+                .add(fileName)                                  .xy(3, 1)
+                .add(button("Change...", this::selectFile)).xy(5, 1)
+                .add(label("Command line:", RIGHT))         .xy(1, 3)
+                .add(commandLine)                              .xyw(3, 3, 3)
+                .add(button("Deploy", this::deploy))        .xy(5, 5)
+                .build();
     }
 
     private void selectFile() {
@@ -59,19 +58,17 @@ public class DeployView extends LazyInitRichAbstractView {
 
     private void deploy() {
         if (selectedFile != null) {
-            BackgroundOperation.execute(
+            inBackground(
                     () -> httpPaasClient.deploy(selectedFile, commandLine.getText()),
-                    this::deployed,
-                    this::onException,
-                    getParent()
+                    this::deployed
             );
         } else {
-            getParent().showAndLock("No file selected");
+            showMessage("No file selected");
         }
     }
 
     private void deployed(String statusMessage) {
         eventBus.appDeployed();
-        getParent().showAndLock(statusMessage);
+        showMessage(statusMessage);
     }
 }

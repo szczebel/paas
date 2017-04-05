@@ -2,6 +2,7 @@ package paas.procman;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,6 +20,7 @@ public class HostedApp {
     private final File err;
     private final File workingDirectory;
     private Process process;
+    private ZonedDateTime start;
 
     public HostedApp(int id, File jarFile, String commandLineArgs, File workingDirectory) {
         this.id = id;
@@ -31,8 +33,9 @@ public class HostedApp {
 
 
     private Process spawn() throws IOException, InterruptedException {
+        this.start = ZonedDateTime.now();
         List<String> commands = new ArrayList<>(asList(JAVA_BIN, "-jar", jarFile.getAbsolutePath()));
-        if(commandLineArgs != null) {
+        if (commandLineArgs != null) {
             List<String> additionalArgs = asList(commandLineArgs.split(" "));
             if (!additionalArgs.isEmpty()) commands.addAll(additionalArgs);
         }
@@ -80,5 +83,9 @@ public class HostedApp {
 
     public boolean isRunning() {
         return process != null && process.isAlive();
+    }
+
+    public ZonedDateTime getStart() {
+        return start;
     }
 }

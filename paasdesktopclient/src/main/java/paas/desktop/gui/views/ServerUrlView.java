@@ -1,5 +1,6 @@
 package paas.desktop.gui.views;
 
+import com.jgoodies.forms.builder.FormBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -8,9 +9,9 @@ import swingutils.components.LazyInitRichAbstractView;
 
 import javax.swing.*;
 
+import static javax.swing.SwingConstants.RIGHT;
 import static swingutils.components.ComponentFactory.button;
-import static swingutils.layout.LayoutBuilders.borderLayout;
-import static swingutils.layout.forms.FormLayoutBuilders.simpleForm;
+import static swingutils.components.ComponentFactory.label;
 
 @Component
 public class ServerUrlView extends LazyInitRichAbstractView {
@@ -26,19 +27,18 @@ public class ServerUrlView extends LazyInitRichAbstractView {
         urlTextField.setEditable(false);
         JButton button = button("Change...", this::changeServer);
 
-
-        return simpleForm()
-                .addRow("URL:",
-                    borderLayout()
-                        .center(urlTextField)
-                        .east(button)
-                        .build()
-                ).build();
+        return FormBuilder.create()
+                .rows("pref:none")
+                .columns("pref:none, ${label-component-gap}, pref:grow, ${label-component-gap}, pref:grow")
+                .add(label("Url:", RIGHT)).xy(1, 1)
+                .add(urlTextField).xy(3, 1)
+                .add(button).xy(5, 1)
+                .build();
     }
 
     private void changeServer() {
-        String res = JOptionPane.showInputDialog(getComponent(), "Provide url of the server");
-        if (res != null) {
+        String res = JOptionPane.showInputDialog(getComponent(), "Provide url of the server", urlTextField.getText());
+        if (res != null && !res.equals(urlTextField.getText())) {
             urlTextField.setText(res);
             eventBus.serverChanged(res);
         }

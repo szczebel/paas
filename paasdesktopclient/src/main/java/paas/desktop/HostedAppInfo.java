@@ -1,20 +1,16 @@
 package paas.desktop;
 
+import java.util.Date;
+
 //todo: copied from server, remove duplication
 public class HostedAppInfo {
 
-    //todo: startTime, uptime?
+
     private int id;
     private String jarFile;
     private String commandLineArgs;
     private boolean running;
-
-    HostedAppInfo(int id, String jarFile, String commandLineArgs, boolean running) {
-        this.id = id;
-        this.jarFile = jarFile;
-        this.commandLineArgs = commandLineArgs;
-        this.running = running;
-    }
+    private Date start;
 
     public HostedAppInfo() {
     }
@@ -51,6 +47,14 @@ public class HostedAppInfo {
         this.commandLineArgs = commandLineArgs;
     }
 
+    public Date getStart() {
+        return start;
+    }
+
+    public void setStart(Date start) {
+        this.start = start;
+    }
+
     @Override
     public String toString() {
         return "HostedAppInfo{" +
@@ -58,6 +62,7 @@ public class HostedAppInfo {
                 ", jarFile='" + jarFile + '\'' +
                 ", commandLineArgs='" + commandLineArgs + '\'' +
                 ", running=" + running +
+                ", start=" + start +
                 '}';
     }
 }

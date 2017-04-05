@@ -18,6 +18,8 @@ import paas.procman.HostedAppManager;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.sql.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -61,7 +63,7 @@ public class Server extends SpringBootServletInitializer {
         List<HostedAppInfo> applications() throws IOException {
             return hostedAppManager.getApps()
                     .stream()
-                    .map(ha -> new HostedAppInfo(ha.getId(), ha.getJarFile().getName(), ha.getCommandLineArgs(), ha.isRunning()))
+                    .map(ha -> new HostedAppInfo(ha.getId(), ha.getJarFile().getName(), ha.getCommandLineArgs(), ha.isRunning(), Date.from(ha.getStart().toInstant())))
                     .collect(toList());
         }
 
@@ -83,7 +85,14 @@ public class Server extends SpringBootServletInitializer {
             }
         }
 
-        //todo undeploy(int appId)
+        @GetMapping(value = "/undeploy")
+        public String undeploy(@RequestParam int appId) throws IOException, InterruptedException {
+            HostedApp app = hostedAppManager.getApp(appId);
+            app.stop();
+            hostedAppManager.remove(appId);
+            Files.delete(app.getJarFile().toPath());
+            return "Undeployed app with ID: " + app.getId();
+        }
 
         @GetMapping(value = "/restart")
         public String restart(@RequestParam int appId) throws IOException, InterruptedException {

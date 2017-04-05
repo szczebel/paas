@@ -33,4 +33,8 @@ public class HostedAppManager {
     public Optional<HostedApp> findByJarName(String jarFileName) {
         return hostedApps.stream().filter(ha -> jarFileName.equals(ha.getJarFile().getName())).findAny();
     }
+
+    public void remove(int appId) {
+        hostedApps.remove(getApp(appId));
+    }
 }

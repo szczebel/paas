@@ -4,6 +4,7 @@ import org.springframework.stereotype.Component;
 import paas.desktop.HostedAppInfo;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -37,5 +38,15 @@ public class EventBus {
 
     public void showTailFor(HostedAppInfo hostedAppInfo) {
         tailRequestListeners.forEach(l -> l.accept(hostedAppInfo));
+    }
+
+    private List<Consumer<Collection<HostedAppInfo>>> currentAppsChangeListeners = new ArrayList<>();
+
+    public void whenCurrentAppsChanged(Consumer<Collection<HostedAppInfo>> listener) {
+        currentAppsChangeListeners.add(listener);
+    }
+
+    public void currentAppsChanged(Collection<HostedAppInfo> apps) {
+        currentAppsChangeListeners.forEach(l -> l.accept(apps));
     }
 }
