@@ -1,5 +1,6 @@
 package paas.desktop.gui.views;
 
+import paas.desktop.DatedMessage;
 import paas.desktop.HostedAppInfo;
 import paas.desktop.remoting.HttpPaasClient;
 import swingutils.components.LazyInitRichAbstractView;
@@ -17,8 +18,9 @@ public class TailView extends LazyInitRichAbstractView {
     private final HostedAppInfo appInfo;
     private final HttpPaasClient httpPaasClient;
 
-    private final RollingConsole sysout = new RollingConsole(100);
-    private final RollingConsole connection = new RollingConsole(100);
+    private long lastMessageTimestamp = 0;
+    private final RollingConsole sysout = new RollingConsole(1000);
+    private final RollingConsole connection = new RollingConsole(1000);
 
     private JCheckBox autorefresh;
     private Timer timer;//todo websockets :>
@@ -59,14 +61,15 @@ public class TailView extends LazyInitRichAbstractView {
 
     void refresh() {
         inBackground(
-                () -> httpPaasClient.tailSysout(appInfo.getId(), 100),
-                res -> replace(sysout, res)
+                () -> httpPaasClient.tailNewerThan(appInfo.getId(), lastMessageTimestamp),
+                this::newTailReceived
         );
     }
 
-    private void replace(RollingConsole console, List<String> newTail) {
-        console.clear();
-        newTail.forEach(console::appendLine);
+    private void newTailReceived(List<DatedMessage> newOutput) {
+        if (newOutput.isEmpty()) return;
+        lastMessageTimestamp = newOutput.get(newOutput.size() - 1).getTimestamp();
+        newOutput.stream().map(DatedMessage::getMessage).forEach(sysout::appendLine);
     }
 
     @Override

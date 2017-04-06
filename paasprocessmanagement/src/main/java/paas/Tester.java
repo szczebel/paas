@@ -1,5 +1,6 @@
 package paas;
 
+import paas.procman.DatedMessage;
 import paas.procman.HostedApp;
 
 import javax.swing.*;
@@ -8,6 +9,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class Tester {
 
@@ -16,7 +18,7 @@ public class Tester {
 //        fileChooser.showOpenDialog(null);
 //        File selectedFile = fileChooser.getSelectedFile();
         File selectedFile = new File(
-        "C:\\Users\\Adam_Szczeblewski\\IdeaProjects\\elevators-epam-fresh\\elevatorcontestwebgroup\\elevatorcontestwebrestserver\\target\\elevator-hackaton-web-rest-server-1.1.war"
+        "C:\\Users\\Adam_Szczeblewski\\IdeaProjects\\elevators-epam-fresh\\elevatorcontestwebgroup\\elevatorcontestwebrestserver\\target\\elevator-hackaton-web-rest-server-1.1.jar"
         );
         System.out.println(selectedFile);
 
@@ -69,11 +71,13 @@ public class Tester {
         }
 
         void tailOut() throws IOException {
-            showTail(app.tailSysout(100));
+            showTail(app.tailSysout(0).stream().map(DatedMessage::getMessage).collect(Collectors.toList()));
         }
 
         private void showTail(List<String> strings) {
-            JOptionPane.showMessageDialog(parent, new JScrollPane(new JList<>(strings.toArray())));
+            JOptionPane.showMessageDialog(parent,
+                    new JScrollPane(new JList<>(strings.toArray()))
+            );
         }
     }
 }

@@ -16,16 +16,15 @@ public class HostedApp {
     private final int id;
     private final File jarFile;
     private final String commandLineArgs;
-    private final File out;
     private final File workingDirectory;
     private Process process;
     private ZonedDateTime start;
+    private AsyncOutputCollector outputCollector = new AsyncOutputCollector(300);
 
     public HostedApp(int id, File jarFile, String commandLineArgs, File workingDirectory) {
         this.id = id;
         this.jarFile = jarFile;
         this.commandLineArgs = commandLineArgs;
-        this.out = new File(workingDirectory, jarFile.getName() + ".out");
         this.workingDirectory = workingDirectory;
     }
 
@@ -37,12 +36,16 @@ public class HostedApp {
             List<String> additionalArgs = asList(commandLineArgs.split(" "));
             if (!additionalArgs.isEmpty()) commands.addAll(additionalArgs);
         }
-        return new ProcessBuilder()
+        Process p = new ProcessBuilder()
                 .command(commands)
                 .directory(workingDirectory)
-                .redirectOutput(out) //todo consider in-memory err&out logs (see Shell)
                 .redirectErrorStream(true)
                 .start();
+        outputCollector.asyncCollect(
+                String.join(" ", commands),
+                p.getInputStream()
+        );
+        return p;
     }
 
 
@@ -59,9 +62,8 @@ public class HostedApp {
         process = null;
     }
 
-    //todo: replace 'limit' with timestamp (tail logs newer than timestamp) - ONLY if switched to in-memory
-    public List<String> tailSysout(int limit) throws IOException {
-        return Tail.tail(out, limit);
+    public List<DatedMessage> tailSysout(long timestamp) {
+        return outputCollector.getOutputNewerThan(timestamp);
     }
 
     public int getId() {

@@ -1,23 +1,23 @@
 package paas.desktop;
 
-public class ShellOutput {
+public class DatedMessage {
 
     private long timestamp;
-    private String outputLine;
+    private String message;
 
     public void setTimestamp(long timestamp) {
         this.timestamp = timestamp;
     }
 
-    public void setOutputLine(String outputLine) {
-        this.outputLine = outputLine;
+    public void setMessage(String message) {
+        this.message = message;
     }
 
     public long getTimestamp() {
         return timestamp;
     }
 
-    public String getOutputLine() {
-        return outputLine;
+    public String getMessage() {
+        return message;
     }
 }

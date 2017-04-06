@@ -2,7 +2,7 @@ package paas.desktop.gui.views;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import paas.desktop.ShellOutput;
+import paas.desktop.DatedMessage;
 import paas.desktop.gui.infra.EventBus;
 import paas.desktop.remoting.HttpPaasClient;
 import swingutils.components.LazyInitRichAbstractView;
@@ -69,10 +69,10 @@ public class ServerShellConsole extends LazyInitRichAbstractView {
         );
     }
 
-    private void newOutputReceived(List<ShellOutput> newOutput) {
+    private void newOutputReceived(List<DatedMessage> newOutput) {
         if (newOutput.isEmpty()) return;
         lastMessageTimestamp = newOutput.get(newOutput.size() - 1).getTimestamp();
-        newOutput.stream().map(ShellOutput::getOutputLine).forEach(output::appendLine);
+        newOutput.stream().map(DatedMessage::getMessage).forEach(output::appendLine);
     }
 
     private void sendCommand(String command) {

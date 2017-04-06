@@ -1,10 +1,13 @@
 package paas.host;
 
+import paas.procman.AsyncOutputCollector;
+import paas.procman.DatedMessage;
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.util.*;
+import java.util.List;
 
 public class Shell {
 
@@ -22,47 +25,30 @@ public class Shell {
 
     private static long printNewOutput(long timestamp, Shell shell) throws InterruptedException {
         Thread.sleep(1000);
-        List<ShellOutput> newOutput = shell.getOutputNewerThan(timestamp);
+        List<DatedMessage> newOutput = shell.getOutputNewerThan(timestamp);
         if(newOutput.isEmpty()) return timestamp;
         timestamp = newOutput.get(newOutput.size()-1).getTimestamp();
-        newOutput.stream().map(ShellOutput::getOutputLine).forEach(System.out::println);
+        newOutput.stream().map(DatedMessage::getMessage).forEach(System.out::println);
         return timestamp;
     }
 
     private static final int OUTPUT_MAX_SIZE = 1000;
     private final String shellInvokeCmd;
-    private final LinkedList<ShellOutput> output = new LinkedList<>();
 
     private Process shellProcess;
     private BufferedWriter shellWriter;
+    private AsyncOutputCollector outputCollector = new AsyncOutputCollector(OUTPUT_MAX_SIZE);
 
     public Shell(String shellInvokeCmd) {
         this.shellInvokeCmd = shellInvokeCmd;
     }
 
-    public synchronized List<ShellOutput> getOutputNewerThan(long timestamp) {
-        if(timestamp==0) return new ArrayList<>(output);
-        LinkedList<ShellOutput> retval = new LinkedList<>();
-        Iterator<ShellOutput> shellOutputIterator = output.descendingIterator();
-        while (shellOutputIterator.hasNext()) {
-            ShellOutput next = shellOutputIterator.next();
-            if(next.getTimestamp() > timestamp) retval.addFirst(next);
-            else break;
-        }
-        return retval;
-    }
-
-    private synchronized void appendLine(String line) {
-        output.addLast(new ShellOutput(System.nanoTime(), line));
-        if (output.size() > OUTPUT_MAX_SIZE) {
-            output.removeFirst();
-        }
+    public List<DatedMessage> getOutputNewerThan(long timestamp) {
+        return outputCollector.getOutputNewerThan(timestamp);
     }
 
     public synchronized void execute(String command) throws IOException, InterruptedException {
         if(shellProcess == null || !shellProcess.isAlive()) {
-            output.clear();
-            appendLine("Shell process not running, creating one");
             start();
         }
         shellWriter.write(command);
@@ -80,20 +66,13 @@ public class Shell {
                 .redirectErrorStream(true)
                 .start();
         shellWriter = new BufferedWriter(new OutputStreamWriter(shellProcess.getOutputStream()));
-        Thread outputReader = new Thread(this::readShellOutput);
-        outputReader.setDaemon(true);
-        outputReader.start();
+        outputCollector.asyncCollect(
+                "Shell process not running, creating one",
+                shellProcess.getInputStream()
+        );
     }
 
-    private void readShellOutput() {
-        System.out.println("running readoutput thread");
-        try (Scanner reader = new Scanner(shellProcess.getInputStream())) {
-            while (reader.hasNextLine()) {
-                String line = reader.nextLine();
-                appendLine(line);
-            }
-        }
-    }
+
 
 
 }

@@ -15,7 +15,7 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 import paas.host.Shell;
-import paas.host.ShellOutput;
+import paas.procman.DatedMessage;
 import paas.procman.HostedApp;
 import paas.procman.HostedAppManager;
 
@@ -75,7 +75,7 @@ public class Server extends SpringBootServletInitializer {
         }
 
         @GetMapping("/getShellOutput")
-        public List<ShellOutput> getShellOutput(@RequestParam(required = false) long timestamp) {
+        public List<DatedMessage> getShellOutput(@RequestParam(required = false) long timestamp) {
             return shell.getOutputNewerThan(timestamp);
         }
 
@@ -128,8 +128,8 @@ public class Server extends SpringBootServletInitializer {
         }
 
         @GetMapping(value = "/tailSysout")
-        public List<String> tailSysout(@RequestParam int appId, @RequestParam int limit) throws IOException {
-            return hostedAppManager.getApp(appId).tailSysout(limit);
+        public List<DatedMessage> tailSysout(@RequestParam int appId, @RequestParam(required = false) long timestamp) throws IOException {
+            return hostedAppManager.getApp(appId).tailSysout(timestamp);
         }
     }
 

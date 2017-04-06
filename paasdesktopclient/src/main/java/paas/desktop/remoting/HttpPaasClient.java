@@ -3,8 +3,8 @@ package paas.desktop.remoting;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
+import paas.desktop.DatedMessage;
 import paas.desktop.HostedAppInfo;
-import paas.desktop.ShellOutput;
 import paas.desktop.gui.infra.MustBeInBackground;
 
 import java.io.File;
@@ -37,12 +37,12 @@ public class HttpPaasClient {
     }
 
     @MustBeInBackground
-    public List<String> tailSysout(int appID, int limit) {
+    public List<DatedMessage> tailNewerThan(int appID, long timestamp) {
         return asList(
                 restGetList(
-                        serverUrl + "/tailSysout", String[].class)
+                        serverUrl + "/tailSysout", DatedMessage[].class)
                         .param("appId", appID)
-                        .param("limit", limit)
+                        .param("timestamp", timestamp)
                         .execute()
         );
     }
@@ -69,9 +69,9 @@ public class HttpPaasClient {
     }
 
     @MustBeInBackground
-    public List<ShellOutput> getShellOutputNewerThan(long timestamp) {
+    public List<DatedMessage> getShellOutputNewerThan(long timestamp) {
         return asList(
-                restGetList(serverUrl + "/getShellOutput", ShellOutput[].class)
+                restGetList(serverUrl + "/getShellOutput", DatedMessage[].class)
                         .param("timestamp", timestamp)
                         .execute());
     }
