@@ -44,8 +44,7 @@ public class ServerShellConsole extends LazyInitRichAbstractView {
     private JComponent commandbar() {
         ProgressIndicatingContainer c = BusyFactory.progressBarOverlay();
         commandProgressIndicator = c;
-
-
+        //todo request focus to textfield when shown
         JTextField textField = new JTextField(20);
         textField.setFont(output.getFont());
         textField.setBackground(Color.black);

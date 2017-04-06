@@ -7,14 +7,15 @@ import paas.desktop.gui.infra.EventBus;
 import paas.desktop.remoting.HttpPaasClient;
 import swingutils.components.ComponentFactory;
 import swingutils.components.IsComponent;
+import swingutils.layout.cards.CardMenuBuilders;
+import swingutils.layout.cards.MenuPlacement;
 
 import javax.swing.*;
 import java.awt.*;
 
-import static javax.swing.SwingConstants.BOTTOM;
 import static swingutils.components.ComponentFactory.decorate;
 import static swingutils.layout.LayoutBuilders.borderLayout;
-import static swingutils.layout.LayoutBuilders.tabbedPane;
+import static swingutils.layout.cards.CardLayoutBuilder.cardLayout;
 
 //todo splashscreen
 //todo fix too long error messages not fitting overlays
@@ -54,12 +55,14 @@ public class GuiBuilder {
         JComponent logs = dec(tailViewsContainer.getComponent(), "Logs", 4, 8, 8, 8);
         logs.setPreferredSize(new Dimension(1300, 600));
 
-        return borderLayout()
+        JComponent appsTab = borderLayout()
                 .north(north)
-                .center(tabbedPane(BOTTOM)
-                        .addTab("Logs", logs)
-                        .addTab("Server shell console", serverShellConsole.getComponent())
-                        .build())
+                .center(logs)
+                .build();
+
+        return cardLayout(CardMenuBuilders.NoBorderOrange().menuPlacement(MenuPlacement.BOTTOM))
+                .addTab("Applications", appsTab)
+                .addTab("Server shell console", serverShellConsole.getComponent())
                 .build();
     }
 
