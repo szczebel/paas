@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
+import paas.host.Shell;
 import paas.procman.HostedApp;
 import paas.procman.HostedAppManager;
 
@@ -25,6 +26,8 @@ import java.util.List;
 import java.util.Optional;
 
 import static java.util.stream.Collectors.toList;
+
+//todo maven plugin for automated deployment
 
 @SpringBootApplication
 public class Server extends SpringBootServletInitializer {
@@ -46,10 +49,16 @@ public class Server extends SpringBootServletInitializer {
     @Bean
     FileSystemStorageService fileSystemStorageService(
             @Value("${storage.root}") String storageRoot,
-            @Value("${storage.root.is.relative.to.user.dir}") boolean relative) {
+            @Value("${storage.root.is.relative.to.user.home}") boolean relative) {
         if(relative) storageRoot = System.getProperty("user.home") + storageRoot;
         System.out.println("Storage path:" + storageRoot);
         return new FileSystemStorageService(storageRoot);
+    }
+
+    @Bean
+    Shell shell() {
+        //todo: check if Win or Linux
+        return new Shell("bash");
     }
 
     @RestController
@@ -57,6 +66,18 @@ public class Server extends SpringBootServletInitializer {
 
         @Autowired FileSystemStorageService fileSystemStorageService;
         @Autowired HostedAppManager hostedAppManager;
+        @Autowired Shell shell;
+
+        @PostMapping("/executeShellCommand")
+        public String executeHostCommand(@RequestParam String command) throws IOException, InterruptedException {
+            shell.execute(command);
+            return "Executed " + command;
+        }
+
+        @GetMapping("/getShellOutput")
+        public List<String> getShellOutput() {
+            return shell.getOutput();
+        }
 
         @GetMapping("/files")
         List<String> files() throws IOException {

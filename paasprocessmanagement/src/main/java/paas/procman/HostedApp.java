@@ -43,7 +43,7 @@ public class HostedApp {
                 .command(commands)
                 .directory(workingDirectory)
                 .redirectOutput(out)
-                .redirectError(err)
+                .redirectError(err)//todo consider in-memory err&out logs (see Shell)
                 .start();
     }
 

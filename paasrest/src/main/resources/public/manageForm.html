@@ -28,5 +28,10 @@
     <button type="submit">Undeploy</button>
 </form>
 
+<form action="executeShellCommand" method="post">
+    Shell command:<input type="text" name="command" value="tail -100 /var/lib/tomcat8/logs/catalina.out"/>
+    <button type="submit">Execute</button>
+</form>
+
 </body>
 </html>

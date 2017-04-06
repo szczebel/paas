@@ -15,10 +15,12 @@ import static java.util.Collections.emptyList;
 
 class FileSystemStorageService {
 
+    private final File root;
     private final File uploads;
     final File logs;
 
     FileSystemStorageService(String storageRoot) {
+        root = Paths.get(storageRoot).toFile();
         uploads = Paths.get(storageRoot + "/uploads").toFile();
         logs = Paths.get(storageRoot + "/logs").toFile();
     }
@@ -26,6 +28,7 @@ class FileSystemStorageService {
     @SuppressWarnings("unused")
     @PostConstruct
     void init() throws IOException {
+        if(!root.exists()) Files.createDirectory(root.toPath());
         if(!logs.exists()) Files.createDirectory(logs.toPath());
     }
 
