@@ -5,7 +5,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import paas.desktop.gui.infra.EventBus;
 import paas.desktop.gui.views.ServerShellConsole;
-import paas.desktop.remoting.HttpPaasClient;
 import swingutils.components.ComponentFactory;
 import swingutils.components.IsComponent;
 import swingutils.layout.cards.CardMenuBuilders;
@@ -24,7 +23,6 @@ import static swingutils.layout.cards.CardLayoutBuilder.cardLayout;
 @Component
 public class GuiBuilder {
 
-    @Autowired private HttpPaasClient httpPaasClient;
     @Autowired private IsComponent hostedApplicationsView;
     @Autowired private IsComponent deployView;
     @Autowired private IsComponent serverUrlView;
@@ -33,7 +31,6 @@ public class GuiBuilder {
     @Autowired private EventBus eventBus;
 
     public void showGui() {
-        eventBus.whenServerChanged(httpPaasClient::serverChanged);//todo: this does not belong here
         ComponentFactory.initLAF();
         JFrame f = new JFrame("Tiniest PaaS desktop client");
         f.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
