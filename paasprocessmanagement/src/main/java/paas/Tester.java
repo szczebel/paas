@@ -33,7 +33,6 @@ public class Tester {
         f.add(button("Check if running", show::status));
         f.add(button("Stop", hostedApp::stop));
         f.add(button("Tail out", show::tailOut));
-        f.add(button("Tail err", show::tailErr));
         f.pack();
         f.setLocationRelativeTo(null);
         f.setVisible(true);
@@ -71,10 +70,6 @@ public class Tester {
 
         void tailOut() throws IOException {
             showTail(app.tailSysout(100));
-        }
-
-        void tailErr() throws IOException {
-            showTail(app.tailSyserr(100));
         }
 
         private void showTail(List<String> strings) {

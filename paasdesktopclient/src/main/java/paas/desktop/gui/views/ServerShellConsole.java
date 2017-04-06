@@ -15,6 +15,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.List;
 
+import static swingutils.components.ComponentFactory.blockCaret;
 import static swingutils.components.ComponentFactory.button;
 import static swingutils.layout.LayoutBuilders.borderLayout;
 import static swingutils.layout.LayoutBuilders.flowLayout;
@@ -28,6 +29,7 @@ public class ServerShellConsole extends LazyInitRichAbstractView {
     private RollingConsole output;
     private ProgressIndicator commandProgressIndicator;
     private long lastMessageTimestamp = 0;
+    private JTextField commandField;
 
 
     @Override
@@ -44,17 +46,14 @@ public class ServerShellConsole extends LazyInitRichAbstractView {
     private JComponent commandbar() {
         ProgressIndicatingContainer c = BusyFactory.progressBarOverlay();
         commandProgressIndicator = c;
-        //todo request focus to textfield when shown
-        JTextField textField = new JTextField(20);
-        textField.setFont(output.getFont());
-        textField.setBackground(Color.black);
-        textField.setForeground(Color.green);
-        textField.setCaretColor(Color.green);//todo make it a blinking block
-        textField.addActionListener(e -> sendCommand(textField.getText(), () -> {
-            textField.setText("");
-            refresh();
-        }));
-        c.getContentPane().add(textField);
+        commandField = new JTextField(20);
+        commandField.setFont(output.getFont());
+        commandField.setBackground(Color.black);
+        commandField.setForeground(Color.green);
+        commandField.setCaretColor(Color.green);
+        commandField.setCaret(blockCaret());
+        commandField.addActionListener(e -> sendCommand(commandField.getText()));
+        c.getContentPane().add(commandField);
         return c.getComponent();
     }
 
@@ -76,13 +75,20 @@ public class ServerShellConsole extends LazyInitRichAbstractView {
         newOutput.stream().map(ShellOutput::getOutputLine).forEach(output::appendLine);
     }
 
-    private void sendCommand(String command, Runnable done) {
+    private void sendCommand(String command) {
         inBackground(
                 () -> httpPaasClient.executeShellCommand(command),
-                s -> done.run(),
+                this::commandSent,
                 commandProgressIndicator
         );
     }
 
+    private void commandSent(String response) {
+        commandField.setText("");
+        refresh();
+    }
 
+    public void focus() {
+        commandField.requestFocus();
+    }
 }

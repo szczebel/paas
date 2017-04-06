@@ -18,7 +18,6 @@ public class TailView extends LazyInitRichAbstractView {
     private final HttpPaasClient httpPaasClient;
 
     private final RollingConsole sysout = new RollingConsole(100);
-    private final RollingConsole syserr = new RollingConsole(100);
     private final RollingConsole connection = new RollingConsole(100);
 
     private JCheckBox autorefresh;
@@ -53,7 +52,6 @@ public class TailView extends LazyInitRichAbstractView {
                 .center(
                         tabbedPane(LEFT)
                                 .addTab("System.out", sysout.getComponent())
-                                .addTab("System.err", syserr.getComponent())
                                 .addTab("Connection", connection.getComponent())
                                 .build())
                 .build();
@@ -63,10 +61,6 @@ public class TailView extends LazyInitRichAbstractView {
         inBackground(
                 () -> httpPaasClient.tailSysout(appInfo.getId(), 100),
                 res -> replace(sysout, res)
-        );
-        inBackground(
-                () -> httpPaasClient.tailSyserr(appInfo.getId(), 100),
-                res -> replace(syserr, res)
         );
     }
 

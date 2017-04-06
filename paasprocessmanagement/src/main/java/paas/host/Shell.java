@@ -10,7 +10,6 @@ public class Shell {
 
     public static void main(String[] args) throws IOException, InterruptedException {
         long timestamp = 0;
-        List<ShellOutput> newOutput;
         Shell shell = new Shell("cmd");
         shell.start();
         timestamp = printNewOutput(timestamp, shell);
@@ -77,7 +76,7 @@ public class Shell {
         if(shellProcess!=null && shellProcess.isAlive()) throw new IllegalStateException("Shell process already running");
         shellProcess = new ProcessBuilder()
                 .command(shellInvokeCmd)
-                .directory(new File(System.getProperty("user.home")))
+                .directory(new File(System.getProperty("user.dir")))
                 .redirectErrorStream(true)
                 .start();
         shellWriter = new BufferedWriter(new OutputStreamWriter(shellProcess.getOutputStream()));

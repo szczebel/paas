@@ -4,6 +4,7 @@ import com.jgoodies.forms.builder.FormBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import paas.desktop.gui.infra.EventBus;
+import paas.desktop.gui.views.ServerShellConsole;
 import paas.desktop.remoting.HttpPaasClient;
 import swingutils.components.ComponentFactory;
 import swingutils.components.IsComponent;
@@ -18,9 +19,7 @@ import static swingutils.layout.LayoutBuilders.borderLayout;
 import static swingutils.layout.cards.CardLayoutBuilder.cardLayout;
 
 //todo splashscreen
-//todo fix too long error messages not fitting overlays
 //todo redirect Syserr/out to  gui
-//todo local tomcat&paas forever
 
 @Component
 public class GuiBuilder {
@@ -30,7 +29,7 @@ public class GuiBuilder {
     @Autowired private IsComponent deployView;
     @Autowired private IsComponent serverUrlView;
     @Autowired private IsComponent tailViewsContainer;
-    @Autowired private IsComponent serverShellConsole;
+    @Autowired private ServerShellConsole serverShellConsole;
     @Autowired private EventBus eventBus;
 
     public void showGui() {
@@ -52,7 +51,7 @@ public class GuiBuilder {
                 .add(dec(deployView.getComponent(), "Deploy", 4, 8, 4, 4)).xy(1, 2)
                 .add(dec(hostedApplicationsView.getComponent(), "Hosted applications", 8, 4, 4, 8)).xywh(2, 1, 1, 2)
                 .build();
-        JComponent logs = dec(tailViewsContainer.getComponent(), "Logs", 4, 8, 8, 8);
+        JComponent logs = dec(tailViewsContainer.getComponent(), "Logs", 4, 8, 0, 8);
         logs.setPreferredSize(new Dimension(1300, 600));
 
         JComponent appsTab = borderLayout()
@@ -63,6 +62,9 @@ public class GuiBuilder {
         return cardLayout(CardMenuBuilders.NoBorderOrange().menuPlacement(MenuPlacement.BOTTOM))
                 .addTab("Applications", appsTab)
                 .addTab("Server shell console", serverShellConsole.getComponent())
+                .onCardChange((prevCard, newCard) -> {
+                    if("Server shell console".equals(newCard)) serverShellConsole.focus();
+                })
                 .build();
     }
 

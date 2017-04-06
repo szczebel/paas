@@ -131,11 +131,6 @@ public class Server extends SpringBootServletInitializer {
         public List<String> tailSysout(@RequestParam int appId, @RequestParam int limit) throws IOException {
             return hostedAppManager.getApp(appId).tailSysout(limit);
         }
-
-        @GetMapping(value = "/tailSyserr")
-        public List<String> tailSyserr(@RequestParam int appId, @RequestParam int limit) throws IOException {
-            return hostedAppManager.getApp(appId).tailSyserr(limit);
-        }
     }
 
     @ControllerAdvice

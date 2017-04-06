@@ -38,23 +38,15 @@ public class HttpPaasClient {
 
     @MustBeInBackground
     public List<String> tailSysout(int appID, int limit) {
-        return tail(appID, limit, "Sysout");
-    }
-
-    @MustBeInBackground
-    public List<String> tailSyserr(int appID, int limit) {
-        return tail(appID, limit, "Syserr");
-    }
-
-    private List<String> tail(int appID, int limit, String out) {
         return asList(
                 restGetList(
-                        substitute(serverUrl + "/tail{out}", out), String[].class)
+                        serverUrl + "/tailSysout", String[].class)
                         .param("appId", appID)
                         .param("limit", limit)
                         .execute()
         );
     }
+
 
     @MustBeInBackground
     public String restart(int appId) {

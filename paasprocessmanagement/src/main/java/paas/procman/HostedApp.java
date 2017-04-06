@@ -17,7 +17,6 @@ public class HostedApp {
     private final File jarFile;
     private final String commandLineArgs;
     private final File out;
-    private final File err;
     private final File workingDirectory;
     private Process process;
     private ZonedDateTime start;
@@ -27,7 +26,6 @@ public class HostedApp {
         this.jarFile = jarFile;
         this.commandLineArgs = commandLineArgs;
         this.out = new File(workingDirectory, jarFile.getName() + ".out");
-        this.err = new File(workingDirectory, jarFile.getName() + ".err");
         this.workingDirectory = workingDirectory;
     }
 
@@ -42,8 +40,8 @@ public class HostedApp {
         return new ProcessBuilder()
                 .command(commands)
                 .directory(workingDirectory)
-                .redirectOutput(out)
-                .redirectError(err)//todo consider in-memory err&out logs (see Shell)
+                .redirectOutput(out) //todo consider in-memory err&out logs (see Shell)
+                .redirectErrorStream(true)
                 .start();
     }
 
@@ -64,10 +62,6 @@ public class HostedApp {
     //todo: replace 'limit' with timestamp (tail logs newer than timestamp) - ONLY if switched to in-memory
     public List<String> tailSysout(int limit) throws IOException {
         return Tail.tail(out, limit);
-    }
-
-    public List<String> tailSyserr(int limit) throws IOException {
-        return Tail.tail(err, limit);
     }
 
     public int getId() {
