@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import paas.desktop.HostedAppInfo;
+import paas.desktop.ShellOutput;
 import paas.desktop.gui.infra.MustBeInBackground;
 
 import java.io.File;
@@ -67,6 +68,20 @@ public class HttpPaasClient {
         return restGet(serverUrl + "/undeploy", String.class)
                 .param("appId", appId)
                 .execute();
+    }
+
+    public String executeShellCommand(String cmd) {
+        return restPost(serverUrl + "/executeShellCommand", String.class)
+                .param("command", cmd)
+                .execute();
+    }
+
+    @MustBeInBackground
+    public List<ShellOutput> getShellOutputNewerThan(long timestamp) {
+        return asList(
+                restGetList(serverUrl + "/getShellOutput", ShellOutput[].class)
+                        .param("timestamp", timestamp)
+                        .execute());
     }
 
     public void serverChanged(String newServerUrl) {

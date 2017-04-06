@@ -29,7 +29,7 @@ public class ServerUrlView extends LazyInitRichAbstractView {
 
         return FormBuilder.create()
                 .rows("pref:none")
-                .columns("pref:none, ${label-component-gap}, pref:grow, ${label-component-gap}, pref:grow")
+                .columns("pref:none, ${label-component-gap}, pref:grow, ${label-component-gap}, pref:none")
                 .add(label("Url:", RIGHT)).xy(1, 1)
                 .add(urlTextField).xy(3, 1)
                 .add(button).xy(5, 1)
