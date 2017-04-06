@@ -44,7 +44,7 @@ public class DeployView extends LazyInitRichAbstractView {
                 .add(button("Change...", this::selectFile)).xy(5, 1)
                 .add(label("Command line:", RIGHT))         .xy(1, 3)
                 .add(commandLine)                              .xyw(3, 3, 3)
-                .add(button("Deploy", this::deploy))        .xy(5, 5)
+                .add(button("Deploy", this::deploy))       .xy(5, 5)
                 .build();
     }
 
@@ -69,6 +69,5 @@ public class DeployView extends LazyInitRichAbstractView {
 
     private void deployed(String statusMessage) {
         eventBus.appDeployed();
-        showMessage(statusMessage);
     }
 }

@@ -15,6 +15,7 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 import paas.host.Shell;
+import paas.host.ShellOutput;
 import paas.procman.HostedApp;
 import paas.procman.HostedAppManager;
 
@@ -57,8 +58,7 @@ public class Server extends SpringBootServletInitializer {
 
     @Bean
     Shell shell() {
-        //todo: check if Win or Linux
-        return new Shell("bash");
+        return new Shell(System.getProperty("os.name").startsWith("Windows") ? "cmd" : "bash");
     }
 
     @RestController
@@ -75,8 +75,8 @@ public class Server extends SpringBootServletInitializer {
         }
 
         @GetMapping("/getShellOutput")
-        public List<String> getShellOutput() {
-            return shell.getOutput();
+        public List<ShellOutput> getShellOutput(@RequestParam(required = false) long timestamp) {
+            return shell.getOutputNewerThan(timestamp);
         }
 
         @GetMapping("/files")

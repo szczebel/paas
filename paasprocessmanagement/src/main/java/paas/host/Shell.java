@@ -4,44 +4,58 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 
 public class Shell {
 
     public static void main(String[] args) throws IOException, InterruptedException {
+        long timestamp = 0;
+        List<ShellOutput> newOutput;
         Shell shell = new Shell("cmd");
         shell.start();
-        System.out.println("--------------------------------------------------------------");
-        shell.getOutput().forEach(System.out::println);
+        timestamp = printNewOutput(timestamp, shell);
         shell.execute("echo hello");
-        System.out.println("--------------------------------------------------------------");
-        shell.getOutput().forEach(System.out::println);
+        timestamp = printNewOutput(timestamp, shell);
         shell.execute("dir");
-        System.out.println("--------------------------------------------------------------");
-        shell.getOutput().forEach(System.out::println);
+        timestamp = printNewOutput(timestamp, shell);
 //        shell.execute("echo hello");//this should throw, shell is dead
     }
 
-    private final String shellCmd;
-
-    public Shell(String shellCmd) {
-        this.shellCmd = shellCmd;
+    private static long printNewOutput(long timestamp, Shell shell) throws InterruptedException {
+        Thread.sleep(1000);
+        List<ShellOutput> newOutput = shell.getOutputNewerThan(timestamp);
+        if(newOutput.isEmpty()) return timestamp;
+        timestamp = newOutput.get(newOutput.size()-1).getTimestamp();
+        newOutput.stream().map(ShellOutput::getOutputLine).forEach(System.out::println);
+        return timestamp;
     }
 
-    public synchronized List<String> getOutput() {
-        return new ArrayList<>(output);
-    }
+    private static final int OUTPUT_MAX_SIZE = 1000;
+    private final String shellInvokeCmd;
+    private final LinkedList<ShellOutput> output = new LinkedList<>();
 
-    private final LinkedList<String> output = new LinkedList<>();
     private Process shellProcess;
     private BufferedWriter shellWriter;
 
+    public Shell(String shellInvokeCmd) {
+        this.shellInvokeCmd = shellInvokeCmd;
+    }
+
+    public synchronized List<ShellOutput> getOutputNewerThan(long timestamp) {
+        if(timestamp==0) return new ArrayList<>(output);
+        LinkedList<ShellOutput> retval = new LinkedList<>();
+        Iterator<ShellOutput> shellOutputIterator = output.descendingIterator();
+        while (shellOutputIterator.hasNext()) {
+            ShellOutput next = shellOutputIterator.next();
+            if(next.getTimestamp() > timestamp) retval.addFirst(next);
+            else break;
+        }
+        return retval;
+    }
+
     private synchronized void appendLine(String line) {
-        output.addLast(line);
-        if (output.size() > 100) {
+        output.addLast(new ShellOutput(System.nanoTime(), line));
+        if (output.size() > OUTPUT_MAX_SIZE) {
             output.removeFirst();
         }
     }
@@ -62,15 +76,18 @@ public class Shell {
     private void start() throws IOException {
         if(shellProcess!=null && shellProcess.isAlive()) throw new IllegalStateException("Shell process already running");
         shellProcess = new ProcessBuilder()
-                .command(shellCmd)
+                .command(shellInvokeCmd)
                 .directory(new File(System.getProperty("user.home")))
                 .redirectErrorStream(true)
                 .start();
         shellWriter = new BufferedWriter(new OutputStreamWriter(shellProcess.getOutputStream()));
-        new Thread(this::readShellOutput).start();
+        Thread outputReader = new Thread(this::readShellOutput);
+        outputReader.setDaemon(true);
+        outputReader.start();
     }
 
     private void readShellOutput() {
+        System.out.println("running readoutput thread");
         try (Scanner reader = new Scanner(shellProcess.getInputStream())) {
             while (reader.hasNextLine()) {
                 String line = reader.nextLine();

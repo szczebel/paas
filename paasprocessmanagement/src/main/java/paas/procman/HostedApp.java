@@ -61,6 +61,7 @@ public class HostedApp {
         process = null;
     }
 
+    //todo: replace 'limit' with timestamp (tail logs newer than timestamp) - ONLY if switched to in-memory
     public List<String> tailSysout(int limit) throws IOException {
         return Tail.tail(out, limit);
     }
