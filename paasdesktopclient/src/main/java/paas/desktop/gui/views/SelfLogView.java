@@ -1,7 +1,7 @@
 package paas.desktop.gui.views;
 
 import org.springframework.stereotype.Component;
-import swingutils.SysoutInterceptor;
+import paas.desktop.DesktopClient;
 import swingutils.components.LazyInitRichAbstractView;
 import swingutils.components.RollingConsole;
 
@@ -13,7 +13,9 @@ public class SelfLogView extends LazyInitRichAbstractView {
     protected JComponent wireAndLayout() {
         RollingConsole rollingConsole = new RollingConsole(1000);
         rollingConsole.getComponent();
-        SysoutInterceptor.registerSwingConsumer(rollingConsole::appendLine);
+        SwingUtilities.invokeLater(() ->
+            DesktopClient.sysoutInterceptor.registerSwingConsumer(rollingConsole::append)
+        );
         return rollingConsole.getComponent();
     }
 

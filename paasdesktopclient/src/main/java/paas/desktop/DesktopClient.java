@@ -16,8 +16,10 @@ import java.io.IOException;
 @SpringBootApplication
 public class DesktopClient {
 
+    public static final SysoutInterceptor sysoutInterceptor = new SysoutInterceptor();
+
     public static void main(String[] args) throws IOException {
-        SysoutInterceptor.interceptSystemOutAndErr();
+        sysoutInterceptor.interceptSystemOutAndErr();
         new SpringApplicationBuilder(DesktopClient.class).headless(false).run(args);
     }
 
