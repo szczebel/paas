@@ -2,6 +2,7 @@ package paas.desktop.gui;
 
 import com.jgoodies.forms.builder.FormBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import paas.desktop.gui.infra.EventBus;
 import paas.desktop.gui.views.ServerShellConsole;
@@ -21,6 +22,9 @@ public class GuiBuilder {
 
     private static final int MARGIN = 4;
 
+    @Value("${tiniestpaas.server.url}")
+    private String initialServerUrl;
+
     @Autowired private IsComponent hostedApplicationsView;
     @Autowired private IsComponent deployView;
     @Autowired private IsComponent serverUrlView;
@@ -31,7 +35,8 @@ public class GuiBuilder {
 
     public void showGui() {
         ComponentFactory.initLAF();
-        JFrame f = new JFrame("Tiniest PaaS desktop client");
+        JFrame f = new JFrame("Tiniest PaaS desktop client - " + initialServerUrl);
+        eventBus.whenServerChanged(url -> f.setTitle("Tiniest PaaS desktop client - " + url));
         f.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         f.add(buildContent());
         f.pack();
