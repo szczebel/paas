@@ -19,7 +19,7 @@ public class Shell {
         shell.execute("echo hello");
         timestamp = printNewOutput(timestamp, shell);
         shell.execute("dir");
-        timestamp = printNewOutput(timestamp, shell);
+        printNewOutput(timestamp, shell);
 //        shell.execute("echo hello");//this should throw, shell is dead
     }
 
@@ -51,6 +51,7 @@ public class Shell {
         if(shellProcess == null || !shellProcess.isAlive()) {
             start();
         }
+        outputCollector.appendLine("[INPUT] >>>>> Command received : " + command);
         shellWriter.write(command);
         shellWriter.newLine();
         shellWriter.flush();

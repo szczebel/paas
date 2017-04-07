@@ -13,7 +13,7 @@ public class AsyncOutputCollector {
         this.bufferSize = bufferSize;
     }
 
-    private synchronized void appendLine(String line) {
+    public synchronized void appendLine(String line) {
         buffer.addLast(new DatedMessage(System.nanoTime(), line));
         if (buffer.size() > bufferSize) {
             buffer.removeFirst();
@@ -34,8 +34,7 @@ public class AsyncOutputCollector {
 
     private Thread reader;
     public synchronized void asyncCollect(String initialMessage, InputStream inputStream) {
-        if(reader!=null) throw new IllegalStateException("Reader not null, previous process may still be alive. " +
-                "Risk of mixing inputs from multiple streams");
+        if(reader!=null) reader.interrupt();
         buffer.clear();
         appendLine(initialMessage);
         reader = new Thread(() -> {

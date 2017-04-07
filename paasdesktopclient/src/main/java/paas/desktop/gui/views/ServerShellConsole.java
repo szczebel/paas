@@ -17,6 +17,7 @@ import java.util.List;
 
 import static swingutils.components.ComponentFactory.*;
 import static swingutils.layout.LayoutBuilders.borderLayout;
+import static swingutils.layout.LayoutBuilders.hBox;
 
 @Component
 public class ServerShellConsole extends LazyInitRichAbstractView {
@@ -58,7 +59,13 @@ public class ServerShellConsole extends LazyInitRichAbstractView {
         return borderLayout()
                 .west(greenOnBlack(label("   Shell command >   ")))
                 .center(commandTextField())
-                .east(button("Refresh output", this::refresh))
+                .east(
+                        hBox(4,
+                                button("Refresh output", this::refresh),
+                                button("Clear output", this::clear)
+
+                        )
+                )
                 .build();
     }
 
@@ -75,6 +82,12 @@ public class ServerShellConsole extends LazyInitRichAbstractView {
                 this::newOutputReceived,
                 ProgressIndicator.NoOp
         );
+        focus();
+    }
+
+    private void clear() {
+        output.clear();
+        focus();
     }
 
     private void newOutputReceived(List<DatedMessage> newOutput) {
