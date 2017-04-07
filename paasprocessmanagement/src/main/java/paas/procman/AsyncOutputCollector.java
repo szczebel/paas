@@ -14,7 +14,7 @@ public class AsyncOutputCollector {
     }
 
     public synchronized void appendLine(String line) {
-        buffer.addLast(new DatedMessage(System.nanoTime(), line));
+        buffer.addLast(new DatedMessage(System.currentTimeMillis(), line));
         if (buffer.size() > bufferSize) {
             buffer.removeFirst();
         }
