@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import paas.desktop.gui.infra.EventBus;
+import paas.desktop.gui.infra.VersionChecker;
 import paas.desktop.gui.views.ServerShellConsole;
 import swingutils.components.ComponentFactory;
 import swingutils.components.IsComponent;
@@ -32,6 +33,7 @@ public class GuiBuilder {
     @Autowired private IsComponent selfLogView;
     @Autowired private ServerShellConsole serverShellConsole;
     @Autowired private EventBus eventBus;
+    @Autowired private VersionChecker versionChecker;
 
     public void showGui() {
         ComponentFactory.initLAF();
@@ -42,7 +44,10 @@ public class GuiBuilder {
         f.pack();
         f.setLocationRelativeTo(null);
         f.setVisible(true);
+
+        versionChecker.initialize(f);
     }
+
 
     private JComponent buildContent() {
         JPanel north = FormBuilder.create()

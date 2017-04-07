@@ -82,6 +82,14 @@ public class Server extends SpringBootServletInitializer {
             else throw new IllegalStateException("Call admin and tell him to upload desktop client");
         }
 
+        @GetMapping(value = "/desktopClientLastModified")
+        public long getDesktopClientLastModified() {
+            File desktopClientJar = fileSystemStorageService.getDesktopClientJar();
+            if(desktopClientJar.exists())
+                return desktopClientJar.lastModified();
+            else throw new IllegalStateException("Call admin and tell him to upload desktop client");
+        }
+
         @PostMapping("/uploadDesktopClient")
         public String uploadDesktopClient(@RequestParam("jarFile") MultipartFile file) throws IOException, InterruptedException {
             String jarFileName = file.getOriginalFilename();
