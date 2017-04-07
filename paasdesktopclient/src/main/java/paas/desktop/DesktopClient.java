@@ -8,13 +8,16 @@ import org.springframework.stereotype.Component;
 import paas.desktop.gui.GuiBuilder;
 import paas.desktop.gui.infra.EventBus;
 import paas.desktop.remoting.HttpPaasClient;
+import swingutils.SysoutInterceptor;
 
 import javax.swing.*;
+import java.io.IOException;
 
 @SpringBootApplication
 public class DesktopClient {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
+        SysoutInterceptor.interceptSystemOutAndErr();
         new SpringApplicationBuilder(DesktopClient.class).headless(false).run(args);
     }
 
@@ -23,7 +26,6 @@ public class DesktopClient {
         @Autowired GuiBuilder guiBuilder;
         @Autowired HttpPaasClient httpPaasClient;
         @Autowired EventBus eventBus;
-
 
         @Override
         public void run(String... strings) throws Exception {

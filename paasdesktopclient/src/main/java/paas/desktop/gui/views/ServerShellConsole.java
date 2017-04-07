@@ -15,10 +15,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.List;
 
-import static swingutils.components.ComponentFactory.blockCaret;
-import static swingutils.components.ComponentFactory.button;
+import static swingutils.components.ComponentFactory.*;
 import static swingutils.layout.LayoutBuilders.borderLayout;
-import static swingutils.layout.LayoutBuilders.flowLayout;
 
 @Component
 public class ServerShellConsole extends LazyInitRichAbstractView {
@@ -37,13 +35,12 @@ public class ServerShellConsole extends LazyInitRichAbstractView {
         output = new RollingConsole(1000);
 
         return borderLayout()
-                .north(toolbar())
                 .center(output.getComponent())
-                .south(commandbar())
+                .south(commandBar())
                 .build();
     }
 
-    private JComponent commandbar() {
+    private JComponent commandTextField() {
         ProgressIndicatingContainer c = BusyFactory.progressBarOverlay();
         commandProgressIndicator = c;
         commandField = new JTextField(20);
@@ -57,8 +54,19 @@ public class ServerShellConsole extends LazyInitRichAbstractView {
         return c.getComponent();
     }
 
-    private JComponent toolbar() {
-        return flowLayout(button("Refresh", this::refresh));
+    private JComponent commandBar() {
+        return borderLayout()
+                .west(greenOnBlack(label("   Shell command >   ")))
+                .center(commandTextField())
+                .east(button("Refresh output", this::refresh))
+                .build();
+    }
+
+    private JComponent greenOnBlack(JLabel label) {
+        label.setOpaque(true);
+        label.setBackground(Color.black);
+        label.setForeground(Color.green);
+        return label;
     }
 
     private void refresh() {

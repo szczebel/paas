@@ -63,7 +63,7 @@ public class DeployView extends LazyInitRichAbstractView {
                     this::deployed
             );
         } else {
-            showMessage("No file selected");
+            JOptionPane.showMessageDialog(getComponent(), "No file selected");
         }
     }
 

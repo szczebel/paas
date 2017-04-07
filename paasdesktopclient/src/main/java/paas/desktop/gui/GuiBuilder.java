@@ -8,7 +8,6 @@ import paas.desktop.gui.views.ServerShellConsole;
 import swingutils.components.ComponentFactory;
 import swingutils.components.IsComponent;
 import swingutils.layout.cards.CardMenuBuilders;
-import swingutils.layout.cards.MenuPlacement;
 
 import javax.swing.*;
 import java.awt.*;
@@ -17,16 +16,16 @@ import static swingutils.components.ComponentFactory.decorate;
 import static swingutils.layout.LayoutBuilders.borderLayout;
 import static swingutils.layout.cards.CardLayoutBuilder.cardLayout;
 
-//todo splashscreen
-//todo redirect Syserr/out to  gui
-
 @Component
 public class GuiBuilder {
+
+    private static final int MARGIN = 4;
 
     @Autowired private IsComponent hostedApplicationsView;
     @Autowired private IsComponent deployView;
     @Autowired private IsComponent serverUrlView;
     @Autowired private IsComponent tailViewsContainer;
+    @Autowired private IsComponent selfLogView;
     @Autowired private ServerShellConsole serverShellConsole;
     @Autowired private EventBus eventBus;
 
@@ -44,11 +43,11 @@ public class GuiBuilder {
         JPanel north = FormBuilder.create()
                 .columns("pref:none, pref:grow")
                 .rows("pref:none, pref:none")
-                .add(dec(serverUrlView.getComponent(), "Tiniest Paas Server", 8, 8, 4, 4)).xy(1, 1)
-                .add(dec(deployView.getComponent(), "Deploy", 4, 8, 4, 4)).xy(1, 2)
-                .add(dec(hostedApplicationsView.getComponent(), "Hosted applications", 8, 4, 4, 8)).xywh(2, 1, 1, 2)
+                .add(dec(serverUrlView.getComponent(), "Tiniest Paas Server", 0, MARGIN, MARGIN/2, MARGIN/2)).xy(1, 1)
+                .add(dec(deployView.getComponent(), "Deploy", MARGIN/2, MARGIN, MARGIN/2, MARGIN/2)).xy(1, 2)
+                .add(dec(hostedApplicationsView.getComponent(), "Hosted applications", 0, MARGIN/2, MARGIN/2, MARGIN)).xywh(2, 1, 1, 2)
                 .build();
-        JComponent logs = dec(tailViewsContainer.getComponent(), "Logs", 4, 8, 0, 8);
+        JComponent logs = dec(tailViewsContainer.getComponent(), "Logs", MARGIN/2, MARGIN, MARGIN, MARGIN);
         logs.setPreferredSize(new Dimension(1300, 600));
 
         JComponent appsTab = borderLayout()
@@ -56,9 +55,10 @@ public class GuiBuilder {
                 .center(logs)
                 .build();
 
-        return cardLayout(CardMenuBuilders.NoBorderOrange().menuPlacement(MenuPlacement.BOTTOM))
+        return cardLayout(CardMenuBuilders.BorderedOrange())
                 .addTab("Applications", appsTab)
                 .addTab("Server shell console", serverShellConsole.getComponent())
+                .addTab("My error log", selfLogView.getComponent())
                 .onCardChange((prevCard, newCard) -> {
                     if("Server shell console".equals(newCard)) serverShellConsole.focus();
                 })
@@ -67,7 +67,7 @@ public class GuiBuilder {
 
     private JComponent dec(JComponent component, String title, int top, int left, int bottom, int right) {
         return decorate(component)
-                .withEmptyBorder(4, 4, 4, 4)
+                .withEmptyBorder(MARGIN, MARGIN, MARGIN, MARGIN)
                 .withGradientHeader(title)
                 .withEmptyBorder(top, left, bottom, right)
                 .get();
