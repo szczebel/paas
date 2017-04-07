@@ -33,7 +33,7 @@ public class ServerShellConsole extends LazyInitRichAbstractView {
     private long lastMessageTimestamp = 0;
     private JTextField commandField;
 
-    private static final DateFormat df = new SimpleDateFormat("yyyy-MMM-dd hh:mm:ss");
+    private static final DateFormat df = new SimpleDateFormat("yyyy-MMM-dd HH:mm:ss");
 
 
     @Override

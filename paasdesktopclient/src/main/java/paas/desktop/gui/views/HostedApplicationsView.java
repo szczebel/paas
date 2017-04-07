@@ -86,7 +86,7 @@ public class HostedApplicationsView extends LazyInitRichAbstractView {
     }
 
     private static class DateRenderer extends DefaultTableCellRenderer {
-        private static final DateFormat df = new SimpleDateFormat("yyyy-MMM-dd hh:mm:ss");
+        private static final DateFormat df = new SimpleDateFormat("yyyy-MMM-dd HH:mm:ss");
 
         public java.awt.Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
             return super.getTableCellRendererComponent(table, df.format(value), isSelected, hasFocus, row, column);
