@@ -34,27 +34,6 @@
                     <url>http://ecsc00300356.epam.com:8080/manager/text</url>
                 </configuration>
             </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-antrun-plugin</artifactId>
-                <version>1.8</version>
-                <executions>
-                    <execution>
-                        <phase>test</phase>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                        <configuration>
-                            <tasks>
-                                <echo>Copying DesktopClient jar</echo>
-                                <copy
-                                        file="${basedir}/../paasdesktopclient/target/paasdesktopclient-1.0.jar"
-                                        tofile="${basedir}/target/paasrest-1.0/WEB-INF/classes/public/paasdesktopclient-1.0.jar"/>
-                            </tasks>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
         </plugins>
     </build>
 

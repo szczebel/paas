@@ -19,6 +19,7 @@
     </properties>
 
     <build>
+        <finalName>PaaSDesktopClient</finalName>
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>

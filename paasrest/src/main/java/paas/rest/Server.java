@@ -7,8 +7,10 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.support.SpringBootServletInitializer;
 import org.springframework.context.annotation.Bean;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.WebRequest;
@@ -27,6 +29,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static java.util.stream.Collectors.toList;
+import static paas.rest.FileSystemStorageService.DESKTOP_CLIENT_JAR_NAME;
 
 //todo maven plugin for automated deployment
 
@@ -67,6 +70,25 @@ public class Server extends SpringBootServletInitializer {
         @Autowired FileSystemStorageService fileSystemStorageService;
         @Autowired HostedAppManager hostedAppManager;
         @Autowired Shell shell;
+
+        @GetMapping(value = "/PaasDesktopClient.jar")
+        public ResponseEntity<FileSystemResource> getDesktopClient() {
+            File desktopClientJar = fileSystemStorageService.getDesktopClientJar();
+            if(desktopClientJar.exists())
+                return ResponseEntity.ok()
+                        .contentLength(desktopClientJar.length())
+                        .contentType(MediaType.parseMediaType("application/java-archive"))
+                        .body(new FileSystemResource(desktopClientJar));
+            else throw new IllegalStateException("Call admin and tell him to upload desktop client");
+        }
+
+        @PostMapping("/uploadDesktopClient")
+        public String uploadDesktopClient(@RequestParam("jarFile") MultipartFile file) throws IOException, InterruptedException {
+            String jarFileName = file.getOriginalFilename();
+            if(!DESKTOP_CLIENT_JAR_NAME.equals(jarFileName)) throw new IllegalArgumentException("Expected " + DESKTOP_CLIENT_JAR_NAME);
+            fileSystemStorageService.saveDesktopClientJar(file);
+            return "OK";
+        }
 
         @PostMapping("/executeShellCommand")
         public String executeHostCommand(@RequestParam String command) throws IOException, InterruptedException {
