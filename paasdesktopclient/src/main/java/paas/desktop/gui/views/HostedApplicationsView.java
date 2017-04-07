@@ -15,7 +15,6 @@ import swingutils.components.table.descriptor.Columns;
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
 import java.text.DateFormat;
-import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.Date;
@@ -87,7 +86,6 @@ public class HostedApplicationsView extends LazyInitRichAbstractView {
     }
 
     private static class DateRenderer extends DefaultTableCellRenderer {
-        private static final DecimalFormat formatter = new DecimalFormat("#,##0.00");
         private static final DateFormat df = new SimpleDateFormat("yyyy-MMM-dd hh:mm:ss");
 
         public java.awt.Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {

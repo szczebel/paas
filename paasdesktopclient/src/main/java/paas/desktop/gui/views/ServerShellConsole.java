@@ -13,6 +13,9 @@ import swingutils.components.progress.ProgressIndicator;
 
 import javax.swing.*;
 import java.awt.*;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 import static swingutils.components.ComponentFactory.*;
@@ -29,6 +32,8 @@ public class ServerShellConsole extends LazyInitRichAbstractView {
     private ProgressIndicator commandProgressIndicator;
     private long lastMessageTimestamp = 0;
     private JTextField commandField;
+
+    private static final DateFormat df = new SimpleDateFormat("yyyy-MMM-dd hh:mm:ss");
 
 
     @Override
@@ -93,7 +98,12 @@ public class ServerShellConsole extends LazyInitRichAbstractView {
     private void newOutputReceived(List<DatedMessage> newOutput) {
         if (newOutput.isEmpty()) return;
         lastMessageTimestamp = newOutput.get(newOutput.size() - 1).getTimestamp();
-        newOutput.stream().map(DatedMessage::getMessage).forEach(output::appendLine);
+        newOutput.stream().map(this::formatDatedMessage).forEach(output::appendLine);
+    }
+
+    private String formatDatedMessage(DatedMessage msg) {
+        String date = df.format(new Date(msg.getTimestamp()));
+        return "[" + date + "] " + msg.getMessage();
     }
 
     private void sendCommand(String command) {
