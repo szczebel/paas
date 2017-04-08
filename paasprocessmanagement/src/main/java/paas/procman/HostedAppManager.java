@@ -37,4 +37,15 @@ public class HostedAppManager {
     public void remove(int appId) {
         hostedApps.remove(getApp(appId));
     }
+
+    public void shutdown() {
+        for (HostedApp hostedApp : hostedApps) {
+            try {
+                hostedApp.stop();
+            } catch (InterruptedException ignored) {
+            }
+        }
+    }
+
+    //todo: on init, restart all apps (needs persisting command lines)
 }

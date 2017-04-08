@@ -7,7 +7,9 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Shell {
 
@@ -48,13 +50,16 @@ public class Shell {
     }
 
     public synchronized void execute(String command) throws IOException, InterruptedException {
-        if(shellProcess == null || !shellProcess.isAlive()) {
+        if (shellProcess == null || !shellProcess.isAlive()) {
             start();
         }
         outputCollector.appendLine("[INPUT] >>>>> Command received : " + command);
-        shellWriter.write(command);
-        shellWriter.newLine();
-        shellWriter.flush();
+        if(specialCommandsMap.containsKey(command)) specialCommandsMap.get(command).run();
+        else {
+            shellWriter.write(command);
+            shellWriter.newLine();
+            shellWriter.flush();
+        }
     }
 
 
@@ -73,7 +78,11 @@ public class Shell {
         );
     }
 
+    public void killShellProcess() {
+        if(shellProcess!=null) shellProcess.destroyForcibly();
+    }
 
-
-
+    private Map<String, Runnable> specialCommandsMap = new HashMap<>();{
+        specialCommandsMap.put("restart", this::killShellProcess);
+    }
 }
