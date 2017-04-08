@@ -1,5 +1,7 @@
 package paas.desktop.gui.infra;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -20,6 +22,8 @@ import static swingutils.layout.LayoutBuilders.borderLayout;
 
 @Component
 public class VersionChecker {
+
+    private final Logger logger = LoggerFactory.getLogger(getClass());
 
     @Autowired
     private EventBus eventBus;
@@ -43,13 +47,13 @@ public class VersionChecker {
                     if (yes) {
                         tellUserAboutNewVersion(serverUrl);
                     } else {
-                        System.out.println("No new version detected");
+                        logger.info("No new version detected");
                     }
                 },
                 ex -> {
                     Throwable t = ex;
                     while (t.getCause() != null) t = t.getCause();
-                    System.out.println("Checking version failed due to:");
+                    logger.info("Checking version failed due to:");
                     t.printStackTrace();
                 }
         );
@@ -70,6 +74,7 @@ public class VersionChecker {
         try {
             Desktop.getDesktop().browse(new URI(serverUrl + "/PaasDesktopClient.jar"));
         } catch (IOException | URISyntaxException e) {
+            logger.warn("Could not open browser");
             e.printStackTrace();
         }
     }
@@ -91,7 +96,7 @@ public class VersionChecker {
             if (!file.exists() || !file.isFile()) throw new Exception("Not a file: " + jarFileName);
             return file.lastModified();
         } catch (Exception e) {
-            System.out.println("Checking self last modified failed:");
+            logger.info("Checking self last modified failed:");
             e.printStackTrace();
             return null;
         }
