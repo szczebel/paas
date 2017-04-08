@@ -4,12 +4,12 @@ import paas.procman.AsyncOutputCollector;
 import paas.procman.DatedMessage;
 
 import java.io.BufferedWriter;
-import java.io.File;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 
 public class Shell {
 
@@ -68,7 +68,6 @@ public class Shell {
         if(shellProcess!=null && shellProcess.isAlive()) throw new IllegalStateException("Shell process already running");
         shellProcess = new ProcessBuilder()
                 .command(shellInvokeCmd)
-                .directory(new File(System.getProperty("user.dir")))
                 .redirectErrorStream(true)
                 .start();
         shellWriter = new BufferedWriter(new OutputStreamWriter(shellProcess.getOutputStream()));
@@ -80,6 +79,23 @@ public class Shell {
 
     public void killShellProcess() {
         if(shellProcess!=null) shellProcess.destroyForcibly();
+    }
+
+    public void registerSpecialCommand(String command, Supplier<List<String>> outputProducer) {
+        registerSpecialCommand(command, outputProducer, false);
+    }
+
+    @SuppressWarnings({"WeakerAccess", "SameParameterValue"})
+    public void registerSpecialCommand(String command, Supplier<List<String>> outputProducer, boolean override) {
+        if(override) specialCommandsMap.put(command, asRunnable(outputProducer));
+        else {
+            if(specialCommandsMap.containsKey(command)) throw new IllegalArgumentException("Special command '" + command + "' already defined");
+            else specialCommandsMap.put(command, asRunnable(outputProducer));
+        }
+    }
+
+    private Runnable asRunnable(Supplier<List<String>> outputProducer) {
+        return () -> outputProducer.get().forEach(outputCollector::appendLine);
     }
 
     private Map<String, Runnable> specialCommandsMap = new HashMap<>();{
