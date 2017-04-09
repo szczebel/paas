@@ -1,7 +1,7 @@
 package paas;
 
 import paas.procman.DatedMessage;
-import paas.procman.HostedApp;
+import paas.procman.JavaProcess;
 
 import javax.swing.*;
 import java.awt.*;
@@ -10,6 +10,8 @@ import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static java.util.Arrays.asList;
 
 public class Tester {
 
@@ -24,16 +26,16 @@ public class Tester {
 
         String commandline = JOptionPane.showInputDialog("Additional commandline");
 
-        HostedApp hostedApp = new HostedApp(0, selectedFile, commandline, Paths.get(System.getProperty("user.home")).toFile());
+        JavaProcess app = new JavaProcess(0, selectedFile, Paths.get(System.getProperty("user.home")).toFile(), asList(commandline.split(" ")));
 
         JFrame f = new JFrame("Littel PaaS");
-        final Show show = new Show(hostedApp, f);
+        final Show show = new Show(app, f);
         f.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         JPanel contentPane = new JPanel(new FlowLayout());
         f.setContentPane(contentPane);
-        f.add(button("Start", hostedApp::start));
+        f.add(button("Start", app::start));
         f.add(button("Check if running", show::status));
-        f.add(button("Stop", hostedApp::stop));
+        f.add(button("Stop", app::stop));
         f.add(button("Tail out", show::tailOut));
         f.pack();
         f.setLocationRelativeTo(null);
@@ -58,10 +60,10 @@ public class Tester {
     }
 
     static class Show {
-        final HostedApp app;
+        final JavaProcess app;
         final Component parent;
 
-        Show(HostedApp app, Component parent) {
+        Show(JavaProcess app, Component parent) {
             this.app = app;
             this.parent = parent;
         }

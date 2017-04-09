@@ -39,7 +39,7 @@ public class HostedApplicationsView extends LazyInitRichAbstractView {
         eventBus.whenAppDeployed(this::refreshApps);
 
         Columns<HostedAppInfo> columns = Columns.create(HostedAppInfo.class)
-                .column("App ID", Integer.class, HostedAppInfo::getId)
+                .column("App ID", Long.class, HostedAppInfo::getId)
                 .column("Jar file", String.class, HostedAppInfo::getJarFile)
                 .column("Command line", String.class, HostedAppInfo::getCommandLineArgs)
                 .column("Running", Boolean.class, HostedAppInfo::isRunning)

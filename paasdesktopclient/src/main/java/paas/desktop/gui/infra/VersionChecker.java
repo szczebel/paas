@@ -53,8 +53,7 @@ public class VersionChecker {
                 ex -> {
                     Throwable t = ex;
                     while (t.getCause() != null) t = t.getCause();
-                    logger.info("Checking version failed due to:");
-                    t.printStackTrace();
+                    logger.error("Checking version failed due to : ", t);
                 }
         );
     }
@@ -74,8 +73,7 @@ public class VersionChecker {
         try {
             Desktop.getDesktop().browse(new URI(serverUrl + "/PaasDesktopClient.jar"));
         } catch (IOException | URISyntaxException e) {
-            logger.warn("Could not open browser");
-            e.printStackTrace();
+            logger.warn("Could not open browser", e);
         }
     }
 
@@ -96,8 +94,7 @@ public class VersionChecker {
             if (!file.exists() || !file.isFile()) throw new Exception("Not a file: " + jarFileName);
             return file.lastModified();
         } catch (Exception e) {
-            logger.info("Checking self last modified failed:");
-            e.printStackTrace();
+            logger.error("Checking self last modified failed : ", e);
             return null;
         }
     }

@@ -1,6 +1,8 @@
-package paas.rest;
+package paas.rest.service;
 
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.PostConstruct;
@@ -9,19 +11,16 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.List;
 
-import static java.util.Collections.emptyList;
+@Component
+public class FileSystemStorageService {
 
-class FileSystemStorageService {
-
-    static final String DESKTOP_CLIENT_JAR_NAME = "PaaSDesktopClient.jar";
+    public static final String DESKTOP_CLIENT_JAR_NAME = "PaaSDesktopClient.jar";
     private final File storageRoot;
     private final File uploads;
     private final File appsWorkingDirs;
 
-    FileSystemStorageService(String storageRoot) {
+    public FileSystemStorageService(@Value("${storage.root}") String storageRoot) {
         this.storageRoot = Paths.get(storageRoot).toFile();
         LoggerFactory.getLogger(getClass()).info("Storage root is : " + this.storageRoot.getAbsolutePath());
         uploads = Paths.get(storageRoot + "/uploads").toFile();
@@ -36,40 +35,44 @@ class FileSystemStorageService {
         if (!uploads.exists()) Files.createDirectory(uploads.toPath());
     }
 
-
-    List<File> getFiles() throws IOException {
-        File[] files = uploads.listFiles();
-        return files != null ? Arrays.asList(files) : emptyList();
-    }
-
     public File getStorageRoot() {
         return storageRoot;
     }
 
-    public File getAppsWorkingDirs() {
-        return appsWorkingDirs;
+    File saveUpload(MultipartFile file, boolean overwrite) throws IOException {
+        Path target = resolveUpload(file.getOriginalFilename());
+        return save(target, file, overwrite);
     }
 
-    File overwrite(MultipartFile file) throws IOException {
-        Path target = uploads.toPath().resolve(file.getOriginalFilename());
-        return overwrite(target, file);
+    void deleteUpload(String jarFileName) throws IOException {
+        Files.deleteIfExists(resolveUpload(jarFileName));
     }
 
-    private File overwrite(Path target, MultipartFile file) throws IOException {
+    Path resolveUpload(String jarFileName) {
+        return uploads.toPath().resolve(jarFileName);
+    }
+
+    private File save(Path target, MultipartFile file, boolean overwrite) throws IOException {
         if (file.isEmpty()) {
             throw new IOException("Empty file: " + file.getOriginalFilename());
         }
-        Files.deleteIfExists(target);
+        if(overwrite) Files.deleteIfExists(target);
         Files.copy(file.getInputStream(), target);
         return target.toFile();
     }
 
-    File getDesktopClientJar() {
+    public File getDesktopClientJar() {
         return storageRoot.toPath().resolve(DESKTOP_CLIENT_JAR_NAME).toFile();
     }
 
-    void saveDesktopClientJar(MultipartFile file) throws IOException {
+    public void saveDesktopClientJar(MultipartFile file) throws IOException {
         Path target = storageRoot.toPath().resolve(DESKTOP_CLIENT_JAR_NAME);
-        overwrite(target, file);
+        save(target, file, true);
+    }
+
+    File createWorkDirFor(File jarFile) throws IOException {
+        File retval = appsWorkingDirs.toPath().resolve(jarFile.getName() + "-workdir").toFile();
+        if(!retval.exists()) Files.createDirectory(retval.toPath());
+        return retval;
     }
 }

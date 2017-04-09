@@ -1,21 +1,21 @@
-package paas.rest;
+package paas.rest.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import paas.host.Shell;
-import paas.procman.HostedAppManager;
+import paas.procman.JavaProcessManager;
 
 import javax.annotation.PreDestroy;
 
 @Component
-public class Shutdown {
+public class PaasShutdown {
 
-    @Autowired private HostedAppManager hostedAppManager;
+    @Autowired private JavaProcessManager processManager;
     @Autowired private Shell shell;
 
     @PreDestroy
     void shutdown() {
-        hostedAppManager.shutdown();
+        processManager.shutdown();
         shell.killShellProcess();
     }
 }

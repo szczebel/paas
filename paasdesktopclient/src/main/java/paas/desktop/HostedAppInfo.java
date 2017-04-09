@@ -6,7 +6,7 @@ import java.util.Date;
 public class HostedAppInfo {
 
 
-    private int id;
+    private long id;
     private String jarFile;
     private String commandLineArgs;
     private boolean running;
@@ -15,11 +15,11 @@ public class HostedAppInfo {
     public HostedAppInfo() {
     }
 
-    public int getId() {
+    public long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(long id) {
         this.id = id;
     }
 

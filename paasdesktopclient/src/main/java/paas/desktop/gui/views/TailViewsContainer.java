@@ -24,7 +24,7 @@ public class TailViewsContainer extends LazyInitRichAbstractView {
     @Autowired private HttpPaasClient httpPaasClient;
 
     private JTabbedPane tabs;
-    private Map<Integer, TailView> tabsMap = new HashMap<>();
+    private Map<Long, TailView> tabsMap = new HashMap<>();
 
     @Override
     protected JComponent wireAndLayout() {
@@ -36,15 +36,15 @@ public class TailViewsContainer extends LazyInitRichAbstractView {
     }
 
     private void currentAppsChanged(Collection<HostedAppInfo> currentApps) {
-        List<Integer> currentAppIds = currentApps.stream().map(HostedAppInfo::getId).collect(Collectors.toList());
-        for (Integer appId : tabsMap.keySet()) {
+        List<Long> currentAppIds = currentApps.stream().map(HostedAppInfo::getId).collect(Collectors.toList());
+        for (Long appId : tabsMap.keySet()) {
             if(!currentAppIds.contains(appId)) {
                 closeTailView(appId);
             }
         }
     }
 
-    private void closeTailView(int appId) {
+    private void closeTailView(long appId) {
         TailView removed = tabsMap.remove(appId);
         removed.dispose();
         tabs.remove(removed.getComponent());

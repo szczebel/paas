@@ -28,8 +28,16 @@ public class HttpPaasClient {
 
     @MustBeInBackground
     public String deploy(File jarFile, String commandLineArgs) throws IOException, InterruptedException {
-        Thread.sleep(3000);
-        return restPost(serverUrl + "/deploy", String.class)
+        return send("/deploy", jarFile, commandLineArgs);
+    }
+
+    @MustBeInBackground
+    public String redeploy(File jarFile, String commandLineArgs) throws IOException, InterruptedException {
+        return send("/redeploy", jarFile, commandLineArgs);
+    }
+
+    private String send(String link, File jarFile, String commandLineArgs) throws IOException {
+        return restPost(serverUrl + link, String.class)
                 .param("jarFile", new UploadableFile(jarFile.getName(), Files.readAllBytes(jarFile.toPath())))
                 .param("commandLineArgs", commandLineArgs)
                 .contentType(MediaType.MULTIPART_FORM_DATA)
@@ -37,7 +45,7 @@ public class HttpPaasClient {
     }
 
     @MustBeInBackground
-    public List<DatedMessage> tailNewerThan(int appID, long timestamp) {
+    public List<DatedMessage> tailNewerThan(long appID, long timestamp) {
         return asList(
                 restGetList(
                         serverUrl + "/tailSysout", DatedMessage[].class)
@@ -49,14 +57,14 @@ public class HttpPaasClient {
 
 
     @MustBeInBackground
-    public String restart(int appId) {
+    public String restart(long appId) {
         return restGet(serverUrl + "/restart", String.class)
                 .param("appId", appId)
                 .execute();
     }
 
     @MustBeInBackground
-    public String undeploy(int appId) {
+    public String undeploy(long appId) {
         return restGet(serverUrl + "/undeploy", String.class)
                 .param("appId", appId)
                 .execute();

@@ -1,27 +1,29 @@
-package paas.rest;
+package paas.rest.dto;
 
+import java.time.ZonedDateTime;
 import java.util.Date;
+import java.util.List;
 
 public class HostedAppInfo {
 
-    private int id;
+    private long id;
     private String jarFile;
     private String commandLineArgs;
     private boolean running;
     private Date start;//ZoneDateTime doesn't get marshalled to json well by default (own converter needed and I'm lazy)
 
-    HostedAppInfo(int id, String jarFile, String commandLineArgs, boolean running,  Date start) {
+    public HostedAppInfo(long id, String jarFile, List<String> commandLineArgs, boolean running, ZonedDateTime start) {
         this.id = id;
         this.jarFile = jarFile;
-        this.commandLineArgs = commandLineArgs;
+        this.commandLineArgs = String.join(" ", commandLineArgs);
         this.running = running;
-        this.start = start;
+        this.start = Date.from(start.toInstant());
     }
 
     public HostedAppInfo() {
     }
 
-    public int getId() {
+    public long getId() {
         return id;
     }
 

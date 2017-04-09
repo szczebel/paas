@@ -9,22 +9,22 @@ import java.util.List;
 import static java.io.File.separator;
 import static java.util.Arrays.asList;
 
-public class HostedApp {
+public class JavaProcess {
 
     private static final String JAVA_BIN = String.join(separator, System.getProperty("java.home"), "bin", "java");
 
-    private final int id;
+    private final long appId;
     private final File jarFile;
-    private final String commandLineArgs;
     private final File workingDirectory;
     private Process process;
     private ZonedDateTime start;
     private AsyncOutputCollector outputCollector = new AsyncOutputCollector(300);
+    private final List<String> commandLineArgs;
 
-    public HostedApp(int id, File jarFile, String commandLineArgs, File workingDirectory) {
-        this.id = id;
+    public JavaProcess(long appId, File jarFile, File workingDirectory, List<String> additionalArgs) {
+        this.appId = appId;
         this.jarFile = jarFile;
-        this.commandLineArgs = commandLineArgs;
+        this.commandLineArgs = additionalArgs;
         this.workingDirectory = workingDirectory;
     }
 
@@ -32,10 +32,7 @@ public class HostedApp {
     private Process spawn() throws IOException, InterruptedException {
         this.start = ZonedDateTime.now();
         List<String> commands = new ArrayList<>(asList(JAVA_BIN, "-jar", jarFile.getAbsolutePath()));
-        if (commandLineArgs != null) {
-            List<String> additionalArgs = asList(commandLineArgs.split(" "));
-            if (!additionalArgs.isEmpty()) commands.addAll(additionalArgs);
-        }
+        commands.addAll(commandLineArgs);
         Process p = new ProcessBuilder()
                 .command(commands)
                 .directory(workingDirectory)
@@ -66,15 +63,15 @@ public class HostedApp {
         return outputCollector.getOutputNewerThan(timestamp);
     }
 
-    public int getId() {
-        return id;
+    public long getAppId() {
+        return appId;
     }
 
     public File getJarFile() {
         return jarFile;
     }
 
-    public String getCommandLineArgs() {
+    public List<String> getCommandLineArgs() {
         return commandLineArgs;
     }
 
