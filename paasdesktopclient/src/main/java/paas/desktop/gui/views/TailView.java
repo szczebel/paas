@@ -1,7 +1,7 @@
 package paas.desktop.gui.views;
 
-import paas.desktop.DatedMessage;
-import paas.desktop.HostedAppInfo;
+import paas.desktop.dto.DatedMessage;
+import paas.desktop.dto.HostedAppInfo;
 import paas.desktop.remoting.HttpPaasClient;
 import swingutils.components.LazyInitRichAbstractView;
 import swingutils.components.RollingConsole;

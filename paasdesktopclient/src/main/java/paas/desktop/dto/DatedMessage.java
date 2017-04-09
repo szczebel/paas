@@ -1,4 +1,4 @@
-package paas.desktop;
+package paas.desktop.dto;
 
 public class DatedMessage {
 

@@ -1,7 +1,7 @@
 package paas.desktop.gui.infra;
 
 import org.springframework.stereotype.Component;
-import paas.desktop.HostedAppInfo;
+import paas.desktop.dto.HostedAppInfo;
 
 import java.util.ArrayList;
 import java.util.Collection;

@@ -3,8 +3,8 @@ package paas.desktop.remoting;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
-import paas.desktop.DatedMessage;
-import paas.desktop.HostedAppInfo;
+import paas.desktop.dto.DatedMessage;
+import paas.desktop.dto.HostedAppInfo;
 import paas.desktop.gui.infra.MustBeInBackground;
 
 import java.io.File;

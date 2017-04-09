@@ -1,4 +1,4 @@
-package paas.desktop;
+package paas.desktop.dto;
 
 import java.util.Date;
 

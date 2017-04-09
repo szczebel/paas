@@ -2,7 +2,7 @@ package paas.desktop.gui.views;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import paas.desktop.DatedMessage;
+import paas.desktop.dto.DatedMessage;
 import paas.desktop.gui.infra.EventBus;
 import paas.desktop.remoting.HttpPaasClient;
 import swingutils.components.LazyInitRichAbstractView;
