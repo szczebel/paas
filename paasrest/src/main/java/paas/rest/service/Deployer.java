@@ -11,6 +11,8 @@ import paas.rest.persistence.repos.ProcfileRepository;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
 import static java.util.Arrays.asList;
@@ -24,6 +26,7 @@ public class Deployer {
     private JavaProcessManager processManager;
     @Autowired
     private ProcfileRepository procfileRepository;
+    @Autowired Provisioning provisioning;
 
 
     public long deploy(MultipartFile file, String commandLineArgs) throws IOException, InterruptedException {
@@ -55,8 +58,10 @@ public class Deployer {
 
     private void createAndStart(Long id, File jarFile, String commandLineArgs) throws IOException, InterruptedException {
         File appWorkDir = fileSystemStorageService.createWorkDirFor(jarFile);
-        //todo: provisioning (logfile, storage, etc. to commandline)
-        JavaProcess newApp = processManager.create(id, jarFile, appWorkDir, asList(commandLineArgs.split(" ")));
+        List<String> commandLine = asList(commandLineArgs.split(" "));
+        Collection<String> additionalCommandLine = provisioning.provision(appWorkDir);
+        commandLine.addAll(additionalCommandLine);
+        JavaProcess newApp = processManager.create(id, jarFile, appWorkDir, commandLine);
         newApp.start();
     }
 
