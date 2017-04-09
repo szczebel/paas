@@ -11,6 +11,7 @@ import paas.rest.persistence.repos.ProcfileRepository;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -58,7 +59,8 @@ public class Deployer {
 
     private void createAndStart(Long id, File jarFile, String commandLineArgs) throws IOException, InterruptedException {
         File appWorkDir = fileSystemStorageService.createWorkDirFor(jarFile);
-        List<String> commandLine = asList(commandLineArgs.split(" "));
+        List<String> commandLine = new ArrayList<>();
+        commandLine.addAll(asList(commandLineArgs.split(" ")));
         Collection<String> additionalCommandLine = provisioning.provision(appWorkDir);
         commandLine.addAll(additionalCommandLine);
         JavaProcess newApp = processManager.create(id, jarFile, appWorkDir, commandLine);
