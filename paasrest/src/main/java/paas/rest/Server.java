@@ -47,21 +47,18 @@ public class Server extends SpringBootServletInitializer {
 
     @Bean
     HostedAppManager hostedAppManager(@Autowired FileSystemStorageService fileSystemStorageService) {
-        return new HostedAppManager(fileSystemStorageService.logs);
+        return new HostedAppManager(fileSystemStorageService.getAppsWorkingDirs());
     }
 
     @Bean
     FileSystemStorageService fileSystemStorageService(
-            @Value("${storage.root}") String storageRoot,
-            @Value("${storage.root.is.relative.to.user.home}") boolean relative) {
-        if(relative) storageRoot = System.getProperty("user.home") + storageRoot;
-        System.out.println("Storage path:" + storageRoot);
+            @Value("${storage.root}") String storageRoot) {
         return new FileSystemStorageService(storageRoot);
     }
 
     @Bean
-    Shell shell() {
-        return new Shell(System.getProperty("os.name").startsWith("Windows") ? "cmd" : "bash");
+    Shell shell(@Autowired FileSystemStorageService fileSystemStorageService) {
+        return new Shell(System.getProperty("os.name").startsWith("Windows") ? "cmd" : "bash", fileSystemStorageService.getStorageRoot());
     }
 
     @RestController
@@ -124,6 +121,7 @@ public class Server extends SpringBootServletInitializer {
 
         @PostMapping("/deploy")
         public String deploy(@RequestParam("jarFile") MultipartFile file, @RequestParam String commandLineArgs) throws IOException, InterruptedException {
+            //todo: refactor to separate class, persist, provision
             String jarFileName = file.getOriginalFilename();
             Optional<HostedApp> existingApp = hostedAppManager.findByJarName(jarFileName);
             if(!existingApp.isPresent()) {

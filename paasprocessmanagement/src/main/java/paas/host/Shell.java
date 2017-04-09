@@ -4,6 +4,7 @@ import paas.procman.AsyncOutputCollector;
 import paas.procman.DatedMessage;
 
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.HashMap;
@@ -15,7 +16,7 @@ public class Shell {
 
     public static void main(String[] args) throws IOException, InterruptedException {
         long timestamp = 0;
-        Shell shell = new Shell("cmd");
+        Shell shell = new Shell("cmd", new File("."));
         shell.start();
         timestamp = printNewOutput(timestamp, shell);
         shell.execute("echo hello");
@@ -34,15 +35,18 @@ public class Shell {
         return timestamp;
     }
 
+
     private static final int OUTPUT_MAX_SIZE = 1000;
+    private final File shellWorkingDir;
     private final String shellInvokeCmd;
 
     private Process shellProcess;
     private BufferedWriter shellWriter;
     private AsyncOutputCollector outputCollector = new AsyncOutputCollector(OUTPUT_MAX_SIZE);
 
-    public Shell(String shellInvokeCmd) {
+    public Shell(String shellInvokeCmd, File shellWorkingDir) {
         this.shellInvokeCmd = shellInvokeCmd;
+        this.shellWorkingDir = shellWorkingDir;
     }
 
     public List<DatedMessage> getOutputNewerThan(long timestamp) {
@@ -68,6 +72,7 @@ public class Shell {
         if(shellProcess!=null && shellProcess.isAlive()) throw new IllegalStateException("Shell process already running");
         shellProcess = new ProcessBuilder()
                 .command(shellInvokeCmd)
+                .directory(shellWorkingDir)
                 .redirectErrorStream(true)
                 .start();
         shellWriter = new BufferedWriter(new OutputStreamWriter(shellProcess.getOutputStream()));

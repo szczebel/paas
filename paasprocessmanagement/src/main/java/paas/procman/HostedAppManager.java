@@ -10,8 +10,8 @@ public class HostedAppManager {
     private final File workingDirectory;
     private List<HostedApp> hostedApps = new ArrayList<>();
 
-    public HostedAppManager(File workingDirectory) {
-        this.workingDirectory = workingDirectory;
+    public HostedAppManager(File workingDirector) {
+        this.workingDirectory = workingDirector;
     }
 
     public Collection<HostedApp> getApps() {

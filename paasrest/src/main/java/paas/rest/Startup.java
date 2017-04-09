@@ -13,6 +13,6 @@ public class Startup {
 
     @PostConstruct
     void startup() {
-        //todo: register 'logfile' as special command if springboot's /logfile endpoint doesnt work...
+        //todo start all hosted apps
     }
 }
