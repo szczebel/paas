@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 import static java.io.File.separator;
 import static java.util.Arrays.asList;
@@ -16,16 +17,24 @@ public class JavaProcess {
     private final long appId;
     private final File jarFile;
     private final File workingDirectory;
-    private Process process;
-    private ZonedDateTime start;
-    private AsyncOutputCollector outputCollector = new AsyncOutputCollector(300);
+    private final OutputBuffer outputBuffer = new OutputBuffer(300);
+    private final AsyncOutputReader outputReader;
     private final List<String> commandLineArgs;
 
-    public JavaProcess(long appId, File jarFile, File workingDirectory, List<String> additionalArgs) {
+    private Process process;
+    private ZonedDateTime start;
+
+    public JavaProcess(long appId, File jarFile, File workingDirectory, List<String> additionalArgs, Consumer<String> processOutputConsumer) {
         this.appId = appId;
         this.jarFile = jarFile;
         this.commandLineArgs = additionalArgs;
         this.workingDirectory = workingDirectory;
+
+        outputReader = new AsyncOutputReader(new CompositeOutputDrain(asList(outputBuffer, forwardTo(processOutputConsumer))));
+    }
+
+    private Consumer<String> forwardTo(Consumer<String> processOutputConsumer) {
+        return outputLine -> processOutputConsumer.accept("[AppId:"+appId+"] " + outputLine);
     }
 
 
@@ -38,8 +47,8 @@ public class JavaProcess {
                 .directory(workingDirectory)
                 .redirectErrorStream(true)
                 .start();
-        outputCollector.asyncCollect(
-                String.join(" ", commands),
+        outputReader.asyncCollect(
+                "Spawning process " + String.join(" ", commands),
                 p.getInputStream()
         );
         return p;
@@ -60,7 +69,7 @@ public class JavaProcess {
     }
 
     public List<DatedMessage> tailSysout(long timestamp) {
-        return outputCollector.getOutputNewerThan(timestamp);
+        return outputBuffer.getOutputNewerThan(timestamp);
     }
 
     public long getAppId() {

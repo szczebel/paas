@@ -2,10 +2,16 @@ package paas.procman;
 
 import java.io.File;
 import java.util.*;
+import java.util.function.Consumer;
 
 public class JavaProcessManager {
 
+    private final Consumer<String> processOutputConsumer;
     private List<JavaProcess> apps = new ArrayList<>();
+
+    public JavaProcessManager(Consumer<String> processOutputConsumer) {
+        this.processOutputConsumer = processOutputConsumer;
+    }
 
     public Collection<JavaProcess> getApps() {
         return Collections.unmodifiableCollection(apps);
@@ -17,7 +23,7 @@ public class JavaProcessManager {
 
     public JavaProcess create(long id, File jarFile, File appWorkDir, List<String> commandLine) {
         if(!jarFile.exists()) throw new IllegalArgumentException(jarFile.getAbsolutePath() + " does not exist!");
-        JavaProcess app = new JavaProcess(id, jarFile, appWorkDir, commandLine);
+        JavaProcess app = new JavaProcess(id, jarFile, appWorkDir, commandLine, processOutputConsumer);
         apps.add(app);
         return app;
     }

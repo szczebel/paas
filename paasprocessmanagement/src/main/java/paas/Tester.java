@@ -26,7 +26,11 @@ public class Tester {
 
         String commandline = JOptionPane.showInputDialog("Additional commandline");
 
-        JavaProcess app = new JavaProcess(0, selectedFile, Paths.get(System.getProperty("user.home")).toFile(), asList(commandline.split(" ")));
+        JavaProcess app = new JavaProcess(0, selectedFile,
+                Paths.get(System.getProperty("user.home")).toFile(),
+                asList(commandline.split(" ")),
+                outputLine -> System.out.println("Sending to ELK : " + outputLine)
+                );
 
         JFrame f = new JFrame("Littel PaaS");
         final Show show = new Show(app, f);

@@ -1,20 +1,24 @@
 package paas.procman;
 
-import java.io.InputStream;
 import java.util.*;
+import java.util.function.Consumer;
 
-public class AsyncOutputCollector {
+import static paas.procman.DatedMessage.msg;
+
+public class OutputBuffer implements Consumer<String> {
 
     private final int bufferSize;
     private final ArrayDeque<DatedMessage> buffer;
 
-    public AsyncOutputCollector(int bufferSize) {
+    public OutputBuffer(int bufferSize) {
         buffer = new ArrayDeque<>(bufferSize+1);
         this.bufferSize = bufferSize;
     }
 
-    public synchronized void appendLine(String line) {
-        buffer.addLast(new DatedMessage(System.currentTimeMillis(), line));
+
+    @Override
+    public synchronized void accept(String line) {
+        buffer.addLast(msg(line));
         if (buffer.size() > bufferSize) {
             buffer.removeFirst();
         }
@@ -30,22 +34,5 @@ public class AsyncOutputCollector {
             else break;
         }
         return retval;
-    }
-
-    private Thread reader;
-    public synchronized void asyncCollect(String initialMessage, InputStream inputStream) {
-        if(reader!=null) reader.interrupt();
-        buffer.clear();
-        appendLine(initialMessage);
-        reader = new Thread(() -> {
-            try (Scanner reader = new Scanner(inputStream)) {
-                while (reader.hasNextLine()) {
-                    String line = reader.nextLine();
-                    appendLine(line);
-                }
-            }
-        });
-        reader.setDaemon(true);
-        reader.start();
     }
 }

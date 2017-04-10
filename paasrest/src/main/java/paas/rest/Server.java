@@ -17,6 +17,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 import paas.host.Shell;
 import paas.procman.JavaProcessManager;
 import paas.rest.service.FileSystemStorageService;
+import paas.rest.service.logging.AppsOutputForwarded;
 
 //todo maven plugin for automated deployment
 
@@ -33,8 +34,8 @@ public class Server extends SpringBootServletInitializer {
     }
 
     @Bean(name = "processManager")
-    JavaProcessManager procman(@Autowired FileSystemStorageService fileSystemStorageService) {
-        return new JavaProcessManager();
+    JavaProcessManager procman(@Autowired AppsOutputForwarded appsOutputForwarded) {
+        return new JavaProcessManager(appsOutputForwarded::forward);
     }
 
     @Bean

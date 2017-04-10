@@ -2,10 +2,14 @@ package paas.procman;
 
 public class DatedMessage {
 
+    static DatedMessage msg(String message) {
+        return new DatedMessage(System.currentTimeMillis(), message);
+    }
+
     private final long timestamp;
     private final String message;
 
-    DatedMessage(long timestamp, String outputLine) {
+    private DatedMessage(long timestamp, String outputLine) {
         this.timestamp = timestamp;
         this.message = outputLine;
     }

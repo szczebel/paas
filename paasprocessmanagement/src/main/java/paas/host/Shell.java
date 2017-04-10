@@ -1,7 +1,8 @@
 package paas.host;
 
-import paas.procman.AsyncOutputCollector;
+import paas.procman.AsyncOutputReader;
 import paas.procman.DatedMessage;
+import paas.procman.OutputBuffer;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -10,7 +11,7 @@ import java.io.OutputStreamWriter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Supplier;
+import java.util.function.Consumer;
 
 public class Shell {
 
@@ -36,13 +37,14 @@ public class Shell {
     }
 
 
-    private static final int OUTPUT_MAX_SIZE = 1000;
+    private static final int OUTPUT_MAX_SIZE = 300;
     private final File shellWorkingDir;
     private final String shellInvokeCmd;
 
     private Process shellProcess;
     private BufferedWriter shellWriter;
-    private AsyncOutputCollector outputCollector = new AsyncOutputCollector(OUTPUT_MAX_SIZE);
+    private OutputBuffer outputBuffer = new OutputBuffer(OUTPUT_MAX_SIZE);
+    private AsyncOutputReader outputReader = new AsyncOutputReader(outputBuffer);
 
     public Shell(String shellInvokeCmd, File shellWorkingDir) {
         this.shellInvokeCmd = shellInvokeCmd;
@@ -50,22 +52,21 @@ public class Shell {
     }
 
     public List<DatedMessage> getOutputNewerThan(long timestamp) {
-        return outputCollector.getOutputNewerThan(timestamp);
+        return outputBuffer.getOutputNewerThan(timestamp);
     }
 
     public synchronized void execute(String command) throws IOException, InterruptedException {
         if (shellProcess == null || !shellProcess.isAlive()) {
             start();
         }
-        outputCollector.appendLine("[INPUT] >>>>> Command received : " + command);
-        if(specialCommandsMap.containsKey(command)) specialCommandsMap.get(command).run();
+        outputBuffer.accept("[INPUT] >>>>> Command received : " + command);
+        if(specialCommandsMap.containsKey(command)) specialCommandsMap.get(command).accept(outputBuffer);
         else {
             shellWriter.write(command);
             shellWriter.newLine();
             shellWriter.flush();
         }
     }
-
 
 
     private void start() throws IOException {
@@ -76,34 +77,31 @@ public class Shell {
                 .redirectErrorStream(true)
                 .start();
         shellWriter = new BufferedWriter(new OutputStreamWriter(shellProcess.getOutputStream()));
-        outputCollector.asyncCollect(
+        outputReader.asyncCollect(
                 "Shell process not running, creating one",
                 shellProcess.getInputStream()
         );
     }
 
-    public void killShellProcess() {
+    public void killShellProcess(Consumer<String> output) {
+        output.accept("Killing existing shell process");
         if(shellProcess!=null) shellProcess.destroyForcibly();
     }
 
-    public void registerSpecialCommand(String command, Supplier<List<String>> outputProducer) {
+    public void registerSpecialCommand(String command, Consumer<Consumer<String>> outputProducer) {
         registerSpecialCommand(command, outputProducer, false);
     }
 
     @SuppressWarnings({"WeakerAccess", "SameParameterValue"})
-    public void registerSpecialCommand(String command, Supplier<List<String>> outputProducer, boolean override) {
-        if(override) specialCommandsMap.put(command, asRunnable(outputProducer));
+    public void registerSpecialCommand(String command, Consumer<Consumer<String>> outputProducer, boolean override) {
+        if(override) specialCommandsMap.put(command, outputProducer);
         else {
             if(specialCommandsMap.containsKey(command)) throw new IllegalArgumentException("Special command '" + command + "' already defined");
-            else specialCommandsMap.put(command, asRunnable(outputProducer));
+            else specialCommandsMap.put(command, outputProducer);
         }
     }
 
-    private Runnable asRunnable(Supplier<List<String>> outputProducer) {
-        return () -> outputProducer.get().forEach(outputCollector::appendLine);
-    }
-
-    private Map<String, Runnable> specialCommandsMap = new HashMap<>();{
+    private Map<String, Consumer<Consumer<String>>> specialCommandsMap = new HashMap<>();{
         specialCommandsMap.put("restart", this::killShellProcess);
     }
 }
