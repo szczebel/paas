@@ -23,7 +23,7 @@ public class TailView extends LazyInitRichAbstractView {
     private final RollingConsole connection = new RollingConsole(1000);
 
     private JCheckBox autorefresh;
-    private Timer timer;//todo websockets :>
+    private Timer timer;
 
     TailView(HostedAppInfo appInfo, PaasRestClient paasRestClient) {
         this.appInfo = appInfo;
