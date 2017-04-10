@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import paas.desktop.dto.DatedMessage;
 import paas.desktop.gui.infra.EventBus;
-import paas.desktop.remoting.HttpPaasClient;
+import paas.desktop.remoting.PaasRestClient;
 import swingutils.components.LazyInitRichAbstractView;
 import swingutils.components.RollingConsole;
 import swingutils.components.progress.BusyFactory;
@@ -23,7 +23,7 @@ import static swingutils.layout.LayoutBuilders.hBox;
 public class ServerShellConsole extends LazyInitRichAbstractView {
 
     @Autowired private EventBus eventBus;
-    @Autowired private HttpPaasClient httpPaasClient;
+    @Autowired private PaasRestClient paasRestClient;
 
     private RollingConsole output;
     private ProgressIndicator commandProgressIndicator;
@@ -80,7 +80,7 @@ public class ServerShellConsole extends LazyInitRichAbstractView {
 
     private void refresh() {
         inBackground(
-                () -> httpPaasClient.getShellOutputNewerThan(lastMessageTimestamp),
+                () -> paasRestClient.getShellOutputNewerThan(lastMessageTimestamp),
                 this::newOutputReceived,
                 ProgressIndicator.NoOp
         );
@@ -106,7 +106,7 @@ public class ServerShellConsole extends LazyInitRichAbstractView {
 
     private void sendCommand(String command) {
         inBackground(
-                () -> httpPaasClient.executeShellCommand(command),
+                () -> paasRestClient.executeShellCommand(command),
                 this::commandSent,
                 commandProgressIndicator
         );

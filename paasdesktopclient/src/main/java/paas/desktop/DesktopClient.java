@@ -7,7 +7,7 @@ import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.stereotype.Component;
 import paas.desktop.gui.GuiBuilder;
 import paas.desktop.gui.infra.EventBus;
-import paas.desktop.remoting.HttpPaasClient;
+import paas.desktop.remoting.PaasRestClient;
 import swingutils.SysoutInterceptor;
 
 import javax.swing.*;
@@ -26,12 +26,12 @@ public class DesktopClient {
     @Component
     protected static class GuiEntryPoint implements CommandLineRunner {
         @Autowired GuiBuilder guiBuilder;
-        @Autowired HttpPaasClient httpPaasClient;
+        @Autowired PaasRestClient paasRestClient;
         @Autowired EventBus eventBus;
 
         @Override
         public void run(String... strings) throws Exception {
-            eventBus.whenServerChanged(httpPaasClient::serverChanged);
+            eventBus.whenServerChanged(paasRestClient::serverChanged);
             SwingUtilities.invokeLater(guiBuilder::showGui);
         }
 

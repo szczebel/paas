@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import paas.desktop.dto.HostedAppInfo;
 import paas.desktop.gui.infra.EventBus;
-import paas.desktop.remoting.HttpPaasClient;
+import paas.desktop.remoting.PaasRestClient;
 import swingutils.components.LazyInitRichAbstractView;
 
 import javax.swing.*;
@@ -21,7 +21,7 @@ import static swingutils.layout.LayoutBuilders.tabbedPane;
 public class TailViewsContainer extends LazyInitRichAbstractView {
 
     @Autowired private EventBus eventBus;
-    @Autowired private HttpPaasClient httpPaasClient;
+    @Autowired private PaasRestClient paasRestClient;
 
     private JTabbedPane tabs;
     private Map<Long, TailView> tabsMap = new HashMap<>();
@@ -60,7 +60,7 @@ public class TailViewsContainer extends LazyInitRichAbstractView {
             tabs.setSelectedComponent(tailView.getComponent());
             tailView.refresh();
         } else {
-            TailView tailView = new TailView(appInfo, httpPaasClient);
+            TailView tailView = new TailView(appInfo, paasRestClient);
             tabsMap.put(appInfo.getId(), tailView);
             tabs.addTab("App ID : " + appInfo.getId(), tailView.getComponent());
             tabs.setSelectedComponent(tailView.getComponent());

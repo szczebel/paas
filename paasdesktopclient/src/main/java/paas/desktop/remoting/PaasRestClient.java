@@ -16,7 +16,7 @@ import static java.util.Arrays.asList;
 import static paas.desktop.remoting.RestCall.*;
 
 @Component
-public class HttpPaasClient {
+public class PaasRestClient {
 
     @Value("${tiniestpaas.server.url}")
     private String serverUrl;

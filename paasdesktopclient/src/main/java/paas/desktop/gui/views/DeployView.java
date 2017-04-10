@@ -4,7 +4,7 @@ import com.jgoodies.forms.builder.FormBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import paas.desktop.gui.infra.EventBus;
-import paas.desktop.remoting.HttpPaasClient;
+import paas.desktop.remoting.PaasRestClient;
 import swingutils.components.LazyInitRichAbstractView;
 
 import javax.swing.*;
@@ -22,7 +22,7 @@ public class DeployView extends LazyInitRichAbstractView {
     @Autowired
     private EventBus eventBus;
     @Autowired
-    private HttpPaasClient httpPaasClient;
+    private PaasRestClient paasRestClient;
 
     private JTextField fileName;
     private JTextField commandLine;
@@ -59,11 +59,11 @@ public class DeployView extends LazyInitRichAbstractView {
     }
 
     private void deploy() {
-        send(() -> httpPaasClient.deploy(selectedFile, commandLine.getText()));
+        send(() -> paasRestClient.deploy(selectedFile, commandLine.getText()));
     }
 
     private void redeploy() {
-        send(() -> httpPaasClient.redeploy(selectedFile, commandLine.getText()));
+        send(() -> paasRestClient.redeploy(selectedFile, commandLine.getText()));
     }
 
     private void send(Callable<String> callable) {

@@ -2,7 +2,7 @@ package paas.desktop.gui.views;
 
 import paas.desktop.dto.DatedMessage;
 import paas.desktop.dto.HostedAppInfo;
-import paas.desktop.remoting.HttpPaasClient;
+import paas.desktop.remoting.PaasRestClient;
 import swingutils.components.LazyInitRichAbstractView;
 import swingutils.components.RollingConsole;
 import swingutils.components.progress.ProgressIndicator;
@@ -16,7 +16,7 @@ import static swingutils.layout.LayoutBuilders.*;
 
 public class TailView extends LazyInitRichAbstractView {
     private final HostedAppInfo appInfo;
-    private final HttpPaasClient httpPaasClient;
+    private final PaasRestClient paasRestClient;
 
     private long lastMessageTimestamp = 0;
     private final RollingConsole sysout = new RollingConsole(1000);
@@ -25,9 +25,9 @@ public class TailView extends LazyInitRichAbstractView {
     private JCheckBox autorefresh;
     private Timer timer;//todo websockets :>
 
-    TailView(HostedAppInfo appInfo, HttpPaasClient httpPaasClient) {
+    TailView(HostedAppInfo appInfo, PaasRestClient paasRestClient) {
         this.appInfo = appInfo;
-        this.httpPaasClient = httpPaasClient;
+        this.paasRestClient = paasRestClient;
     }
 
     private void startTimer() {
@@ -61,7 +61,7 @@ public class TailView extends LazyInitRichAbstractView {
 
     void refresh() {
         inBackground(
-                () -> httpPaasClient.tailNewerThan(appInfo.getId(), lastMessageTimestamp),
+                () -> paasRestClient.tailNewerThan(appInfo.getId(), lastMessageTimestamp),
                 this::newTailReceived
         );
     }

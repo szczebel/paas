@@ -5,7 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import paas.desktop.dto.HostedAppInfo;
 import paas.desktop.gui.infra.EventBus;
-import paas.desktop.remoting.HttpPaasClient;
+import paas.desktop.remoting.PaasRestClient;
 import swingutils.EventListHelper;
 import swingutils.components.LazyInitRichAbstractView;
 import swingutils.components.table.TableFactory;
@@ -29,7 +29,7 @@ public class HostedApplicationsView extends LazyInitRichAbstractView {
 
     private final EventList<HostedAppInfo> apps = eventList();
     @Autowired
-    private HttpPaasClient httpPaasClient;
+    private PaasRestClient paasRestClient;
     @Autowired
     private EventBus eventBus;
 
@@ -62,7 +62,7 @@ public class HostedApplicationsView extends LazyInitRichAbstractView {
     }
 
     private void refreshApps() {
-        inBackground(httpPaasClient::getHostedApplications, this::appsFetched);
+        inBackground(paasRestClient::getHostedApplications, this::appsFetched);
     }
 
     private void appsFetched(List<HostedAppInfo> apps) {
@@ -71,11 +71,11 @@ public class HostedApplicationsView extends LazyInitRichAbstractView {
     }
 
     private void restart(HostedAppInfo appInfo) {
-        doInBackgroundAndRefreshApps(() -> httpPaasClient.restart(appInfo.getId()));
+        doInBackgroundAndRefreshApps(() -> paasRestClient.restart(appInfo.getId()));
     }
 
     private void undeploy(HostedAppInfo appInfo) {
-        doInBackgroundAndRefreshApps(() -> httpPaasClient.undeploy(appInfo.getId()));
+        doInBackgroundAndRefreshApps(() -> paasRestClient.undeploy(appInfo.getId()));
     }
 
     private void doInBackgroundAndRefreshApps(Callable<String> task) {
