@@ -70,8 +70,8 @@ public class FileSystemStorageService {
         save(target, file, true);
     }
 
-    File createWorkDirFor(File jarFile) throws IOException {
-        File retval = appsWorkingDirs.toPath().resolve(jarFile.getName() + "-workdir").toFile();
+    public File createWorkDirFor(String jarFileName) throws IOException {
+        File retval = appsWorkingDirs.toPath().resolve(jarFileName + "-workdir").toFile();
         if(!retval.exists()) Files.createDirectory(retval.toPath());
         return retval;
     }

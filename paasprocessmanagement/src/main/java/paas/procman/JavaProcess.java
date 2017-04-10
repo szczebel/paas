@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 import static java.io.File.separator;
@@ -24,7 +25,7 @@ public class JavaProcess {
     private Process process;
     private ZonedDateTime start;
 
-    public JavaProcess(long appId, File jarFile, File workingDirectory, List<String> additionalArgs, Consumer<String> processOutputConsumer) {
+    public JavaProcess(long appId, File jarFile, File workingDirectory, List<String> additionalArgs, BiConsumer<Long, String> processOutputConsumer) {
         this.appId = appId;
         this.jarFile = jarFile;
         this.commandLineArgs = additionalArgs;
@@ -33,8 +34,8 @@ public class JavaProcess {
         outputReader = new AsyncOutputReader(new CompositeOutputDrain(asList(outputBuffer, forwardTo(processOutputConsumer))));
     }
 
-    private Consumer<String> forwardTo(Consumer<String> processOutputConsumer) {
-        return outputLine -> processOutputConsumer.accept("[AppId:"+appId+"] " + outputLine);
+    private Consumer<String> forwardTo(BiConsumer<Long, String> processOutputConsumer) {
+        return outputLine -> processOutputConsumer.accept(appId, outputLine);
     }
 
 

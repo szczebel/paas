@@ -2,27 +2,22 @@ package paas.procman;
 
 import java.io.File;
 import java.util.*;
-import java.util.function.Consumer;
+import java.util.function.BiConsumer;
 
 public class JavaProcessManager {
 
-    private final Consumer<String> processOutputConsumer;
     private List<JavaProcess> apps = new ArrayList<>();
-
-    public JavaProcessManager(Consumer<String> processOutputConsumer) {
-        this.processOutputConsumer = processOutputConsumer;
-    }
 
     public Collection<JavaProcess> getApps() {
         return Collections.unmodifiableCollection(apps);
     }
 
     public JavaProcess getApp(long id) {
-        return apps.stream().filter(ha -> id==ha.getAppId()).findAny().orElseThrow(() -> new IllegalArgumentException("Unknown appId:"+id));
+        return apps.stream().filter(ha -> id == ha.getAppId()).findAny().orElseThrow(() -> new IllegalArgumentException("Unknown appId:" + id));
     }
 
-    public JavaProcess create(long id, File jarFile, File appWorkDir, List<String> commandLine) {
-        if(!jarFile.exists()) throw new IllegalArgumentException(jarFile.getAbsolutePath() + " does not exist!");
+    public JavaProcess create(long id, File jarFile, File appWorkDir, List<String> commandLine, BiConsumer<Long, String> processOutputConsumer) {
+        if (!jarFile.exists()) throw new IllegalArgumentException(jarFile.getAbsolutePath() + " does not exist!");
         JavaProcess app = new JavaProcess(id, jarFile, appWorkDir, commandLine, processOutputConsumer);
         apps.add(app);
         return app;
@@ -37,7 +32,7 @@ public class JavaProcessManager {
     }
 
     private void stopAndRemoveIfExists(Optional<JavaProcess> existingApp) throws InterruptedException {
-        if(existingApp.isPresent()) {
+        if (existingApp.isPresent()) {
             JavaProcess javaProcess = existingApp.get();
             javaProcess.stop();
             apps.remove(javaProcess);

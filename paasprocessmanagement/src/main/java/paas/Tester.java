@@ -29,7 +29,7 @@ public class Tester {
         JavaProcess app = new JavaProcess(0, selectedFile,
                 Paths.get(System.getProperty("user.home")).toFile(),
                 asList(commandline.split(" ")),
-                outputLine -> System.out.println("Sending to ELK : " + outputLine)
+                (appId, outputLine) -> System.out.println("Sending to ELK : " + outputLine)
                 );
 
         JFrame f = new JFrame("Littel PaaS");
