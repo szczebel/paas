@@ -44,7 +44,7 @@ public class TailView extends LazyInitRichAbstractView {
 
     @Override
     protected JComponent wireAndLayout() {
-        autorefresh = new JCheckBox("Autorefresh (a.k.a. tail -f -100");
+        autorefresh = new JCheckBox("Autorefresh (a.k.a. tail -f");
         autorefresh.addActionListener(e -> {
             if(autorefresh.isSelected()) startTimer();
             else stopTimer();
