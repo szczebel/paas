@@ -28,21 +28,13 @@ public class PaasRestClient {
 
     @MustBeInBackground
     public String deploy(File jarFile, String commandLineArgs) throws IOException, InterruptedException {
-        return send("/deploy", jarFile, commandLineArgs);
-    }
-
-    @MustBeInBackground
-    public String redeploy(File jarFile, String commandLineArgs) throws IOException, InterruptedException {
-        return send("/redeploy", jarFile, commandLineArgs);
-    }
-
-    private String send(String link, File jarFile, String commandLineArgs) throws IOException {
-        return restPost(serverUrl + link, String.class)
+        return restPost(serverUrl + "/deploy", String.class)
                 .param("jarFile", new UploadableFile(jarFile.getName(), Files.readAllBytes(jarFile.toPath())))
                 .param("commandLineArgs", commandLineArgs)
                 .contentType(MediaType.MULTIPART_FORM_DATA)
                 .execute();
     }
+
 
     @MustBeInBackground
     public List<DatedMessage> tailNewerThan(long appID, long timestamp) {

@@ -1,19 +1,21 @@
 package paas.procman;
 
 import java.io.File;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import java.util.function.BiConsumer;
 
 public class JavaProcessManager {
 
     private List<JavaProcess> apps = new ArrayList<>();
 
-    public Collection<JavaProcess> getApps() {
-        return Collections.unmodifiableCollection(apps);
+    public JavaProcess getApp(long id) {
+        return getAppOptional(id).orElseThrow(() -> new IllegalArgumentException("Unknown appId:" + id));
     }
 
-    public JavaProcess getApp(long id) {
-        return apps.stream().filter(ha -> id == ha.getAppId()).findAny().orElseThrow(() -> new IllegalArgumentException("Unknown appId:" + id));
+    public Optional<JavaProcess> getAppOptional(long id) {
+        return apps.stream().filter(ha -> id == ha.getAppId()).findAny();
     }
 
     public JavaProcess create(long id, File jarFile, File appWorkDir, List<String> commandLine, BiConsumer<Long, String> processOutputConsumer) {

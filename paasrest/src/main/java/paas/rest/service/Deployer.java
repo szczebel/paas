@@ -22,16 +22,24 @@ import static java.util.Arrays.asList;
 @Component
 public class Deployer {
 
-    @Autowired
-    Provisioner provisioner;
-    @Autowired
-    private FileSystemStorageService fileSystemStorageService;
-    @Autowired
-    private JavaProcessManager processManager;
-    @Autowired
-    private ProcfileRepository procfileRepository;
+    @Autowired private Provisioner provisioner;
+    @Autowired private FileSystemStorageService fileSystemStorageService;
+    @Autowired private JavaProcessManager processManager;
+    @Autowired private ProcfileRepository procfileRepository;
 
     public long deploy(MultipartFile file, String commandLineArgs) throws IOException, InterruptedException {
+        Optional<Procfile> optionalProcfile = procfileRepository.findByJarFileName(file.getOriginalFilename());
+        if (optionalProcfile.isPresent()) {
+            Procfile procfile = optionalProcfile.get();
+            procfile.setCommandLineArgs(commandLineArgs);
+            procfileRepository.save(procfile);
+            return redeploy(procfile, file);
+        } else {
+            return newDeployment(file, commandLineArgs);
+        }
+    }
+
+    private long newDeployment(MultipartFile file, String commandLineArgs) throws IOException, InterruptedException {
         File uploaded = fileSystemStorageService.saveUpload(file, false);
         Procfile procfile = new Procfile(uploaded.getName(), commandLineArgs);
         procfileRepository.save(procfile);
@@ -39,18 +47,9 @@ public class Deployer {
         return procfile.getId();
     }
 
-    public long redeploy(MultipartFile file, String commandLineArgs) throws IOException, InterruptedException {
-        String jarFileName = file.getOriginalFilename();
-        Optional<Procfile> optionalProcfile = procfileRepository.findByJarFileName(jarFileName);
-        if (!optionalProcfile.isPresent())
-            throw new IllegalArgumentException(jarFileName + " is not hosted, cannot redeploy. Use Deploy instead");
+    private long redeploy(Procfile procfile, MultipartFile file) throws IOException, InterruptedException {
 
-        //else
-        Procfile procfile = optionalProcfile.get();
-        procfile.setCommandLineArgs(commandLineArgs);
-        procfileRepository.save(procfile);
-
-        processManager.stopAndRemoveIfExists(jarFileName);
+        processManager.stopAndRemoveIfExists(procfile.getJarFileName());
         fileSystemStorageService.saveUpload(file, true);
 
         createAndStart(procfile);
