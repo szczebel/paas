@@ -6,18 +6,18 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+import paas.dto.HostedAppInfo;
+import paas.dto.HostedAppRequestedProvisions;
+import paas.dto.HostedAppStatus;
 import paas.procman.DatedMessage;
 import paas.procman.JavaProcess;
 import paas.procman.JavaProcessManager;
-import paas.rest.dto.HostedAppInfo;
-import paas.rest.persistence.entities.Procfile;
-import paas.rest.persistence.repos.ProcfileRepository;
+import paas.rest.persistence.entities.HostedAppDescriptor;
+import paas.rest.persistence.repos.HostedAppDescriptorRepository;
 import paas.rest.service.Deployer;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 
 import static java.util.stream.Collectors.toList;
 
@@ -29,39 +29,47 @@ public class HostingEndpoint {
     @Autowired
     private Deployer deployer;
     @Autowired
-    private ProcfileRepository procfileRepository;
+    private HostedAppDescriptorRepository hostedAppDescriptorRepository;
 
     @GetMapping("/applications")
     List<HostedAppInfo> applications() throws IOException {
-        return procfileRepository.findAll()
+        return hostedAppDescriptorRepository.findAll()
                 .stream().map(this::info).collect(toList());
     }
 
-    private HostedAppInfo info(Procfile p) {
-        Optional<JavaProcess> optional = processManager.getAppOptional(p.getId());
-        if (optional.isPresent()) {
-            JavaProcess app = optional.get();
-            return new HostedAppInfo(
-                    app.getAppId(),
-                    app.getJarFile().getName(),
-                    app.getCommandLineArgs(),
-                    app.isRunning(),
-                    app.getStart()
-            );
-        } else {
-            return new HostedAppInfo(
-                    p.getId(),
-                    p.getJarFileName(),
-                    Arrays.asList(p.getCommandLineArgs().split(" ")),
-                    false,
-                    null);
-        }
+    private HostedAppInfo info(HostedAppDescriptor p) {
+        return new HostedAppInfo(
+                p.toDto(),
+                processManager.getStatus(p.getId())
+                        .orElse(new HostedAppStatus(false, null)));
 
     }
 
     @PostMapping("/deploy")
-    public String deploy(@RequestParam("jarFile") MultipartFile file, @RequestParam String commandLineArgs) throws IOException, InterruptedException {
-        return "Deployed. App ID:" + deployer.deploy(file, commandLineArgs);
+    public String deploy(
+            @RequestParam("jarFile") MultipartFile file,
+            @RequestParam String commandLineArgs,
+            @RequestParam boolean wantsDB,
+            @RequestParam boolean wantsFileStorage,
+            @RequestParam boolean wantsLogstash,
+            @RequestParam boolean wantsLogging
+            ) throws IOException, InterruptedException {
+        return "Deployed. App ID:" + deployer.newDeployment(file, commandLineArgs,
+                new HostedAppRequestedProvisions(wantsDB, wantsFileStorage, wantsLogstash, wantsLogging));
+    }
+
+    @PostMapping("/redeploy")
+    public String redeploy(
+            @RequestParam long appId,
+            @RequestParam(value = "jarFile", required = false) MultipartFile file,
+            @RequestParam String commandLineArgs,
+            @RequestParam boolean wantsDB,
+            @RequestParam boolean wantsFileStorage,
+            @RequestParam boolean wantsLogstash,
+            @RequestParam boolean wantsLogging
+    ) throws IOException, InterruptedException {
+        return "Redeployed. App ID:" + deployer.redeploy(appId, file, commandLineArgs,
+                new HostedAppRequestedProvisions(wantsDB, wantsFileStorage, wantsLogstash, wantsLogging));
     }
 
     @GetMapping(value = "/undeploy")

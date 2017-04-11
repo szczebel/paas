@@ -23,6 +23,7 @@ public class AsyncOutputReader {
                     drain.accept(line);
                 }
             }
+            drain.accept("Process ended");
         });
         reader.setDaemon(true);
         reader.start();

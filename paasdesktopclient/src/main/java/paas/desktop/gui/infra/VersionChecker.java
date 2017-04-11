@@ -27,7 +27,7 @@ public class VersionChecker {
 
     @Autowired
     private EventBus eventBus;
-    @Value("${tiniestpaas.server.url}")
+    @Value("${server.url}")
     private String initialServerUrl;
 
     private JFrame owner;

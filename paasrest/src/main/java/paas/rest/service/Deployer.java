@@ -4,10 +4,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
+import paas.dto.HostedAppRequestedProvisions;
 import paas.procman.JavaProcess;
 import paas.procman.JavaProcessManager;
-import paas.rest.persistence.entities.Procfile;
-import paas.rest.persistence.repos.ProcfileRepository;
+import paas.rest.persistence.entities.HostedAppDescriptor;
+import paas.rest.persistence.repos.HostedAppDescriptorRepository;
 import paas.rest.service.provisioning.Provisioner;
 import paas.rest.service.provisioning.Provisions;
 
@@ -15,9 +16,9 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import static java.util.Arrays.asList;
+import static paas.rest.persistence.entities.RequestedProvisions.from;
 
 @Component
 public class Deployer {
@@ -25,46 +26,46 @@ public class Deployer {
     @Autowired private Provisioner provisioner;
     @Autowired private FileSystemStorageService fileSystemStorageService;
     @Autowired private JavaProcessManager processManager;
-    @Autowired private ProcfileRepository procfileRepository;
+    @Autowired private HostedAppDescriptorRepository hostedAppDescriptorRepository;
 
-    public long deploy(MultipartFile file, String commandLineArgs) throws IOException, InterruptedException {
-        Optional<Procfile> optionalProcfile = procfileRepository.findByJarFileName(file.getOriginalFilename());
-        if (optionalProcfile.isPresent()) {
-            Procfile procfile = optionalProcfile.get();
-            procfile.setCommandLineArgs(commandLineArgs);
-            procfileRepository.save(procfile);
-            return redeploy(procfile, file);
-        } else {
-            return newDeployment(file, commandLineArgs);
-        }
-    }
-
-    private long newDeployment(MultipartFile file, String commandLineArgs) throws IOException, InterruptedException {
+    public long newDeployment(MultipartFile file, String commandLineArgs, HostedAppRequestedProvisions requestedProvisions)
+            throws IOException, InterruptedException {
         File uploaded = fileSystemStorageService.saveUpload(file, false);
-        Procfile procfile = new Procfile(uploaded.getName(), commandLineArgs);
-        procfileRepository.save(procfile);
-        createAndStart(procfile);
-        return procfile.getId();
+        HostedAppDescriptor hostedAppDescriptor = new HostedAppDescriptor(uploaded.getName(), commandLineArgs, from(requestedProvisions));
+        hostedAppDescriptorRepository.save(hostedAppDescriptor);
+        createAndStart(hostedAppDescriptor);
+        return hostedAppDescriptor.getId();
     }
 
-    private long redeploy(Procfile procfile, MultipartFile file) throws IOException, InterruptedException {
+    public long redeploy(long appId, MultipartFile newJarFile, String commandLineArgs, HostedAppRequestedProvisions requestedProvisions) throws IOException, InterruptedException {
+        HostedAppDescriptor hostedAppDescriptor = hostedAppDescriptorRepository.findOne(appId);
+        processManager.stopAndRemoveIfExists(appId);
 
-        processManager.stopAndRemoveIfExists(procfile.getJarFileName());
-        fileSystemStorageService.saveUpload(file, true);
+        if(newJarFile != null) {
+            String oldJarFile = hostedAppDescriptor.getJarFileName();
+            fileSystemStorageService.deleteUpload(oldJarFile);
+            File uploaded = fileSystemStorageService.saveUpload(newJarFile, false);
+            hostedAppDescriptor.setJarFileName(uploaded.getName());
+        }
 
-        createAndStart(procfile);
-        return procfile.getId();
+        hostedAppDescriptor.setCommandLineArgs(commandLineArgs);
+        hostedAppDescriptor.setRequestedProvisions(from(requestedProvisions));
+        hostedAppDescriptorRepository.save(hostedAppDescriptor);
+
+
+        createAndStart(hostedAppDescriptor);
+        return hostedAppDescriptor.getId();
     }
 
-    private void createAndStart(Procfile procfile) throws IOException, InterruptedException {
-        File jarFile = fileSystemStorageService.resolveUpload(procfile.getJarFileName()).toFile();
+    private void createAndStart(HostedAppDescriptor hostedAppDescriptor) throws IOException, InterruptedException {
+        File jarFile = fileSystemStorageService.resolveUpload(hostedAppDescriptor.getJarFileName()).toFile();
         List<String> commandLine = new ArrayList<>();
-        commandLine.addAll(asList(procfile.getCommandLineArgs().split(" ")));
-        Provisions provisions = provisioner.createProvisionsFor(procfile);
+        commandLine.addAll(asList(hostedAppDescriptor.getCommandLineArgs().split(" ")));
+        Provisions provisions = provisioner.createProvisionsFor(hostedAppDescriptor);
         commandLine.addAll(provisions.getAdditionalCommandLine());
 
         JavaProcess newApp = processManager.create(
-                procfile.getId(),
+                hostedAppDescriptor.getId(),
                 jarFile,
                 provisions.getAppWorkDir(),
                 commandLine,
@@ -74,21 +75,21 @@ public class Deployer {
 
     public void undeploy(long appId) throws InterruptedException, IOException {
         processManager.stopAndRemoveIfExists(appId);
-        Procfile procfile = procfileRepository.findOne(appId);
-        fileSystemStorageService.deleteUpload(procfile.getJarFileName());
-        procfileRepository.delete(procfile);
+        HostedAppDescriptor hostedAppDescriptor = hostedAppDescriptorRepository.findOne(appId);
+        fileSystemStorageService.deleteUpload(hostedAppDescriptor.getJarFileName());
+        hostedAppDescriptorRepository.delete(hostedAppDescriptor);
     }
 
     void redeployFromProcfiles() {
-        procfileRepository.findAll().forEach(this::redeployFromProcfile);
+        hostedAppDescriptorRepository.findAll().forEach(this::redeployFromProcfile);
     }
 
-    private void redeployFromProcfile(Procfile procfile) {
+    private void redeployFromProcfile(HostedAppDescriptor hostedAppDescriptor) {
         try {
-            LoggerFactory.getLogger(getClass()).info("Redeploying from : " + procfile);
-            createAndStart(procfile);
+            LoggerFactory.getLogger(getClass()).info("Redeploying from : " + hostedAppDescriptor);
+            createAndStart(hostedAppDescriptor);
         } catch (Exception e) {
-            LoggerFactory.getLogger(getClass()).error("Failed to redeploy from " + procfile, e);
+            LoggerFactory.getLogger(getClass()).error("Failed to redeploy from " + hostedAppDescriptor, e);
         }
     }
 }

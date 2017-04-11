@@ -1,10 +1,12 @@
 package paas.rest.persistence.entities;
 
+import paas.dto.HostedAppDesc;
+
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
 @Entity
-public class Procfile {
+public class HostedAppDescriptor {
 
     @Id
     @GeneratedValue(strategy= GenerationType.AUTO)
@@ -17,12 +19,16 @@ public class Procfile {
     @NotNull
     private String commandLineArgs;
 
-    public Procfile(String jarFileName, String commandLineArgs) {
+    @Embedded
+    private RequestedProvisions requestedProvisions;
+
+    public HostedAppDescriptor(String jarFileName, String commandLineArgs, RequestedProvisions requestedProvisions) {
         this.jarFileName = jarFileName;
         this.commandLineArgs = commandLineArgs;
+        this.requestedProvisions = requestedProvisions;
     }
 
-    protected Procfile() {
+    protected HostedAppDescriptor() {
     }
 
     public Long getId() {
@@ -37,16 +43,32 @@ public class Procfile {
         return commandLineArgs;
     }
 
+    public RequestedProvisions getRequestedProvisions() {
+        return requestedProvisions;
+    }
+
+    public void setJarFileName(String jarFileName) {
+        this.jarFileName = jarFileName;
+    }
+
     public void setCommandLineArgs(String commandLineArgs) {
         this.commandLineArgs = commandLineArgs;
     }
 
+    public void setRequestedProvisions(RequestedProvisions requestedProvisions) {
+        this.requestedProvisions = requestedProvisions;
+    }
+
     @Override
     public String toString() {
-        return "Procfile{" +
+        return "HostedAppDescriptor{" +
                 "id=" + id +
                 ", jarFileName='" + jarFileName + '\'' +
                 ", commandLineArgs='" + commandLineArgs + '\'' +
                 '}';
+    }
+
+    public HostedAppDesc toDto() {
+        return new HostedAppDesc(id, jarFileName, commandLineArgs, requestedProvisions.toDto());
     }
 }

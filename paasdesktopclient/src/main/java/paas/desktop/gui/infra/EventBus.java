@@ -1,7 +1,7 @@
 package paas.desktop.gui.infra;
 
 import org.springframework.stereotype.Component;
-import paas.desktop.dto.HostedAppInfo;
+import paas.dto.HostedAppInfo;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -16,28 +16,31 @@ public class EventBus {
         serverUrlObserverList.add(listener);
     }
 
+    @MustBeInEDT
     public void serverChanged(String newUrl) {
         serverUrlObserverList.forEach(l -> l.accept(newUrl));
     }
 
-    private List<Runnable> appDeployedListeners = new ArrayList<>();
+    private List<Runnable> appUpdatedListeners = new ArrayList<>();
 
-    public void whenAppDeployed(Runnable listener) {
-        appDeployedListeners.add(listener);
+    public void whenAppUpdated(Runnable listener) {
+        appUpdatedListeners.add(listener);
     }
 
-    public void appDeployed() {
-        appDeployedListeners.forEach(Runnable::run);
+    @MustBeInEDT
+    public void appUpdated() {
+        appUpdatedListeners.forEach(Runnable::run);
     }
 
-    private List<Consumer<HostedAppInfo>> tailRequestListeners = new ArrayList<>();
+    private List<Consumer<HostedAppInfo>> showDetailsListeners = new ArrayList<>();
 
-    public void whenTailRequested(Consumer<HostedAppInfo> consumer) {
-        tailRequestListeners.add(consumer);
+    public void whenDetailsRequested(Consumer<HostedAppInfo> consumer) {
+        showDetailsListeners.add(consumer);
     }
 
-    public void showTailFor(HostedAppInfo hostedAppInfo) {
-        tailRequestListeners.forEach(l -> l.accept(hostedAppInfo));
+    @MustBeInEDT
+    public void showDetails(HostedAppInfo hostedAppInfo) {
+        showDetailsListeners.forEach(l -> l.accept(hostedAppInfo));
     }
 
     private List<Consumer<Collection<HostedAppInfo>>> currentAppsChangeListeners = new ArrayList<>();
@@ -46,6 +49,7 @@ public class EventBus {
         currentAppsChangeListeners.add(listener);
     }
 
+    @MustBeInEDT
     public void currentAppsChanged(Collection<HostedAppInfo> apps) {
         currentAppsChangeListeners.forEach(l -> l.accept(apps));
     }

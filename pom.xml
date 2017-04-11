@@ -11,6 +11,7 @@
         <module>paasprocessmanagement</module>
         <module>paasdesktopclient</module>
         <module>paasrest</module>
+        <module>paasdto</module>
     </modules>
     <packaging>pom</packaging>
 

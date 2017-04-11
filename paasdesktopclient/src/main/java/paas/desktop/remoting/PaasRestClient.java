@@ -4,8 +4,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import paas.desktop.dto.DatedMessage;
-import paas.desktop.dto.HostedAppInfo;
 import paas.desktop.gui.infra.MustBeInBackground;
+import paas.dto.HostedAppInfo;
+import paas.dto.HostedAppRequestedProvisions;
 
 import java.io.File;
 import java.io.IOException;
@@ -18,7 +19,7 @@ import static paas.desktop.remoting.RestCall.*;
 @Component
 public class PaasRestClient {
 
-    @Value("${tiniestpaas.server.url}")
+    @Value("${server.url}")
     private String serverUrl;
 
     @MustBeInBackground
@@ -27,12 +28,32 @@ public class PaasRestClient {
     }
 
     @MustBeInBackground
-    public String deploy(File jarFile, String commandLineArgs) throws IOException, InterruptedException {
+    public String deploy(File jarFile, String commandLineArgs, HostedAppRequestedProvisions requestedProvisions) throws IOException, InterruptedException {
         return restPost(serverUrl + "/deploy", String.class)
                 .param("jarFile", new UploadableFile(jarFile.getName(), Files.readAllBytes(jarFile.toPath())))
                 .param("commandLineArgs", commandLineArgs)
+                .param("wantsDB", requestedProvisions.isWantsDB())
+                .param("wantsFileStorage", requestedProvisions.isWantsFileStorage())
+                .param("wantsLogstash", requestedProvisions.isWantsLogstash())
+                .param("wantsLogging", requestedProvisions.isWantsLogging())
                 .contentType(MediaType.MULTIPART_FORM_DATA)
                 .execute();
+    }
+
+    @MustBeInBackground
+    public String redeploy(long appId, File newJarFile, String commandLineArgs, HostedAppRequestedProvisions requestedProvisions) throws IOException, InterruptedException {
+        RestCall<String> post = restPost(serverUrl + "/redeploy", String.class)
+                .param("appId", appId)
+                .param("commandLineArgs", commandLineArgs)
+                .param("wantsDB", requestedProvisions.isWantsDB())
+                .param("wantsFileStorage", requestedProvisions.isWantsFileStorage())
+                .param("wantsLogstash", requestedProvisions.isWantsLogstash())
+                .param("wantsLogging", requestedProvisions.isWantsLogging())
+                .contentType(MediaType.MULTIPART_FORM_DATA);
+        if(newJarFile != null)
+            post.param("jarFile", new UploadableFile(newJarFile.getName(), Files.readAllBytes(newJarFile.toPath())));
+
+        return post.execute();
     }
 
 

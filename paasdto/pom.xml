@@ -5,20 +5,12 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>sandbox</groupId>
-    <artifactId>paasprocessmanagement</artifactId>
+    <artifactId>paasdto</artifactId>
     <version>1.0</version>
 
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
     </properties>
-
-    <dependencies>
-        <dependency>
-            <groupId>sandbox</groupId>
-            <artifactId>paasdto</artifactId>
-            <version>1.0</version>
-        </dependency>
-    </dependencies>
 
 </project>

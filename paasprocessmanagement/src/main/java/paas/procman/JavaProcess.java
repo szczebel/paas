@@ -1,7 +1,10 @@
 package paas.procman;
 
+import paas.dto.HostedAppStatus;
+
 import java.io.File;
 import java.io.IOException;
+import java.sql.Date;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -91,5 +94,9 @@ public class JavaProcess {
 
     public ZonedDateTime getStart() {
         return start;
+    }
+
+    public HostedAppStatus getStatus() {
+        return new HostedAppStatus(isRunning(), start!=null ? Date.from(start.toInstant()) : null);
     }
 }
