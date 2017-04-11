@@ -77,9 +77,10 @@ public class Server extends SpringBootServletInitializer {
                     .httpBasic()
                     .and()
                     .authorizeRequests()
-                    .antMatchers("/", "/unrestricted/*").permitAll()
+                    .antMatchers("/").permitAll()
+                    .antMatchers("/unrestricted/**").permitAll()
                     .antMatchers("/admin/*").hasRole("ADMIN")
-                    .anyRequest().authenticated()
+                    .anyRequest().authenticated();
             ;
         }
     }
