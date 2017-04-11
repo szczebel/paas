@@ -33,7 +33,7 @@ public class HostedAppsListView extends LazyInitRichAbstractView {
 
     @Override
     protected JComponent wireAndLayout() {
-        eventBus.whenServerChanged(newUrl -> this.onServerChange());
+        eventBus.whenLoginChanged(newUrl -> this.onServerChange());
         eventBus.whenAppUpdated(this::refreshApps);
 
         Columns<HostedAppInfo> columns = Columns.create(HostedAppInfo.class)

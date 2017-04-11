@@ -69,7 +69,7 @@ public class LoginManager implements LoginData, LoginController {
         this.username = username;
         this.password = password;
         onSuccess.run();
-        eventBus.serverChanged(this.serverUrl);
+        eventBus.loginChanged(this.serverUrl);
     }
 
     static class UserInfo {

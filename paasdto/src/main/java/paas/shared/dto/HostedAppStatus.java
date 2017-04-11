@@ -16,7 +16,7 @@ public class HostedAppStatus {
     public HostedAppStatus() {
     }
 
-    boolean isRunning() {
+    public boolean isRunning() {
         return running;
     }
 
@@ -24,7 +24,7 @@ public class HostedAppStatus {
         this.running = running;
     }
 
-    Date getStarted() {
+    public Date getStarted() {
         return started;
     }
 

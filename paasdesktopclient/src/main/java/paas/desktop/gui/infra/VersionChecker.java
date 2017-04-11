@@ -37,7 +37,7 @@ public class VersionChecker {
     public void initialize(JFrame owner) {
         this.owner = owner;
         this.selfLastModified = findSelfLastModified();
-        eventBus.whenServerChanged(this::checkVersion);
+        eventBus.whenLoginChanged(this::checkVersion);
         checkVersion(loginData.getServerUrl());
     }
 

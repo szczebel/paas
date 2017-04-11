@@ -5,8 +5,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import paas.desktop.gui.infra.EventBus;
 import paas.desktop.gui.infra.VersionChecker;
+import paas.desktop.gui.views.AdminView;
 import paas.desktop.gui.views.LoginPresenter;
-import paas.desktop.gui.views.ServerShellConsole;
 import swingutils.components.ComponentFactory;
 import swingutils.components.IsComponent;
 import swingutils.frame.RichFrame;
@@ -34,7 +34,7 @@ public class GuiBuilder {
     @Autowired
     private IsComponent selfLogView;
     @Autowired
-    private ServerShellConsole serverShellConsole;
+    private AdminView adminView;
     @Autowired
     private EventBus eventBus;
     @Autowired
@@ -48,7 +48,7 @@ public class GuiBuilder {
         ComponentFactory.initLAF();
         RichFrame f = new RichFrame();
         f.setTitle("Tiniest PaaS desktop client - " + initialServerUrl);
-        eventBus.whenServerChanged(url -> f.setTitle("Tiniest PaaS desktop client - " + url));
+        eventBus.whenLoginChanged(url -> f.setTitle("Tiniest PaaS desktop client - " + url));
         f.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         f.add(buildContent(f));
         f.pack();
@@ -77,10 +77,10 @@ public class GuiBuilder {
         return cardLayout(CardMenuBuilders.BorderedOrange()
                 .menuBarCustomizer(menu -> borderLayout().center(menu).east(buildLoginButton(f)).build()))
                 .addTab("Applications", appsTab)
-                .addTab("Server shell console", serverShellConsole.getComponent())
+                .addTab("For admins", adminView.getComponent())
                 .addTab("My error log", selfLogView.getComponent())
                 .onCardChange((prevCard, newCard) -> {
-                    if ("Server shell console".equals(newCard)) serverShellConsole.focus();
+                    if ("Server shell console".equals(newCard)) adminView.focus();
                 })
                 .build();
     }

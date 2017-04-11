@@ -20,7 +20,7 @@ import static swingutils.layout.LayoutBuilders.borderLayout;
 import static swingutils.layout.LayoutBuilders.hBox;
 
 @Component
-public class ServerShellConsole extends LazyInitRichAbstractView {
+public class AdminView extends LazyInitRichAbstractView {
 
     @Autowired private EventBus eventBus;
     @Autowired private PaasRestClient paasRestClient;
@@ -29,9 +29,6 @@ public class ServerShellConsole extends LazyInitRichAbstractView {
     private ProgressIndicator commandProgressIndicator;
     private long lastMessageTimestamp = 0;
     private JTextField commandField;
-
-//    private static final DateFormat df = new SimpleDateFormat("yyyy-MMM-dd HH:mm:ss");
-
 
     @Override
     protected JComponent wireAndLayout() {
@@ -64,8 +61,8 @@ public class ServerShellConsole extends LazyInitRichAbstractView {
                 .east(
                         hBox(4,
                                 button("Refresh output", this::refresh),
-                                button("Clear output", this::clear)
-
+                                button("Clear output", this::clear),
+                                button("Upload PaasDesktopClient.jar", this::upload)
                         )
                 )
                 .build();
@@ -76,6 +73,18 @@ public class ServerShellConsole extends LazyInitRichAbstractView {
         label.setBackground(Color.black);
         label.setForeground(Color.green);
         return label;
+    }
+
+    private void upload() {
+        JFileChooser fileChooser = new JFileChooser();
+        if(JFileChooser.APPROVE_OPTION == fileChooser.showOpenDialog(getComponent())) {
+            inBackground(
+                    () -> paasRestClient.uploadDesktopClientJar(fileChooser.getSelectedFile()),
+                    s -> {}
+            );
+        }
+
+        focus();
     }
 
     private void refresh() {
@@ -95,14 +104,8 @@ public class ServerShellConsole extends LazyInitRichAbstractView {
     private void newOutputReceived(List<DatedMessage> newOutput) {
         if (newOutput.isEmpty()) return;
         lastMessageTimestamp = newOutput.get(newOutput.size() - 1).getTimestamp();
-//        newOutput.stream().map(this::formatDatedMessage).forEach(output::appendLine);
         newOutput.stream().map(DatedMessage::getMessage).forEach(output::appendLine);
     }
-
-//    private String formatDatedMessage(DatedMessage msg) {
-//        String date = df.format(new Date(msg.getTimestamp()));
-//        return "[" + date + "] " + msg.getMessage();
-//    }
 
     private void sendCommand(String command) {
         inBackground(

@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 import paas.desktop.dto.DatedMessage;
 import paas.desktop.gui.infra.MustBeInBackground;
 import paas.desktop.gui.infra.security.LoginData;
+import paas.shared.Links;
 import paas.shared.dto.HostedAppInfo;
 import paas.shared.dto.HostedAppRequestedProvisions;
 
@@ -26,6 +27,15 @@ public class PaasRestClient {
 
     private String getServerUrl() {
         return loginData.getServerUrl();
+    }
+
+    @MustBeInBackground
+    public String uploadDesktopClientJar(File jarFile) throws IOException, InterruptedException {
+        return restPost(getServerUrl() + Links.ADMIN_UPLOAD_DESKTOP_CLIENT, String.class)
+                .param("jarFile", new UploadableFile(jarFile.getName(), Files.readAllBytes(jarFile.toPath())))
+                .contentType(MediaType.MULTIPART_FORM_DATA)
+                .httpBasic(loginData.getUsername(), loginData.getPassword())
+                .execute();
     }
 
     @MustBeInBackground

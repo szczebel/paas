@@ -10,15 +10,15 @@ import java.util.function.Consumer;
 
 @Component
 public class EventBus {
-    private List<Consumer<String>> serverUrlObserverList = new ArrayList<>();
+    private List<Consumer<String>> loginDataObservers = new ArrayList<>();
 
-    public void whenServerChanged(Consumer<String> listener) {
-        serverUrlObserverList.add(listener);
+    public void whenLoginChanged(Consumer<String> listener) {
+        loginDataObservers.add(listener);
     }
 
     @MustBeInEDT
-    public void serverChanged(String newUrl) {
-        serverUrlObserverList.forEach(l -> l.accept(newUrl));
+    public void loginChanged(String newUrl) {
+        loginDataObservers.forEach(l -> l.accept(newUrl));
     }
 
     private List<Runnable> appUpdatedListeners = new ArrayList<>();
