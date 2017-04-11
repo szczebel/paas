@@ -1,6 +1,7 @@
 package paas.rest.service.provisioning;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import paas.rest.persistence.entities.HostedAppDescriptor;
 import paas.rest.persistence.entities.RequestedProvisions;
@@ -23,6 +24,8 @@ public class Provisioner {
     AppsOutputForwarder appsOutputForwarder;
     @Autowired
     FileSystemStorageService fileSystemStorageService;
+    @Value("${logstash.endpoint}")
+    private String logstashEndpoint;
 
 
     public Provisions createProvisionsFor(HostedAppDescriptor hostedAppDescriptor) throws IOException {
@@ -30,9 +33,10 @@ public class Provisioner {
         RequestedProvisions requestedProvisions = hostedAppDescriptor.getRequestedProvisions();
 
         Set<String> additionalCommandLine = new HashSet<>();
-        if(requestedProvisions.isWantsFileStorage()) storageDirectoryArg(appWorkDir, additionalCommandLine);
-        if(requestedProvisions.isWantsDB()) dbArgs(appWorkDir, additionalCommandLine);
-        if(requestedProvisions.isWantsLogstash()) logstashArg(additionalCommandLine);
+        if (requestedProvisions.isWantsFileStorage()) storageDirectoryArg(appWorkDir, additionalCommandLine);
+        if (requestedProvisions.isWantsDB()) dbArgs(appWorkDir, additionalCommandLine);
+        if (requestedProvisions.isWantsLogstash()) logstashArg(additionalCommandLine);
+        System.out.println("Additional commandline : " + additionalCommandLine);
 
         return new Provisions(
                 appWorkDir,
@@ -46,18 +50,20 @@ public class Provisioner {
     }
 
     private void storageDirectoryArg(File appWorkDir, Collection<String> commandLine) {
-        commandLine.add("--storage.directory=\"" + appWorkDir.getAbsolutePath() + "\"");
+        //working directory is root ("." should work)
+        commandLine.add("--paas.storage.directory=.");
+//        commandLine.add("--paas.storage.directory=\"" + appWorkDir.getAbsolutePath() + "\"");
     }
 
     private void dbArgs(File appWorkDir, Collection<String> commandLine) {
-        //todo:
-        //String datasourceUrl = "";
-        //commandLine.add("--datasource.url=\"" + datasourceUrl + "\"");
+        //just a file in working directory ("." should work)
+        commandLine.add("--paas.datasource.url=jdbc:h2:file:./h2db;DB_CLOSE_ON_EXIT=FALSE");
+        commandLine.add("--paas.datasource.username=paas");
+        commandLine.add("--paas.datasource.password=paas");
+        commandLine.add("--paas.datasource.driverClassName=org.h2.Driver");
     }
 
     private void logstashArg(Collection<String> commandLine) {
-        //todo:
-        //String logstashUrl = "";
-        //commandLine.add("--logstash.url=\"" + logstashUrl + "\"");
+        commandLine.add("--paas.logstash.url=" + logstashEndpoint);
     }
 }

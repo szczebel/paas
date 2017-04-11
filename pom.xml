@@ -12,6 +12,7 @@
         <module>paasdesktopclient</module>
         <module>paasrest</module>
         <module>paasdto</module>
+        <module>samplepaasapplication</module>
     </modules>
     <packaging>pom</packaging>
 

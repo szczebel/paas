@@ -4,7 +4,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 //todo: setup ELK on VM
-//todo: sample minimal hosted app
 
 @Component
 public class AppsOutputForwarder {
