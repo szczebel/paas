@@ -4,13 +4,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
-import paas.dto.HostedAppRequestedProvisions;
 import paas.procman.JavaProcess;
 import paas.procman.JavaProcessManager;
 import paas.rest.persistence.entities.HostedAppDescriptor;
 import paas.rest.persistence.repos.HostedAppDescriptorRepository;
 import paas.rest.service.provisioning.Provisioner;
 import paas.rest.service.provisioning.Provisions;
+import paas.shared.dto.HostedAppRequestedProvisions;
 
 import java.io.File;
 import java.io.IOException;

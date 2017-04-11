@@ -4,7 +4,8 @@ import org.slf4j.LoggerFactory;
 import paas.desktop.dto.DatedMessage;
 import paas.desktop.gui.infra.EventBus;
 import paas.desktop.remoting.PaasRestClient;
-import paas.dto.HostedAppInfo;
+import paas.shared.Links;
+import paas.shared.dto.HostedAppInfo;
 import swingutils.background.BackgroundOperation;
 import swingutils.components.LazyInitRichAbstractView;
 import swingutils.components.RollingConsole;
@@ -18,7 +19,7 @@ import java.net.URISyntaxException;
 import java.util.List;
 import java.util.concurrent.Callable;
 
-import static paas.dto.HostedAppInfo.getId;
+import static paas.shared.dto.HostedAppInfo.getId;
 import static swingutils.components.ComponentFactory.button;
 import static swingutils.components.ComponentFactory.decorate;
 import static swingutils.layout.LayoutBuilders.*;
@@ -76,7 +77,8 @@ public class HostedAppDetailsView extends LazyInitRichAbstractView {
 
     private void openKibana() {
         try {
-            URI url = new URI(KIBANA_URL + appInfo.getHostedAppDesc().getId());
+
+            URI url = new URI(Links.substitute(KIBANA_URL, appInfo.getHostedAppDesc().getId()));
             Desktop.getDesktop().browse(url);
         } catch (URISyntaxException | IOException e) {
             LoggerFactory.getLogger(getClass()).error("Can't open Kibana url", e);

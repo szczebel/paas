@@ -1,4 +1,4 @@
-package paas.desktop.gui.infra;
+package paas.desktop.gui.infra.security;
 
 public interface LoginData {
     String getServerUrl();

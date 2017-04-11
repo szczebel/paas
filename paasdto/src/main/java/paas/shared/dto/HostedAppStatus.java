@@ -1,7 +1,8 @@
-package paas.dto;
+package paas.shared.dto;
 
 import java.util.Date;
 
+@SuppressWarnings("unused")
 public class HostedAppStatus {
 
     private boolean running;
@@ -15,7 +16,7 @@ public class HostedAppStatus {
     public HostedAppStatus() {
     }
 
-    public boolean isRunning() {
+    boolean isRunning() {
         return running;
     }
 
@@ -23,7 +24,7 @@ public class HostedAppStatus {
         this.running = running;
     }
 
-    public Date getStarted() {
+    Date getStarted() {
         return started;
     }
 

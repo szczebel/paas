@@ -2,9 +2,8 @@ package paas.desktop.gui.views;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import paas.desktop.gui.infra.LoginManager;
-import paas.desktop.gui.infra.MustBeInBackground;
-import paas.desktop.remoting.RestCall;
+import paas.desktop.gui.infra.security.LoginController;
+import paas.desktop.gui.infra.security.LoginData;
 import swingutils.components.LazyInitRichAbstractView;
 import swingutils.frame.RichFrame;
 
@@ -18,7 +17,8 @@ import static swingutils.layout.forms.FormLayoutBuilders.simpleForm;
 @Component
 public class LoginForm extends LazyInitRichAbstractView implements LoginPresenter {
 
-    @Autowired private LoginManager loginManager;
+    @Autowired private LoginController loginController;
+    @Autowired private LoginData loginData;
 
     private JTextField serverUrl;
     private JTextField username;
@@ -26,9 +26,9 @@ public class LoginForm extends LazyInitRichAbstractView implements LoginPresente
 
     @Override
     protected JComponent wireAndLayout() {
-        serverUrl = new JTextField(loginManager.getServerUrl());
-        username = new JTextField(loginManager.getUsername());
-        password = new JPasswordField(loginManager.getPassword());
+        serverUrl = new JTextField(loginData.getServerUrl());
+        username = new JTextField(loginData.getUsername());
+        password = new JPasswordField(loginData.getPassword());
         JButton login = button("Login", this::loginClick);
         JButton cancel = button("Cancel", this::close);
 
@@ -47,18 +47,14 @@ public class LoginForm extends LazyInitRichAbstractView implements LoginPresente
     }
 
     private void loginClick() {
-        inBackground(this::tryLogin, this::loginOk);
-    }
-
-    private void loginOk() {
-        close();
-        loginManager.setLoginData(serverUrl.getText());
-    }
-
-    @SuppressWarnings("WeakerAccess")
-    @MustBeInBackground
-    protected void tryLogin() {
-        RestCall.restGet(serverUrl.getText() + "/login", String.class).execute();
+        loginController.tryLogin(
+                serverUrl.getText(),
+                username.getText(),
+                String.valueOf(password.getPassword()),
+                this::close,
+                this::onException,
+                getProgressIndicator()
+                );
     }
 
     //all below should be in a separate class

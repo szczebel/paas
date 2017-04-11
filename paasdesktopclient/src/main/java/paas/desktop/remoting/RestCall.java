@@ -16,6 +16,7 @@ import java.util.function.Supplier;
 
 import static java.util.Collections.singletonList;
 
+@SuppressWarnings("unused")
 public abstract class RestCall<T> {
     final Class<T> expectedClass;
     final MultiValueMap<String, Object> params = new LinkedMultiValueMap<>();
@@ -36,11 +37,11 @@ public abstract class RestCall<T> {
         return new RestGet<>(url, expectedClass);
     }
 
-    public static <T> RestGetList<T> restGetList(String url, Class<T[]> expectedClass) {
+    static <T> RestGetList<T> restGetList(String url, Class<T[]> expectedClass) {
         return new RestGetList<>(url, expectedClass);
     }
 
-    public static <T> RestPost<T> restPost(String url, Class<T> expectedClass) {
+    static <T> RestPost<T> restPost(String url, Class<T> expectedClass) {
         return new RestPost<>(url, expectedClass);
     }
 
@@ -69,7 +70,7 @@ public abstract class RestCall<T> {
         return this;
     }
 
-    public RestCall<T> param(String key, Object value) {
+    RestCall<T> param(String key, Object value) {
         params.add(key, value);
         return this;
     }
@@ -96,11 +97,11 @@ public abstract class RestCall<T> {
         return restTemplate;
     }
 
-    HttpEntity<?> req() {
+    public HttpEntity<?> req() {
         return new HttpEntity<>(headers);
     }
 
-    public RestCall<T> contentType(MediaType type) {
+    RestCall<T> contentType(MediaType type) {
         headers.setContentType(type);
         return this;
     }
@@ -115,7 +116,7 @@ public abstract class RestCall<T> {
             super(url, expectedClass);
         }
 
-        protected HttpEntity<MultiValueMap<String, Object>> req() {
+        public HttpEntity<MultiValueMap<String, Object>> req() {
             return new HttpEntity<>(params, headers);
         }
 

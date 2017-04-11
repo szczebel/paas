@@ -1,6 +1,6 @@
 package paas.rest.persistence.entities;
 
-import paas.dto.HostedAppRequestedProvisions;
+import paas.shared.dto.HostedAppRequestedProvisions;
 
 import javax.persistence.Embeddable;
 

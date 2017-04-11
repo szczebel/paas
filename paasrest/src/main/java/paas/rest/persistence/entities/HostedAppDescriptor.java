@@ -1,6 +1,6 @@
 package paas.rest.persistence.entities;
 
-import paas.dto.HostedAppDesc;
+import paas.shared.dto.HostedAppDesc;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;

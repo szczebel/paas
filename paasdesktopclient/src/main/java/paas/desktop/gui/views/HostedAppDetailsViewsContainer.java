@@ -1,11 +1,12 @@
 package paas.desktop.gui.views;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import paas.desktop.gui.infra.EventBus;
+import paas.desktop.gui.infra.security.LoginData;
 import paas.desktop.remoting.PaasRestClient;
-import paas.dto.HostedAppInfo;
+import paas.shared.Links;
+import paas.shared.dto.HostedAppInfo;
 import swingutils.components.LazyInitRichAbstractView;
 import swingutils.layout.cards.CardPanel;
 
@@ -16,7 +17,7 @@ import java.util.List;
 import java.util.Map;
 
 import static java.util.stream.Collectors.toList;
-import static paas.dto.HostedAppInfo.getId;
+import static paas.shared.dto.HostedAppInfo.getId;
 import static swingutils.components.ComponentFactory.decorate;
 
 @Component
@@ -26,8 +27,8 @@ public class HostedAppDetailsViewsContainer extends LazyInitRichAbstractView {
     private EventBus eventBus;
     @Autowired
     private PaasRestClient paasRestClient;
-    @Value("${server.url}")
-    private String serverUrl;
+    @Autowired
+    private LoginData loginData;
 
     private CardPanel cardPanel;
     private Map<Long, HostedAppDetailsView> tabsMap = new HashMap<>();
@@ -35,10 +36,7 @@ public class HostedAppDetailsViewsContainer extends LazyInitRichAbstractView {
     @Override
     protected JComponent wireAndLayout() {
         eventBus.whenDetailsRequested(this::openDetailsView);
-        eventBus.whenServerChanged(s -> {
-            serverUrl = s;
-            closeAll();
-        });
+        eventBus.whenServerChanged(s -> closeAll());
         eventBus.whenCurrentAppsChanged(this::currentAppsChanged);
 
         cardPanel = new CardPanel();
@@ -89,6 +87,6 @@ public class HostedAppDetailsViewsContainer extends LazyInitRichAbstractView {
     }
 
     private String getKibanaUrl() {
-        return serverUrl + "/kibana/";
+        return loginData.getServerUrl() + Links.KIBANA;
     }
 }

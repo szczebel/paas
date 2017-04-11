@@ -1,4 +1,4 @@
-package paas.dto;
+package paas.shared.dto;
 
 import java.util.Date;
 

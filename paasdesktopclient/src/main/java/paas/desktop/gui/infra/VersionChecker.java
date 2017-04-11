@@ -3,8 +3,9 @@ package paas.desktop.gui.infra;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import paas.desktop.gui.infra.security.LoginData;
+import paas.shared.Links;
 import swingutils.background.BackgroundOperation;
 
 import javax.swing.*;
@@ -27,8 +28,8 @@ public class VersionChecker {
 
     @Autowired
     private EventBus eventBus;
-    @Value("${server.url}")
-    private String initialServerUrl;
+    @Autowired
+    private LoginData loginData;
 
     private JFrame owner;
     private Long selfLastModified;
@@ -37,7 +38,7 @@ public class VersionChecker {
         this.owner = owner;
         this.selfLastModified = findSelfLastModified();
         eventBus.whenServerChanged(this::checkVersion);
-        checkVersion(initialServerUrl);
+        checkVersion(loginData.getServerUrl());
     }
 
     private void checkVersion(String serverUrl) {
@@ -71,7 +72,7 @@ public class VersionChecker {
 
     private void openBrowser(String serverUrl) {
         try {
-            Desktop.getDesktop().browse(new URI(serverUrl + "/PaasDesktopClient.jar"));
+            Desktop.getDesktop().browse(new URI(serverUrl + Links.PAAS_DESKTOP_CLIENT_JAR));
         } catch (IOException | URISyntaxException e) {
             logger.warn("Could not open browser", e);
         }
@@ -80,8 +81,8 @@ public class VersionChecker {
     @SuppressWarnings("WeakerAccess") //private won't let AOP ensure that this @MustBeInBackground
     @MustBeInBackground
     protected boolean isNewerVersionAvailable(String serverUrl) throws Exception {
-        if(selfLastModified == null) throw new Exception("Self last modified not accessible");
-        long fromServer = restGet(serverUrl + "/desktopClientLastModified", Long.class).execute();
+        if(selfLastModified == null) throw new Exception("Self last modified not available");
+        long fromServer = restGet(serverUrl + Links.DESKTOP_CLIENT_LAST_MODIFIED, Long.class).execute();
         return fromServer > selfLastModified;
     }
 

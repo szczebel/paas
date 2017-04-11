@@ -36,7 +36,6 @@ public class Provisioner {
         if (requestedProvisions.isWantsFileStorage()) storageDirectoryArg(appWorkDir, additionalCommandLine);
         if (requestedProvisions.isWantsDB()) dbArgs(appWorkDir, additionalCommandLine);
         if (requestedProvisions.isWantsLogstash()) logstashArg(additionalCommandLine);
-        System.out.println("Additional commandline : " + additionalCommandLine);
 
         return new Provisions(
                 appWorkDir,

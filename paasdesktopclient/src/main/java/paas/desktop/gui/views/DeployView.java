@@ -5,8 +5,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import paas.desktop.gui.infra.EventBus;
 import paas.desktop.remoting.PaasRestClient;
-import paas.dto.HostedAppDesc;
-import paas.dto.HostedAppRequestedProvisions;
+import paas.shared.dto.HostedAppDesc;
+import paas.shared.dto.HostedAppRequestedProvisions;
 import swingutils.components.LazyInitRichAbstractView;
 
 import javax.swing.*;

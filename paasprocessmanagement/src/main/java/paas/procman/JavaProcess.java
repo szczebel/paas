@@ -1,6 +1,6 @@
 package paas.procman;
 
-import paas.dto.HostedAppStatus;
+import paas.shared.dto.HostedAppStatus;
 
 import java.io.File;
 import java.io.IOException;

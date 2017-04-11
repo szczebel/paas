@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import paas.rest.service.FileSystemStorageService;
+import paas.shared.Links;
 
 import java.io.File;
 import java.io.IOException;
@@ -23,7 +24,7 @@ public class DesktopClientEndpoint {
     private FileSystemStorageService fileSystemStorageService;
 
 
-    @GetMapping(value = "/PaasDesktopClient.jar")
+    @GetMapping(Links.PAAS_DESKTOP_CLIENT_JAR)
     public ResponseEntity<FileSystemResource> getDesktopClient() {
         File desktopClientJar = fileSystemStorageService.getDesktopClientJar();
         if(desktopClientJar.exists())
@@ -34,7 +35,7 @@ public class DesktopClientEndpoint {
         else throw new IllegalStateException("Call admin and tell him to upload desktop client");
     }
 
-    @GetMapping(value = "/desktopClientLastModified")
+    @GetMapping(Links.DESKTOP_CLIENT_LAST_MODIFIED)
     public long getDesktopClientLastModified() {
         File desktopClientJar = fileSystemStorageService.getDesktopClientJar();
         if(desktopClientJar.exists())
@@ -42,7 +43,7 @@ public class DesktopClientEndpoint {
         else throw new IllegalStateException("Call admin and tell him to upload desktop client");
     }
 
-    @PostMapping("/uploadDesktopClient")
+    @PostMapping(Links.ADMIN_UPLOAD_DESKTOP_CLIENT)
     public String uploadDesktopClient(@RequestParam("jarFile") MultipartFile file) throws IOException, InterruptedException {
         String jarFileName = file.getOriginalFilename();
         if(!DESKTOP_CLIENT_JAR_NAME.equals(jarFileName)) throw new IllegalArgumentException("Expected " + DESKTOP_CLIENT_JAR_NAME);
