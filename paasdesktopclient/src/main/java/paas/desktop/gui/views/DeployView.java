@@ -150,6 +150,7 @@ public class DeployView extends LazyInitRichAbstractView {
         }
     }
 
+    //todo extract framework to SwingUtils
     static class ValidationErrors {
 
         static ValidationErrors empty() {

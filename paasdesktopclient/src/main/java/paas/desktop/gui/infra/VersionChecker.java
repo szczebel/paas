@@ -85,6 +85,7 @@ public class VersionChecker {
         long fromServer = restGet(serverUrl + Links.DESKTOP_CLIENT_LAST_MODIFIED, Long.class).execute();
         return fromServer > selfLastModified;
     }
+    //todo: try to base it on buildNumber
 
     private Long findSelfLastModified() {
         try {
