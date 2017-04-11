@@ -1,11 +1,11 @@
 package paas.desktop.gui;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import paas.desktop.gui.infra.EventBus;
-import paas.desktop.gui.infra.LoginManager;
 import paas.desktop.gui.infra.VersionChecker;
-import paas.desktop.gui.views.LoginForm;
+import paas.desktop.gui.views.LoginPresenter;
 import paas.desktop.gui.views.ServerShellConsole;
 import swingutils.components.ComponentFactory;
 import swingutils.components.IsComponent;
@@ -40,12 +40,14 @@ public class GuiBuilder {
     @Autowired
     private VersionChecker versionChecker;
     @Autowired
-    private LoginManager loginManager;
+    private LoginPresenter loginForm;
+    @Value("${server.url}")
+    private String initialServerUrl;
 
     public void showGui() {
         ComponentFactory.initLAF();
         RichFrame f = new RichFrame();
-        f.setTitle("Tiniest PaaS desktop client - " + loginManager.getServerUrl());
+        f.setTitle("Tiniest PaaS desktop client - " + initialServerUrl);
         eventBus.whenServerChanged(url -> f.setTitle("Tiniest PaaS desktop client - " + url));
         f.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         f.add(buildContent(f));
@@ -84,19 +86,9 @@ public class GuiBuilder {
     }
 
     private JComponent buildLoginButton(RichFrame parent) {
-        return decorate(hyperlinkButton("Login", () -> showLogin(parent)))
+        return decorate(hyperlinkButton("Login", () -> loginForm.show(parent)))
                 .withEmptyBorder(0, 0, 0, 8)
                 .get();
-    }
-
-    private void showLogin(RichFrame parent) {
-        //todo: don't do it modal
-        LoginForm form = new LoginForm(loginManager, () -> parent.getOverlay().hideAndUnlock());
-        parent.getOverlay().showAndLock(
-                decorate(form.getComponent())
-                        .withGradientHeader("Login")
-                        .opaque(true)
-                        .get());
     }
 
     private JComponent dec(JComponent component, String title, int top, int left, int bottom, int right) {

@@ -40,13 +40,16 @@ public class HostedAppsListView extends LazyInitRichAbstractView {
                 .column("App ID", Long.class, HostedAppInfo::getId)
                 .column("Jar file", String.class, HostedAppInfo::getJarFile)
                 .column("Command line", String.class, HostedAppInfo::getCommandLineArgs)
-                .column("Running", Boolean.class, HostedAppInfo::isRunning)
                 .column("Start time", Date.class, HostedAppInfo::getStarted)
-                .actionable("Manage", "Manage this app...", eventBus::showDetails);
+                .column("Running", Boolean.class, HostedAppInfo::isRunning);
         TablePanel<HostedAppInfo> tablePanel = TableFactory.createTablePanel(apps, columns);
         tablePanel.getToolbar().removeAll();
         tablePanel.getToolbar().add(button("Refresh", this::refreshApps));
         tablePanel.getTable().setDefaultRenderer(Date.class, new DateRenderer());
+        tablePanel.getTable().getSelectionModel().addListSelectionListener(e -> {
+            HostedAppInfo selection = tablePanel.getSelection();
+            if (selection != null && !e.getValueIsAdjusting()) eventBus.showDetails(selection);
+        });
 
         return tablePanel.getComponent();
     }
@@ -64,7 +67,6 @@ public class HostedAppsListView extends LazyInitRichAbstractView {
         EventListHelper.replaceContent(this.apps, apps);
         eventBus.currentAppsChanged(apps);
     }
-
 
 
     private static class DateRenderer extends DefaultTableCellRenderer {

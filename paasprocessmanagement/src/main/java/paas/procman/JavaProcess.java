@@ -80,23 +80,15 @@ public class JavaProcess {
         return appId;
     }
 
-    public File getJarFile() {
+    File getJarFile() {
         return jarFile;
-    }
-
-    public List<String> getCommandLineArgs() {
-        return commandLineArgs;
     }
 
     public boolean isRunning() {
         return process != null && process.isAlive();
     }
 
-    public ZonedDateTime getStart() {
-        return start;
-    }
-
-    public HostedAppStatus getStatus() {
+    HostedAppStatus getStatus() {
         return new HostedAppStatus(isRunning(), start!=null ? Date.from(start.toInstant()) : null);
     }
 }

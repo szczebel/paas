@@ -53,7 +53,7 @@ public class HostedAppDetailsViewsContainer extends LazyInitRichAbstractView {
         List<Long> currentAppIds = currentApps.stream()
                 .map(HostedAppInfo::getId)
                 .collect(toList());
-        for (Long appId : tabsMap.keySet()) {
+        for (Long appId : tabsMap.keySet().stream().collect(toList())) {
             if (!currentAppIds.contains(appId)) {
                 closeView(appId);
             }
@@ -73,8 +73,6 @@ public class HostedAppDetailsViewsContainer extends LazyInitRichAbstractView {
     private void openDetailsView(HostedAppInfo appInfo) {
         if (tabsMap.containsKey(getId(appInfo))) {
             cardPanel.showCard(String.valueOf(getId(appInfo)));
-            HostedAppDetailsView hostedAppDetailsView = tabsMap.get(getId(appInfo));
-            hostedAppDetailsView.refreshLogs();
         } else {
             HostedAppDetailsView hostedAppDetailsView = new HostedAppDetailsView(eventBus, appInfo, paasRestClient, getKibanaUrl());
             tabsMap.put(getId(appInfo), hostedAppDetailsView);

@@ -21,4 +21,12 @@ public class DatedMessage {
     public String getMessage() {
         return message;
     }
+
+    @Override
+    public String toString() {
+        return "DatedMessage{" +
+                "timestamp=" + timestamp +
+                ", message='" + message + '\'' +
+                '}';
+    }
 }
