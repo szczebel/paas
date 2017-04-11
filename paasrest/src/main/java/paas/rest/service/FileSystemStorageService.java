@@ -11,6 +11,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 
 @Component
 public class FileSystemStorageService {
@@ -39,10 +41,13 @@ public class FileSystemStorageService {
         return storageRoot;
     }
 
-    //todo: make unique by appending timestamp
     File saveUpload(MultipartFile file, boolean overwrite) throws IOException {
-        Path target = resolveUpload(file.getOriginalFilename());
+        Path target = resolveUpload(file.getOriginalFilename()+ nowSuffix());
         return save(target, file, overwrite);
+    }
+
+    private String nowSuffix() {
+        return "["+ZonedDateTime.now().format(DateTimeFormatter.ofPattern("yyyy.MM.dd.HH.mm.ss"))+"]";
     }
 
     void deleteUpload(String jarFileName) throws IOException {

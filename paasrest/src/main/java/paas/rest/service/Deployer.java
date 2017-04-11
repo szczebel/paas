@@ -31,7 +31,11 @@ public class Deployer {
     public long newDeployment(MultipartFile file, String commandLineArgs, HostedAppRequestedProvisions requestedProvisions)
             throws IOException, InterruptedException {
         File uploaded = fileSystemStorageService.saveUpload(file, false);
-        HostedAppDescriptor hostedAppDescriptor = new HostedAppDescriptor(uploaded.getName(), commandLineArgs, from(requestedProvisions));
+        HostedAppDescriptor hostedAppDescriptor = new HostedAppDescriptor(
+                uploaded.getName(),
+                file.getOriginalFilename(),
+                commandLineArgs,
+                from(requestedProvisions));
         hostedAppDescriptorRepository.save(hostedAppDescriptor);
         createAndStart(hostedAppDescriptor);
         return hostedAppDescriptor.getId();
@@ -42,10 +46,11 @@ public class Deployer {
         processManager.stopAndRemoveIfExists(appId);
 
         if(newJarFile != null) {
-            String oldJarFile = hostedAppDescriptor.getJarFileName();
+            String oldJarFile = hostedAppDescriptor.getLocalJarName();
             fileSystemStorageService.deleteUpload(oldJarFile);
             File uploaded = fileSystemStorageService.saveUpload(newJarFile, false);
-            hostedAppDescriptor.setJarFileName(uploaded.getName());
+            hostedAppDescriptor.setLocalJarName(uploaded.getName());
+            hostedAppDescriptor.setOriginalJarName(newJarFile.getOriginalFilename());
         }
 
         hostedAppDescriptor.setCommandLineArgs(commandLineArgs);
@@ -58,7 +63,7 @@ public class Deployer {
     }
 
     private void createAndStart(HostedAppDescriptor hostedAppDescriptor) throws IOException, InterruptedException {
-        File jarFile = fileSystemStorageService.resolveUpload(hostedAppDescriptor.getJarFileName()).toFile();
+        File jarFile = fileSystemStorageService.resolveUpload(hostedAppDescriptor.getLocalJarName()).toFile();
         List<String> commandLine = new ArrayList<>();
         commandLine.addAll(asList(hostedAppDescriptor.getCommandLineArgs().split(" ")));
         Provisions provisions = provisioner.createProvisionsFor(hostedAppDescriptor);
@@ -76,7 +81,7 @@ public class Deployer {
     public void undeploy(long appId) throws InterruptedException, IOException {
         processManager.stopAndRemoveIfExists(appId);
         HostedAppDescriptor hostedAppDescriptor = hostedAppDescriptorRepository.findOne(appId);
-        fileSystemStorageService.deleteUpload(hostedAppDescriptor.getJarFileName());
+        fileSystemStorageService.deleteUpload(hostedAppDescriptor.getLocalJarName());
         hostedAppDescriptorRepository.delete(hostedAppDescriptor);
     }
 

@@ -12,9 +12,11 @@ public class HostedAppDescriptor {
     @GeneratedValue(strategy= GenerationType.AUTO)
     private Long id;
 
-    @Column(unique = true)
     @NotNull
-    private String jarFileName;
+    private String localJarName;
+
+    @NotNull
+    private String originalJarName;
 
     @NotNull
     private String commandLineArgs;
@@ -22,8 +24,9 @@ public class HostedAppDescriptor {
     @Embedded
     private RequestedProvisions requestedProvisions;
 
-    public HostedAppDescriptor(String jarFileName, String commandLineArgs, RequestedProvisions requestedProvisions) {
-        this.jarFileName = jarFileName;
+    public HostedAppDescriptor(String localJarName, String originalJarName, String commandLineArgs, RequestedProvisions requestedProvisions) {
+        this.localJarName = localJarName;
+        this.originalJarName = originalJarName;
         this.commandLineArgs = commandLineArgs;
         this.requestedProvisions = requestedProvisions;
     }
@@ -35,8 +38,12 @@ public class HostedAppDescriptor {
         return id;
     }
 
-    public String getJarFileName() {
-        return jarFileName;
+    public String getLocalJarName() {
+        return localJarName;
+    }
+
+    public String getOriginalJarName() {
+        return originalJarName;
     }
 
     public String getCommandLineArgs() {
@@ -47,8 +54,12 @@ public class HostedAppDescriptor {
         return requestedProvisions;
     }
 
-    public void setJarFileName(String jarFileName) {
-        this.jarFileName = jarFileName;
+    public void setLocalJarName(String localJarName) {
+        this.localJarName = localJarName;
+    }
+
+    public void setOriginalJarName(String originalJarName) {
+        this.originalJarName = originalJarName;
     }
 
     public void setCommandLineArgs(String commandLineArgs) {
@@ -63,12 +74,12 @@ public class HostedAppDescriptor {
     public String toString() {
         return "HostedAppDescriptor{" +
                 "id=" + id +
-                ", jarFileName='" + jarFileName + '\'' +
+                ", jarFileName='" + localJarName + '\'' +
                 ", commandLineArgs='" + commandLineArgs + '\'' +
                 '}';
     }
 
     public HostedAppDesc toDto() {
-        return new HostedAppDesc(id, jarFileName, commandLineArgs, requestedProvisions.toDto());
+        return new HostedAppDesc(id, originalJarName, commandLineArgs, requestedProvisions.toDto());
     }
 }

@@ -19,6 +19,7 @@ import paas.procman.JavaProcessManager;
 import paas.rest.service.FileSystemStorageService;
 
 //todo maven plugin for automated deployment
+//todo security
 
 @SpringBootApplication
 public class Server extends SpringBootServletInitializer {

@@ -26,7 +26,7 @@ public class Provisioner {
 
 
     public Provisions createProvisionsFor(HostedAppDescriptor hostedAppDescriptor) throws IOException {
-        File appWorkDir = fileSystemStorageService.createWorkDirFor(hostedAppDescriptor.getJarFileName());
+        File appWorkDir = fileSystemStorageService.createWorkDirFor(hostedAppDescriptor.getLocalJarName());
         RequestedProvisions requestedProvisions = hostedAppDescriptor.getRequestedProvisions();
 
         Set<String> additionalCommandLine = new HashSet<>();
