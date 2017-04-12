@@ -55,7 +55,7 @@ public class HostingService {
         return redeploy(hostedAppDescriptor, newJarFile, commandLineArgs, requestedProvisions);
     }
 
-    @PreAuthorize("(#hostedAppDescriptor.owner == principal.name)")
+    @PreAuthorize("(#hostedAppDescriptor.owner == authentication.name)")
     protected long redeploy(HostedAppDescriptor hostedAppDescriptor, MultipartFile newJarFile, String commandLineArgs, HostedAppRequestedProvisions requestedProvisions) throws InterruptedException, IOException {
         processManager.stopAndRemoveIfExists(hostedAppDescriptor.getId());
 
@@ -98,7 +98,7 @@ public class HostingService {
         undeploy(hostedAppDescriptor);
     }
 
-    @PreAuthorize("hasRole('ADMIN') OR (#hostedAppDescriptor.owner == principal.name)")
+    @PreAuthorize("hasRole('ADMIN') OR (#hostedAppDescriptor.owner == authentication.name)")
     protected void undeploy(HostedAppDescriptor hostedAppDescriptor) throws InterruptedException, IOException {
         processManager.stopAndRemoveIfExists(hostedAppDescriptor.getId());
         fileSystemStorageService.deleteUpload(hostedAppDescriptor.getLocalJarName());
@@ -118,20 +118,20 @@ public class HostingService {
         }
     }
 
-    @PreAuthorize("hasRole('USER') AND @ownershipChecker.isPrincipalOwnerOfAppId(principal, #appId)")
+    @PreAuthorize("hasRole('USER') AND @ownershipChecker.isCurrentUserOwnerOfAppId(authentication, #appId)")
     public void restart(long appId) throws InterruptedException, IOException {
         JavaProcess app = processManager.getApp(appId);
         app.stop();
         app.start();
     }
 
-    @PreAuthorize("hasRole('USER') AND @ownershipChecker.isPrincipalOwnerOfAppId(principal, #appId)")
+    @PreAuthorize("hasRole('USER') AND @ownershipChecker.isCurrentUserOwnerOfAppId(authentication, #appId)")
     public List<DatedMessage> tailSysout(long appId, long timestamp) {
         return processManager.getApp(appId).tailSysout(timestamp);
     }
 
     @PreAuthorize ("hasRole('USER') OR hasRole('ADMIN')")
-    @PostFilter("hasRole('ADMIN') OR (filterObject.hostedAppDesc.owner == principal.name)")
+    @PostFilter("hasRole('ADMIN') OR (filterObject.hostedAppDesc.owner == authentication.name)")
     public List<HostedAppInfo> getApplications() {
         return hostedAppDescriptorRepository.findAll()
                 .stream().map(this::info).collect(toList());

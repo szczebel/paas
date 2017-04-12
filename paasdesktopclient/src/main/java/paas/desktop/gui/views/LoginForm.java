@@ -2,9 +2,12 @@ package paas.desktop.gui.views;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import paas.desktop.gui.ComponentOwner;
 import paas.desktop.gui.infra.EventBus;
 import paas.desktop.gui.infra.security.LoginData;
 import paas.desktop.gui.infra.security.LoginExecutor;
+import paas.desktop.gui.infra.security.RegistrationPresenter;
+import swingutils.components.IsComponent;
 import swingutils.components.LazyInitRichAbstractView;
 
 import javax.swing.*;
@@ -15,7 +18,7 @@ import static swingutils.components.ComponentFactory.*;
 import static swingutils.layout.forms.FormLayoutBuilders.simpleForm;
 
 @Component
-public class LoginForm extends LazyInitRichAbstractView implements LoginComponent {
+public class LoginForm extends LazyInitRichAbstractView implements IsComponent {
 
     @Autowired
     private LoginExecutor loginController;
@@ -23,20 +26,19 @@ public class LoginForm extends LazyInitRichAbstractView implements LoginComponen
     private LoginData loginData;
     @Autowired
     private EventBus eventBus;
-
-    private JTextField serverUrl;
-    private JTextField username;
-    private JPasswordField password;
-    private Runnable closeAction;
+    @Autowired
+    private RegistrationPresenter mainFrame;
+    @Autowired
+    private ComponentOwner owner;
 
     @Override
     protected JComponent wireAndLayout() {
+
         JLabel notLoggedIn = label("<html>You are not logged in.<br/>Guest's password is 'guest'.", LEFT, BOLD);
         eventBus.whenLoginChanged(() -> notLoggedIn.setVisible(false));
-        serverUrl = new JTextField(loginData.getServerUrl());
-        username = new JTextField(loginData.getUsername());
-        password = new JPasswordField(loginData.getPassword());
-        JButton login = button("Login", this::loginClick);
+        JTextField serverUrl = new JTextField(loginData.getServerUrl());
+        JTextField username = new JTextField(loginData.getUsername());
+        JPasswordField password = new JPasswordField(loginData.getPassword());
 
         return decorate(
                 simpleForm()
@@ -44,7 +46,8 @@ public class LoginForm extends LazyInitRichAbstractView implements LoginComponen
                         .addRow("Server url:", serverUrl)
                         .addRow("Username:", username)
                         .addRow("Password:", password)
-                        .addRow("", login)
+                        .addRow("", button("Login", () -> loginClick(serverUrl.getText(), username.getText(), String.valueOf(password.getPassword()))))
+                        .addRow("", button("Register...", () -> mainFrame.showRegistration()))
                         .build())
                 .withEmptyBorder(32, 32, 32, 32)
                 .withGradientHeader("Login", this::close, null)
@@ -52,11 +55,11 @@ public class LoginForm extends LazyInitRichAbstractView implements LoginComponen
                 .get();
     }
 
-    private void loginClick() {
+    private void loginClick(String server, String username, String password) {
         loginController.tryLogin(
-                serverUrl.getText(),
-                username.getText(),
-                String.valueOf(password.getPassword()),
+                server,
+                username,
+                password,
                 this::close,
                 this::onException,
                 getProgressIndicator()
@@ -64,11 +67,6 @@ public class LoginForm extends LazyInitRichAbstractView implements LoginComponen
     }
 
     private void close() {
-        closeAction.run();
-    }
-
-    @Override
-    public void setCloseAction(Runnable closeAction) {
-        this.closeAction = closeAction;
+        owner.close(this);
     }
 }

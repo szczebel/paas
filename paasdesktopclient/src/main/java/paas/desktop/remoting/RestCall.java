@@ -70,7 +70,7 @@ public abstract class RestCall<T> {
         return this;
     }
 
-    RestCall<T> param(String key, Object value) {
+    public RestCall<T> param(String key, Object value) {
         params.add(key, value);
         return this;
     }

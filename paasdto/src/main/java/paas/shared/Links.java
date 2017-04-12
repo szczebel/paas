@@ -1,6 +1,8 @@
 package paas.shared;
 
 public class Links {
+    public static final String REGISTER = "/unrestricted/register";
+
     public static final String DESKTOP_CLIENT_LAST_MODIFIED = "/unrestricted/desktopClientLastModified";
     public static final String PAAS_DESKTOP_CLIENT_JAR = "/unrestricted/PaasDesktopClient.jar";
     public static final String KIBANA = "/unrestricted/kibana/{appId}";

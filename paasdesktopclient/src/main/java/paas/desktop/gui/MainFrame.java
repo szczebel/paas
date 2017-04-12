@@ -1,17 +1,19 @@
 package paas.desktop.gui;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import paas.desktop.gui.infra.EventBus;
 import paas.desktop.gui.infra.security.LoginData;
 import paas.desktop.gui.infra.security.LoginPresenter;
+import paas.desktop.gui.infra.security.RegistrationPresenter;
 import paas.desktop.gui.infra.version.NewVersionNotifier;
 import paas.desktop.gui.infra.version.VersionChecker;
 import paas.desktop.gui.views.AdminView;
-import paas.desktop.gui.views.LoginComponent;
 import paas.shared.Links;
 import swingutils.RunnableProxy;
 import swingutils.components.IsComponent;
+import swingutils.components.fade.FadingPanel;
 import swingutils.frame.RichFrame;
 import swingutils.layout.SnapToCorner;
 import swingutils.layout.cards.CardMenuBuilders;
@@ -28,7 +30,8 @@ import static swingutils.layout.LayoutBuilders.hBox;
 import static swingutils.layout.cards.CardLayoutBuilder.cardLayout;
 
 @Component
-public class MainFrame extends RichFrame implements LoginPresenter, NewVersionNotifier {
+@Qualifier("owner")
+public class MainFrame extends RichFrame implements LoginPresenter, NewVersionNotifier, RegistrationPresenter, ComponentOwner {
 
     private static final int MARGIN = 4;
 
@@ -47,7 +50,9 @@ public class MainFrame extends RichFrame implements LoginPresenter, NewVersionNo
     @Autowired
     private VersionChecker versionChecker;
     @Autowired
-    private LoginComponent loginForm;
+    private IsComponent loginForm;
+    @Autowired
+    private IsComponent registrationForm;
     @Autowired
     private LoginData loginData;
 
@@ -56,13 +61,17 @@ public class MainFrame extends RichFrame implements LoginPresenter, NewVersionNo
         eventBus.whenLoginChanged(() -> setTitle("Tiniest PaaS desktop client - " + loginData.getServerUrl()));
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         getOverlay().setNonModalLayout(new SnapToCorner(8));
-        loginForm.setCloseAction(this::closeLogin);
         add(buildContent());
         pack();
         setLocationRelativeTo(null);
         setVisible(true);
         showLogin();
         versionChecker.checkVersion();
+    }
+
+    @Override
+    public void close(IsComponent c) {
+        getOverlay().removeNonmodal(c.getComponent());
     }
 
 
@@ -110,25 +119,27 @@ public class MainFrame extends RichFrame implements LoginPresenter, NewVersionNo
     }
 
     @Override
-    public void showLogin() {
-        getOverlay().addNonmodal(loginForm.getComponent(), SnapToCorner.TOP_RIGHT);
+    public void showRegistration() {
+        close(loginForm);
+        getOverlay().addNonmodal(registrationForm.getComponent(), SnapToCorner.TOP_RIGHT);
     }
 
-    private void closeLogin() {
-        getOverlay().removeNonmodal(loginForm.getComponent());
+    @Override
+    public void showLogin() {
+        getOverlay().addNonmodal(loginForm.getComponent(), SnapToCorner.TOP_RIGHT);
     }
 
     @Override //todo: can look better
     public void tellUserAboutNewVersion() {
         RunnableProxy closeAction = new RunnableProxy();
         JButton downloadButton = hyperlinkButton("Download it!", this::download);
-        JComponent downloadMessageBox =
+        FadingPanel downloadMessageBox = new FadingPanel(
                 decorate(downloadButton)
                         .withEmptyBorder(16, 16, 24, 16)
                         .withGradientHeader("New version available", closeAction, null)
                         .opaque(true)
-                        .get();
-        closeAction.delegate(() -> getOverlay().removeNonmodal(downloadMessageBox));
+                        .get());
+        closeAction.delegate(() -> downloadMessageBox.fadeOut(() -> getOverlay().removeNonmodal(downloadMessageBox)));
         getOverlay().addNonmodal(downloadMessageBox, SnapToCorner.BOTTOM_RIGHT);
     }
 
