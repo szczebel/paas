@@ -10,12 +10,12 @@ import javax.annotation.PostConstruct;
 @Component
 public class PaasStartup {
 
-    @Autowired private Deployer deployer;
+    @Autowired private HostingService hostingService;
 
     @PostConstruct
     void startup() {
         Logger log = LoggerFactory.getLogger(getClass());
         log.info("Commencing paas startup sequence");
-        deployer.redeployFromProcfiles();
+        hostingService.redeployFromProcfiles();
     }
 }

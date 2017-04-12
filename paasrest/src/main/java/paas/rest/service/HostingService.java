@@ -12,6 +12,7 @@ import paas.rest.service.provisioning.Provisioner;
 import paas.rest.service.provisioning.Provisions;
 import paas.shared.dto.HostedAppRequestedProvisions;
 
+import javax.annotation.security.RolesAllowed;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -21,13 +22,14 @@ import static java.util.Arrays.asList;
 import static paas.rest.persistence.entities.RequestedProvisions.from;
 
 @Component
-public class Deployer {
+public class HostingService {
 
     @Autowired private Provisioner provisioner;
     @Autowired private FileSystemStorageService fileSystemStorageService;
     @Autowired private JavaProcessManager processManager;
     @Autowired private HostedAppDescriptorRepository hostedAppDescriptorRepository;
 
+    @RolesAllowed("USER")
     public long newDeployment(MultipartFile file, String commandLineArgs, HostedAppRequestedProvisions requestedProvisions)
             throws IOException, InterruptedException {
         File uploaded = fileSystemStorageService.saveUpload(file, false);
@@ -41,7 +43,11 @@ public class Deployer {
         return hostedAppDescriptor.getId();
     }
 
+    @RolesAllowed("USER")
     public long redeploy(long appId, MultipartFile newJarFile, String commandLineArgs, HostedAppRequestedProvisions requestedProvisions) throws IOException, InterruptedException {
+        //sequence is important:
+        //before processManager.stopAndRemoveIfExists it has to be checked if current user
+        //is owner of the app. This is done with SpringACL annotation over the find() method
         HostedAppDescriptor hostedAppDescriptor = hostedAppDescriptorRepository.findOne(appId);
         processManager.stopAndRemoveIfExists(appId);
 
@@ -78,9 +84,13 @@ public class Deployer {
         newApp.start();
     }
 
+    @RolesAllowed("USER")
     public void undeploy(long appId) throws InterruptedException, IOException {
-        processManager.stopAndRemoveIfExists(appId);
+        //sequence is important:
+        //before processManager.stopAndRemoveIfExists it has to be checked if current user
+        //is owner of the app. This is done with SpringACL annotation over the find() method
         HostedAppDescriptor hostedAppDescriptor = hostedAppDescriptorRepository.findOne(appId);
+        processManager.stopAndRemoveIfExists(appId);
         fileSystemStorageService.deleteUpload(hostedAppDescriptor.getLocalJarName());
         hostedAppDescriptorRepository.delete(hostedAppDescriptor);
     }

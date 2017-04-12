@@ -7,14 +7,14 @@ public class Links {
 
     public static final String ADMIN_EXECUTE_SHELL_COMMAND = "/admin/executeShellCommand";
     public static final String ADMIN_GET_SHELL_OUTPUT = "/admin/getShellOutput";
-
     public static final String ADMIN_UPLOAD_DESKTOP_CLIENT = "/admin/uploadDesktopClient";
-    public static final String APPLICATIONS = "/applications";
+
+    public static final String APPLICATIONS = "/applications";//todo secure it
     public static final String DEPLOY = "/deploy";
     public static final String REDEPLOY = "/redeploy";
     public static final String UNDEPLOY = "/undeploy";
-    public static final String RESTART = "/restart";
-    public static final String TAIL_SYSOUT = "/tailSysout";
+    public static final String RESTART = "/restart";//todo secure it
+    public static final String TAIL_SYSOUT = "/tailSysout";//todo secure it
     public static final String WHOAMI = "/whoami";
 
     public static String substitute(String template, Object... actuals){

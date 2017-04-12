@@ -11,7 +11,7 @@ import paas.procman.JavaProcess;
 import paas.procman.JavaProcessManager;
 import paas.rest.persistence.entities.HostedAppDescriptor;
 import paas.rest.persistence.repos.HostedAppDescriptorRepository;
-import paas.rest.service.Deployer;
+import paas.rest.service.HostingService;
 import paas.shared.Links;
 import paas.shared.dto.HostedAppInfo;
 import paas.shared.dto.HostedAppRequestedProvisions;
@@ -28,12 +28,13 @@ public class HostingEndpoint {
     @Autowired
     private JavaProcessManager processManager;
     @Autowired
-    private Deployer deployer;
+    private HostingService hostingService;
     @Autowired
     private HostedAppDescriptorRepository hostedAppDescriptorRepository;
 
     @GetMapping(Links.APPLICATIONS)
     List<HostedAppInfo> applications() throws IOException {
+        //todo apply ACL on the findAll
         return hostedAppDescriptorRepository.findAll()
                 .stream().map(this::info).collect(toList());
     }
@@ -55,7 +56,7 @@ public class HostingEndpoint {
             @RequestParam boolean wantsLogstash,
             @RequestParam boolean wantsLogging
             ) throws IOException, InterruptedException {
-        return "Deployed. App ID:" + deployer.newDeployment(file, commandLineArgs,
+        return "Deployed. App ID:" + hostingService.newDeployment(file, commandLineArgs,
                 new HostedAppRequestedProvisions(wantsDB, wantsFileStorage, wantsLogstash, wantsLogging));
     }
 
@@ -69,18 +70,19 @@ public class HostingEndpoint {
             @RequestParam boolean wantsLogstash,
             @RequestParam boolean wantsLogging
     ) throws IOException, InterruptedException {
-        return "Redeployed. App ID:" + deployer.redeploy(appId, file, commandLineArgs,
+        return "Redeployed. App ID:" + hostingService.redeploy(appId, file, commandLineArgs,
                 new HostedAppRequestedProvisions(wantsDB, wantsFileStorage, wantsLogstash, wantsLogging));
     }
 
     @PostMapping(Links.UNDEPLOY)
     public String undeploy(@RequestParam long appId) throws IOException, InterruptedException {
-        deployer.undeploy(appId);
+        hostingService.undeploy(appId);
         return "Undeployed app with ID: " + appId;
     }
 
     @PostMapping(Links.RESTART)
     public String restart(@RequestParam long appId) throws IOException, InterruptedException {
+        //todo move to HostingService so that security can be applied
         JavaProcess app = processManager.getApp(appId);
         app.stop();
         app.start();
@@ -89,6 +91,7 @@ public class HostingEndpoint {
 
     @GetMapping(Links.TAIL_SYSOUT)
     public List<DatedMessage> tailSysout(@RequestParam long appId, @RequestParam(required = false) long timestamp) throws IOException {
+        //todo move to HostingService so that security can be applied
         return processManager.getApp(appId).tailSysout(timestamp);
     }
 }

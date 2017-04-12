@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.security.RolesAllowed;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -37,7 +38,7 @@ public class FileSystemStorageService {
         if (!uploads.exists()) Files.createDirectory(uploads.toPath());
     }
 
-    public File getStorageRoot() {
+    File getStorageRoot() {
         return storageRoot;
     }
 
@@ -71,6 +72,7 @@ public class FileSystemStorageService {
         return storageRoot.toPath().resolve(DESKTOP_CLIENT_JAR_NAME).toFile();
     }
 
+    @RolesAllowed("ADMIN")
     public void saveDesktopClientJar(MultipartFile file) throws IOException {
         Path target = storageRoot.toPath().resolve(DESKTOP_CLIENT_JAR_NAME);
         save(target, file, true);
