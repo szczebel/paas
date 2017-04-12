@@ -20,8 +20,7 @@ import java.util.List;
 import java.util.concurrent.Callable;
 
 import static paas.shared.dto.HostedAppInfo.getId;
-import static swingutils.components.ComponentFactory.button;
-import static swingutils.components.ComponentFactory.decorate;
+import static swingutils.components.ComponentFactory.*;
 import static swingutils.layout.LayoutBuilders.*;
 
 public class HostedAppDetailsView extends LazyInitRichAbstractView {
@@ -32,6 +31,7 @@ public class HostedAppDetailsView extends LazyInitRichAbstractView {
     private final RollingConsole sysout = new RollingConsole(1000);
     private long lastMessageTimestamp = 0;
     private JCheckBox autorefresh;
+    private JLabel tailErrors;
     private Timer timer;
 
     HostedAppDetailsView(EventBus eventBus, HostedAppInfo appInfo, PaasRestClient paasRestClient, String kibanaUrl) {
@@ -55,6 +55,7 @@ public class HostedAppDetailsView extends LazyInitRichAbstractView {
 
     @Override
     protected JComponent wireAndLayout() {
+        tailErrors = label("");
         autorefresh = new JCheckBox("Autorefresh (a.k.a. tail -f)");
         autorefresh.addActionListener(e -> {
             if (autorefresh.isSelected()) startTimer();
@@ -62,10 +63,11 @@ public class HostedAppDetailsView extends LazyInitRichAbstractView {
         });
         JComponent logs = borderLayout()
                 .center(sysout.getComponent())
-                .south(flowLayout(FlowLayout.RIGHT,
-                        button("Refresh logs", e -> refreshLogs()),
-                        autorefresh
-                        )
+                .south(
+                        borderLayout()
+                                .center(tailErrors)
+                                .west(hBox(4, button("Refresh logs", e -> refreshLogs()), autorefresh))
+                                .build()
                 )
                 .build();
 
@@ -99,6 +101,7 @@ public class HostedAppDetailsView extends LazyInitRichAbstractView {
     }
 
     private void newTailReceived(List<DatedMessage> newOutput) {
+        tailErrors.setText("");
         if (newOutput.isEmpty()) return;
         lastMessageTimestamp = newOutput.get(newOutput.size() - 1).getTimestamp();
         newOutput.stream().map(DatedMessage::getMessage).forEach(sysout::appendLine);
@@ -108,6 +111,7 @@ public class HostedAppDetailsView extends LazyInitRichAbstractView {
         while (e.getCause() != null) {
             e = e.getCause();
         }
+        tailErrors.setText("Refreshing tail failed. " + e.getMessage());
         LoggerFactory.getLogger(getClass()).warn("Refreshing tail failed", e);
     }
 

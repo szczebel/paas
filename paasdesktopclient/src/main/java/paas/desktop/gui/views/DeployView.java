@@ -135,7 +135,7 @@ public class DeployView extends LazyInitRichAbstractView {
 
     @Override
     protected String formatExceptionToShow(Throwable ex) {
-        return "Deployment failed. " + super.formatExceptionToShow(ex);
+        return "<html>Operation failed.<br/>" + ex.getMessage();
     }
 
     static class DeployFormObject {

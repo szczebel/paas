@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.security.PermitAll;
 import javax.annotation.security.RolesAllowed;
 import java.io.File;
 import java.io.IOException;
@@ -68,6 +69,7 @@ public class FileSystemStorageService {
         return target.toFile();
     }
 
+    @PermitAll
     public File getDesktopClientJar() {
         return storageRoot.toPath().resolve(DESKTOP_CLIENT_JAR_NAME).toFile();
     }

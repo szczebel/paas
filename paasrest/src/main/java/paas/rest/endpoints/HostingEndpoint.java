@@ -7,44 +7,23 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import paas.procman.DatedMessage;
-import paas.procman.JavaProcess;
-import paas.procman.JavaProcessManager;
-import paas.rest.persistence.entities.HostedAppDescriptor;
-import paas.rest.persistence.repos.HostedAppDescriptorRepository;
 import paas.rest.service.HostingService;
 import paas.shared.Links;
 import paas.shared.dto.HostedAppInfo;
 import paas.shared.dto.HostedAppRequestedProvisions;
-import paas.shared.dto.HostedAppStatus;
 
 import java.io.IOException;
+import java.security.Principal;
 import java.util.List;
-
-import static java.util.stream.Collectors.toList;
 
 @RestController
 public class HostingEndpoint {
 
-    @Autowired
-    private JavaProcessManager processManager;
-    @Autowired
-    private HostingService hostingService;
-    @Autowired
-    private HostedAppDescriptorRepository hostedAppDescriptorRepository;
+    @Autowired private HostingService hostingService;
 
     @GetMapping(Links.APPLICATIONS)
     List<HostedAppInfo> applications() throws IOException {
-        //todo apply ACL on the findAll
-        return hostedAppDescriptorRepository.findAll()
-                .stream().map(this::info).collect(toList());
-    }
-
-    private HostedAppInfo info(HostedAppDescriptor p) {
-        return new HostedAppInfo(
-                p.toDto(),
-                processManager.getStatus(p.getId())
-                        .orElse(new HostedAppStatus(false, null)));
-
+        return hostingService.getApplications();
     }
 
     @PostMapping(Links.DEPLOY)
@@ -54,9 +33,10 @@ public class HostingEndpoint {
             @RequestParam boolean wantsDB,
             @RequestParam boolean wantsFileStorage,
             @RequestParam boolean wantsLogstash,
-            @RequestParam boolean wantsLogging
+            @RequestParam boolean wantsLogging,
+            Principal principal
             ) throws IOException, InterruptedException {
-        return "Deployed. App ID:" + hostingService.newDeployment(file, commandLineArgs,
+        return "Deployed. App ID:" + hostingService.newDeployment(principal.getName(), file, commandLineArgs,
                 new HostedAppRequestedProvisions(wantsDB, wantsFileStorage, wantsLogstash, wantsLogging));
     }
 
@@ -82,16 +62,12 @@ public class HostingEndpoint {
 
     @PostMapping(Links.RESTART)
     public String restart(@RequestParam long appId) throws IOException, InterruptedException {
-        //todo move to HostingService so that security can be applied
-        JavaProcess app = processManager.getApp(appId);
-        app.stop();
-        app.start();
-        return "Restarted app with ID: " + app.getAppId();
+        hostingService.restart(appId);
+        return "Restarted app with ID: " + appId;
     }
 
     @GetMapping(Links.TAIL_SYSOUT)
     public List<DatedMessage> tailSysout(@RequestParam long appId, @RequestParam(required = false) long timestamp) throws IOException {
-        //todo move to HostingService so that security can be applied
-        return processManager.getApp(appId).tailSysout(timestamp);
+        return hostingService.tailSysout(appId, timestamp);
     }
 }

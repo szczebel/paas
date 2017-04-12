@@ -13,6 +13,9 @@ public class HostedAppDescriptor {
     private Long id;
 
     @NotNull
+    private String owner;
+
+    @NotNull
     private String localJarName;
 
     @NotNull
@@ -24,7 +27,8 @@ public class HostedAppDescriptor {
     @Embedded
     private RequestedProvisions requestedProvisions;
 
-    public HostedAppDescriptor(String localJarName, String originalJarName, String commandLineArgs, RequestedProvisions requestedProvisions) {
+    public HostedAppDescriptor(String owner, String localJarName, String originalJarName, String commandLineArgs, RequestedProvisions requestedProvisions) {
+        this.owner = owner;
         this.localJarName = localJarName;
         this.originalJarName = originalJarName;
         this.commandLineArgs = commandLineArgs;
@@ -36,6 +40,10 @@ public class HostedAppDescriptor {
 
     public Long getId() {
         return id;
+    }
+
+    public String getOwner() {
+        return owner;
     }
 
     public String getLocalJarName() {
@@ -80,6 +88,6 @@ public class HostedAppDescriptor {
     }
 
     public HostedAppDesc toDto() {
-        return new HostedAppDesc(id, originalJarName, commandLineArgs, requestedProvisions.toDto());
+        return new HostedAppDesc(id, owner, originalJarName, commandLineArgs, requestedProvisions.toDto());
     }
 }

@@ -21,8 +21,6 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 import paas.procman.JavaProcessManager;
 
 //todo maven plugin for automated deployment
-//todo restrict access to apps per owner/user (domain object security)
-//todo admins see all apps
 
 @SpringBootApplication
 public class Server extends SpringBootServletInitializer {
@@ -60,6 +58,8 @@ public class Server extends SpringBootServletInitializer {
         protected void configure(AuthenticationManagerBuilder auth) throws Exception {
             auth.inMemoryAuthentication()
                     .withUser("user").password("user").roles("USER")
+                    .and()
+                    .withUser("user2").password("user2").roles("USER")
                     .and()
                     .withUser("admin").password("lupa6").roles("ADMIN")
                     .and()

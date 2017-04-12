@@ -38,6 +38,7 @@ public class HostedAppsListView extends LazyInitRichAbstractView {
 
         Columns<HostedAppInfo> columns = Columns.create(HostedAppInfo.class)
                 .column("App ID", Long.class, HostedAppInfo::getId)
+                .column("Owner", String.class, HostedAppInfo::getOwner)
                 .column("Jar file", String.class, HostedAppInfo::getJarFile)
                 .column("Command line", String.class, HostedAppInfo::getCommandLineArgs)
                 .column("Start time", Date.class, HostedAppInfo::getStarted)

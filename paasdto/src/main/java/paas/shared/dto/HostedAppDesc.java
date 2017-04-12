@@ -3,12 +3,14 @@ package paas.shared.dto;
 public class HostedAppDesc {
 
     private long id;
+    private String owner;
     private String jarFile;
     private String commandLineArgs;
     private HostedAppRequestedProvisions requestedProvisions;
 
-    public HostedAppDesc(long id, String jarFile, String commandLineArgs, HostedAppRequestedProvisions requestedProvisions) {
+    public HostedAppDesc(long id, String owner, String jarFile, String commandLineArgs, HostedAppRequestedProvisions requestedProvisions) {
         this.id = id;
+        this.owner = owner;
         this.jarFile = jarFile;
         this.commandLineArgs = commandLineArgs;
         this.requestedProvisions = requestedProvisions;
@@ -47,5 +49,13 @@ public class HostedAppDesc {
 
     public void setRequestedProvisions(HostedAppRequestedProvisions requestedProvisions) {
         this.requestedProvisions = requestedProvisions;
+    }
+
+    public String getOwner() {
+        return owner;
+    }
+
+    public void setOwner(String owner) {
+        this.owner = owner;
     }
 }

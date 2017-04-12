@@ -40,6 +40,10 @@ public class HostedAppInfo {
         return hostedAppInfo.getHostedAppDesc().getJarFile();
     }
 
+    public static String getOwner(HostedAppInfo hostedAppInfo) {
+        return hostedAppInfo.getHostedAppDesc().getOwner();
+    }
+
     public static String getCommandLineArgs(HostedAppInfo hostedAppInfo) {
         return hostedAppInfo.getHostedAppDesc().getCommandLineArgs();
     }
