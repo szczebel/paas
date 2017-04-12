@@ -1,25 +1,17 @@
-package paas.desktop.gui.infra;
+package paas.desktop.gui.infra.version;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import paas.desktop.gui.infra.EventBus;
+import paas.desktop.gui.infra.MustBeInBackground;
 import paas.desktop.gui.infra.security.LoginData;
-import paas.shared.Links;
 import swingutils.background.BackgroundOperation;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.annotation.PostConstruct;
 import java.io.File;
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
-
-import static paas.desktop.remoting.RestCall.restGet;
-import static swingutils.components.ComponentFactory.hyperlinkButton;
-import static swingutils.components.ComponentFactory.label;
-import static swingutils.layout.LayoutBuilders.borderLayout;
 
 @Component
 public class VersionChecker {
@@ -30,25 +22,23 @@ public class VersionChecker {
     private EventBus eventBus;
     @Autowired
     private LoginData loginData;
+    @Autowired
+    private NewVersionNotifier mainFrame;
 
-    private JFrame owner;
     private Long selfLastModified;
 
-    //todo: break dependency on JFrame
-    public void initialize(JFrame owner) {
-        this.owner = owner;
+    @PostConstruct
+    void initialize() {
         this.selfLastModified = findSelfLastModified();
         eventBus.whenLoginChanged(this::checkVersion);
-        checkVersion();
     }
 
-    private void checkVersion() {
-        String serverUrl = loginData.getServerUrl();
+    public void checkVersion() {
         BackgroundOperation.execute(
-                () -> isNewerVersionAvailable(serverUrl),
+                this::isNewerVersionAvailable,
                 yes -> {
                     if (yes) {
-                        tellUserAboutNewVersion(serverUrl);
+                        mainFrame.tellUserAboutNewVersion();
                     } else {
                         logger.info("No new version detected");
                     }
@@ -61,31 +51,15 @@ public class VersionChecker {
         );
     }
 
-    private void tellUserAboutNewVersion(String serverUrl) {
-        JOptionPane.showMessageDialog(owner,
-                borderLayout()
-                        .center(label("Newer version is available @ " + serverUrl))
-                        .south(hyperlinkButton("Download it now!", () -> openBrowser(serverUrl)))
-                        .build(),
-                "Newer version available",
-                JOptionPane.INFORMATION_MESSAGE
-                );
-    }
-
-    private void openBrowser(String serverUrl) {
-        try {
-            Desktop.getDesktop().browse(new URI(serverUrl + Links.PAAS_DESKTOP_CLIENT_JAR));
-        } catch (IOException | URISyntaxException e) {
-            logger.warn("Could not open browser", e);
-        }
-    }
 
     @SuppressWarnings("WeakerAccess") //private won't let AOP ensure that this @MustBeInBackground
     @MustBeInBackground
-    protected boolean isNewerVersionAvailable(String serverUrl) throws Exception {
-        if(selfLastModified == null) throw new Exception("Self last modified not available");
-        long fromServer = restGet(serverUrl + Links.DESKTOP_CLIENT_LAST_MODIFIED, Long.class).execute();
-        return fromServer > selfLastModified;
+    protected boolean isNewerVersionAvailable() throws Exception {
+        return true;
+//        String serverUrl = loginData.getServerUrl();
+//        if (selfLastModified == null) throw new Exception("Self last modified not available");
+//        long fromServer = restGet(serverUrl + Links.DESKTOP_CLIENT_LAST_MODIFIED, Long.class).execute();
+//        return fromServer > selfLastModified;
     }
     //todo: try to base it on buildNumber
 

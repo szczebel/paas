@@ -37,7 +37,6 @@ public class LoginForm extends LazyInitRichAbstractView implements LoginComponen
         username = new JTextField(loginData.getUsername());
         password = new JPasswordField(loginData.getPassword());
         JButton login = button("Login", this::loginClick);
-        JButton cancel = button("Cancel", this::close);
 
         return decorate(
                 simpleForm()
@@ -46,10 +45,9 @@ public class LoginForm extends LazyInitRichAbstractView implements LoginComponen
                         .addRow("Username:", username)
                         .addRow("Password:", password)
                         .addRow("", login)
-                        .addRow("", cancel)
                         .build())
                 .withEmptyBorder(32, 32, 32, 32)
-                .withGradientHeader("Login")
+                .withGradientHeader("Login", this::close, null)
                 .opaque(true)
                 .get();
     }
