@@ -34,14 +34,16 @@ public class VersionChecker {
     private JFrame owner;
     private Long selfLastModified;
 
+    //todo: break dependency on JFrame
     public void initialize(JFrame owner) {
         this.owner = owner;
         this.selfLastModified = findSelfLastModified();
         eventBus.whenLoginChanged(this::checkVersion);
-        checkVersion(loginData.getServerUrl());
+        checkVersion();
     }
 
-    private void checkVersion(String serverUrl) {
+    private void checkVersion() {
+        String serverUrl = loginData.getServerUrl();
         BackgroundOperation.execute(
                 () -> isNewerVersionAvailable(serverUrl),
                 yes -> {

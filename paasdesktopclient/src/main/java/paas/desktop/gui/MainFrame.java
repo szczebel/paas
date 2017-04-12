@@ -21,7 +21,7 @@ import static swingutils.layout.LayoutBuilders.hBox;
 import static swingutils.layout.cards.CardLayoutBuilder.cardLayout;
 
 @Component
-public class MainFrame extends RichFrame {
+public class MainFrame extends RichFrame implements paas.desktop.gui.infra.security.LoginPresenter {
 
     private static final int MARGIN = 4;
 
@@ -46,7 +46,7 @@ public class MainFrame extends RichFrame {
 
     public void buildAndShow() {
         setTitle("Tiniest PaaS desktop client - " + loginData.getServerUrl());
-        eventBus.whenLoginChanged(url -> setTitle("Tiniest PaaS desktop client - " + url));
+        eventBus.whenLoginChanged(() -> setTitle("Tiniest PaaS desktop client - " + loginData.getServerUrl()));
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         getOverlay().setNonModalLayout(new SnapToCorner());
         loginForm.setCloseAction(this::closeLogin);
@@ -56,7 +56,7 @@ public class MainFrame extends RichFrame {
         setVisible(true);
 
         versionChecker.initialize(this);
-        //showLogin(f); when security implemented
+        showLogin();
     }
 
 
@@ -86,8 +86,8 @@ public class MainFrame extends RichFrame {
     }
 
     private JComponent customizeMenuBar(JComponent menu) {
-        JLabel userInfo = label(getUserInfoString());
-        eventBus.whenLoginChanged(s -> userInfo.setText(getUserInfoString()));
+        JLabel userInfo = label("");
+        eventBus.whenLoginChanged(() -> userInfo.setText(getUserInfoString()));
         return borderLayout()
                 .center(menu)
                 .east(
@@ -103,7 +103,8 @@ public class MainFrame extends RichFrame {
         return "Hello " + loginData.getUsername() + ", your role is: " + loginData.getRoles();
     }
 
-    private void showLogin() {
+    @Override
+    public void showLogin() {
         getOverlay().addNonmodal(loginForm.getComponent(), SnapToCorner.TOP_RIGHT);
     }
 

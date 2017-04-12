@@ -4,7 +4,7 @@ import swingutils.components.progress.ProgressIndicator;
 
 import java.util.function.Consumer;
 
-public interface LoginController {
+public interface LoginExecutor {
     void tryLogin(String serverUrl, String username, String password,
                   Runnable onSuccess, Consumer<Exception> exceptionHandler,
                   ProgressIndicator progressIndicator);

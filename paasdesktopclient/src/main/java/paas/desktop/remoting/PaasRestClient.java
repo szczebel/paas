@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 import paas.desktop.dto.DatedMessage;
 import paas.desktop.gui.infra.MustBeInBackground;
 import paas.desktop.gui.infra.security.LoginData;
+import paas.desktop.gui.infra.security.RequiresLogin;
 import paas.shared.Links;
 import paas.shared.dto.HostedAppInfo;
 import paas.shared.dto.HostedAppRequestedProvisions;
@@ -30,6 +31,7 @@ public class PaasRestClient {
     }
 
     @MustBeInBackground
+    @RequiresLogin
     public String uploadDesktopClientJar(File jarFile) throws IOException, InterruptedException {
         return restPost(getServerUrl() + Links.ADMIN_UPLOAD_DESKTOP_CLIENT, String.class)
                 .param("jarFile", new UploadableFile(jarFile.getName(), Files.readAllBytes(jarFile.toPath())))
@@ -39,6 +41,7 @@ public class PaasRestClient {
     }
 
     @MustBeInBackground
+    @RequiresLogin
     public List<HostedAppInfo> getHostedApplications() {
         return asList(restGetList(getServerUrl() + APPLICATIONS, HostedAppInfo[].class)
                 .httpBasic(loginData.getUsername(), loginData.getPassword())
@@ -46,6 +49,7 @@ public class PaasRestClient {
     }
 
     @MustBeInBackground
+    @RequiresLogin
     public String deploy(File jarFile, String commandLineArgs, HostedAppRequestedProvisions requestedProvisions) throws IOException, InterruptedException {
         return restPost(getServerUrl() + DEPLOY, String.class)
                 .param("jarFile", new UploadableFile(jarFile.getName(), Files.readAllBytes(jarFile.toPath())))
@@ -60,6 +64,7 @@ public class PaasRestClient {
     }
 
     @MustBeInBackground
+    @RequiresLogin
     public String redeploy(long appId, File newJarFile, String commandLineArgs, HostedAppRequestedProvisions requestedProvisions) throws IOException, InterruptedException {
         RestCall<String> post = restPost(getServerUrl() + REDEPLOY, String.class)
                 .param("appId", appId)
@@ -78,6 +83,7 @@ public class PaasRestClient {
 
 
     @MustBeInBackground
+    @RequiresLogin
     public List<DatedMessage> tailNewerThan(long appID, long timestamp) {
         return asList(
                 restGetList(
@@ -90,6 +96,7 @@ public class PaasRestClient {
     }
 
     @MustBeInBackground
+    @RequiresLogin
     public String restart(long appId) {
         return restPost(getServerUrl() + RESTART, String.class)
                 .param("appId", String.valueOf(appId))//ClassCast was thrown without this explicit conversion
@@ -98,6 +105,7 @@ public class PaasRestClient {
     }
 
     @MustBeInBackground
+    @RequiresLogin
     public String undeploy(long appId) {
         return restPost(getServerUrl() + UNDEPLOY, String.class)
                 .param("appId", String.valueOf(appId))//ClassCast was thrown without this explicit conversion
@@ -105,6 +113,8 @@ public class PaasRestClient {
                 .execute();
     }
 
+    @MustBeInBackground
+    @RequiresLogin
     public String executeShellCommand(String cmd) {
         return restPost(getServerUrl() + ADMIN_EXECUTE_SHELL_COMMAND, String.class)
                 .param("command", cmd)
@@ -113,6 +123,7 @@ public class PaasRestClient {
     }
 
     @MustBeInBackground
+    @RequiresLogin
     public List<DatedMessage> getShellOutputNewerThan(long timestamp) {
         return asList(
                 restGetList(getServerUrl() + ADMIN_GET_SHELL_OUTPUT, DatedMessage[].class)

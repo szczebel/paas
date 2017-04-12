@@ -133,11 +133,6 @@ public class DeployView extends LazyInitRichAbstractView {
         eventBus.appUpdated();
     }
 
-    @Override
-    protected String formatExceptionToShow(Throwable ex) {
-        return "<html>Operation failed.<br/>" + ex.getMessage();
-    }
-
     static class DeployFormObject {
         final File jarFile;
         final String commandLineArgs;

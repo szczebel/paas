@@ -12,6 +12,9 @@ import swingutils.components.ComponentFactory;
 import javax.swing.*;
 import java.io.IOException;
 
+//todo: registration
+//todo: remember last host&username
+
 @SpringBootApplication
 public class DesktopClient {
 

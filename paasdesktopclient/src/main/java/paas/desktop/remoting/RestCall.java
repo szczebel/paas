@@ -201,11 +201,12 @@ public abstract class RestCall<T> {
         @Override
         public void handleError(ClientHttpResponse response) throws IOException {
             HttpStatus statusCode = getHttpStatusCode(response);
-            String responseString = new String(getResponseBody(response));
+            String message = statusCode.equals(HttpStatus.BAD_REQUEST) ?
+                    new String(getResponseBody(response)) : statusCode.getReasonPhrase();
             throw new RestClientResponseException(
-                    responseString,
+                    message,
                     statusCode.value(),
-                    statusCode.getReasonPhrase(),
+                    null,
                     response.getHeaders(),
                     getResponseBody(response),
                     Charset.defaultCharset()
@@ -215,7 +216,7 @@ public abstract class RestCall<T> {
         private HttpStatus getHttpStatusCode(ClientHttpResponse response) throws IOException {
             try {
                 return response.getStatusCode();
-            } catch (IllegalArgumentException var4) {
+            } catch (IllegalArgumentException e) {
                 throw new UnknownHttpStatusCodeException(
                         response.getRawStatusCode(),
                         response.getStatusText(),
@@ -234,7 +235,6 @@ public abstract class RestCall<T> {
                 }
             } catch (IOException ignored) {
             }
-
             return new byte[0];
         }
     }

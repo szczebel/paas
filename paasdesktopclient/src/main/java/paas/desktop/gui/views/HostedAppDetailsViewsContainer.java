@@ -36,7 +36,7 @@ public class HostedAppDetailsViewsContainer extends LazyInitRichAbstractView {
     @Override
     protected JComponent wireAndLayout() {
         eventBus.whenDetailsRequested(this::openDetailsView);
-        eventBus.whenLoginChanged(s -> closeAll());
+        eventBus.whenLoginChanged(this::closeAll);
         eventBus.whenCurrentAppsChanged(this::currentAppsChanged);
 
         cardPanel = new CardPanel();

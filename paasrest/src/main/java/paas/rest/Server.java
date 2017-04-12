@@ -57,7 +57,7 @@ public class Server extends SpringBootServletInitializer {
         @Override
         protected void configure(AuthenticationManagerBuilder auth) throws Exception {
             auth.inMemoryAuthentication()
-                    .withUser("user").password("user").roles("USER")
+                    .withUser("guest").password("guest").roles("USER")
                     .and()
                     .withUser("user2").password("user2").roles("USER")
                     .and()

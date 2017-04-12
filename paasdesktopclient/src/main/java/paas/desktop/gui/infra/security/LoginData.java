@@ -8,4 +8,6 @@ public interface LoginData {
     String getPassword();
 
     String getRoles();
+
+    boolean isLoggedIn();
 }

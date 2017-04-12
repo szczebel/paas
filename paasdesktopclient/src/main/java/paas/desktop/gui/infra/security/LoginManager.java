@@ -20,16 +20,17 @@ import static paas.shared.Links.WHOAMI;
 
 @Component
 @Qualifier("loginController, loginData")
-public class LoginManager implements LoginData, LoginController {
+public class LoginManager implements LoginData, LoginExecutor {
 
     @Autowired
     private EventBus eventBus;
 
     @Value("${server.url}")
     private String serverUrl;
-    private String username = "user";
-    private String password = "user";
+    private String username = "guest";
+    private String password = "";
     private Optional<List<AuthorityInfo>> roles = Optional.empty();
+    private boolean loggedIn = false;
 
     @Override
     public String getServerUrl() {
@@ -51,7 +52,7 @@ public class LoginManager implements LoginData, LoginController {
                          Runnable onSuccess, Consumer<Exception> exceptionHandler,
                          ProgressIndicator progressIndicator) {
         BackgroundOperation.execute(
-                () -> callServer(serverUrl, username, password),
+                () -> whoAmI(serverUrl, username, password),
                 userInfo -> loginSuccess(serverUrl, username, password, userInfo.getAuthorities(), onSuccess),
                 exceptionHandler,
                 progressIndicator
@@ -60,7 +61,7 @@ public class LoginManager implements LoginData, LoginController {
 
     @SuppressWarnings("WeakerAccess")
     @MustBeInBackground
-    protected UserInfo callServer(String serverUrl, String username, String password) {
+    protected UserInfo whoAmI(String serverUrl, String username, String password) {
         return
                 RestCall.restGet(serverUrl + WHOAMI, UserInfo.class)
                         .httpBasic(username, password)
@@ -72,8 +73,9 @@ public class LoginManager implements LoginData, LoginController {
         this.username = username;
         this.password = password;
         this.roles = Optional.of(roles);
+        this.loggedIn = true;
         onSuccess.run();
-        eventBus.loginChanged(this.serverUrl);
+        eventBus.loginChanged();
     }
 
     @Override
@@ -87,6 +89,11 @@ public class LoginManager implements LoginData, LoginController {
                         .map(roleString -> roleString.substring(5))//strip ROLE_ prefix
                         .collect(toList())
         );
+    }
+
+    @Override
+    public boolean isLoggedIn() {
+        return loggedIn;
     }
 
     static class UserInfo {
