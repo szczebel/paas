@@ -6,4 +6,6 @@ public interface LoginData {
     String getUsername();
 
     String getPassword();
+
+    String getRoles();
 }

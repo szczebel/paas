@@ -5,17 +5,15 @@ import org.springframework.stereotype.Component;
 import paas.desktop.gui.infra.security.LoginController;
 import paas.desktop.gui.infra.security.LoginData;
 import swingutils.components.LazyInitRichAbstractView;
-import swingutils.frame.RichFrame;
 
 import javax.swing.*;
 
 import static swingutils.components.ComponentFactory.button;
 import static swingutils.components.ComponentFactory.decorate;
-import static swingutils.layout.LayoutBuilders.pack;
 import static swingutils.layout.forms.FormLayoutBuilders.simpleForm;
 
 @Component
-public class LoginForm extends LazyInitRichAbstractView implements LoginPresenter {
+public class LoginForm extends LazyInitRichAbstractView implements LoginComponent {
 
     @Autowired private LoginController loginController;
     @Autowired private LoginData loginData;
@@ -23,6 +21,7 @@ public class LoginForm extends LazyInitRichAbstractView implements LoginPresente
     private JTextField serverUrl;
     private JTextField username;
     private JPasswordField password;
+    private Runnable closeAction;
 
     @Override
     protected JComponent wireAndLayout() {
@@ -57,22 +56,12 @@ public class LoginForm extends LazyInitRichAbstractView implements LoginPresente
                 );
     }
 
-    //all below should be in a separate class
-    private RichFrame parent;
-    @Override
-    public void show(RichFrame parent) {
-        if (this.parent != null) return;
-        this.parent = parent;
-        parent.getOverlay().setNonModalLayout(null);
-        JComponent self = getComponent();
-        pack(self);
-        int cpWidth = parent.getContentPane().getSize().width;
-        self.setLocation(cpWidth - self.getSize().width, 0);
-        parent.getOverlay().addNonmodal(self);
+    private void close() {
+        closeAction.run();
     }
 
-    private void close() {
-        parent.getOverlay().removeNonmodal(getComponent());
-        parent = null;
+    @Override
+    public void setCloseAction(Runnable closeAction) {
+        this.closeAction = closeAction;
     }
 }

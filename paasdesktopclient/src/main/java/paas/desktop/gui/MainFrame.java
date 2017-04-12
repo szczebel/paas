@@ -1,27 +1,27 @@
 package paas.desktop.gui;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import paas.desktop.gui.infra.EventBus;
 import paas.desktop.gui.infra.VersionChecker;
+import paas.desktop.gui.infra.security.LoginData;
 import paas.desktop.gui.views.AdminView;
-import paas.desktop.gui.views.LoginPresenter;
-import swingutils.components.ComponentFactory;
+import paas.desktop.gui.views.LoginComponent;
 import swingutils.components.IsComponent;
 import swingutils.frame.RichFrame;
+import swingutils.layout.SnapToCorner;
 import swingutils.layout.cards.CardMenuBuilders;
 
 import javax.swing.*;
 import java.awt.*;
 
-import static swingutils.components.ComponentFactory.decorate;
-import static swingutils.components.ComponentFactory.hyperlinkButton;
+import static swingutils.components.ComponentFactory.*;
 import static swingutils.layout.LayoutBuilders.borderLayout;
+import static swingutils.layout.LayoutBuilders.hBox;
 import static swingutils.layout.cards.CardLayoutBuilder.cardLayout;
 
 @Component
-public class GuiBuilder {
+public class MainFrame extends RichFrame {
 
     private static final int MARGIN = 4;
 
@@ -40,27 +40,27 @@ public class GuiBuilder {
     @Autowired
     private VersionChecker versionChecker;
     @Autowired
-    private LoginPresenter loginForm;
-    @Value("${server.url}")
-    private String initialServerUrl;
+    private LoginComponent loginForm;
+    @Autowired
+    private LoginData loginData;
 
-    public void showGui() {
-        ComponentFactory.initLAF();
-        RichFrame f = new RichFrame();
-        f.setTitle("Tiniest PaaS desktop client - " + initialServerUrl);
-        eventBus.whenLoginChanged(url -> f.setTitle("Tiniest PaaS desktop client - " + url));
-        f.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        f.add(buildContent(f));
-        f.pack();
-        f.setLocationRelativeTo(null);
-        f.setVisible(true);
+    public void buildAndShow() {
+        setTitle("Tiniest PaaS desktop client - " + loginData.getServerUrl());
+        eventBus.whenLoginChanged(url -> setTitle("Tiniest PaaS desktop client - " + url));
+        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        getOverlay().setNonModalLayout(new SnapToCorner());
+        loginForm.setCloseAction(this::closeLogin);
+        add(buildContent());
+        pack();
+        setLocationRelativeTo(null);
+        setVisible(true);
 
-        versionChecker.initialize(f);
+        versionChecker.initialize(this);
         //showLogin(f); when security implemented
     }
 
 
-    private JComponent buildContent(RichFrame f) {
+    private JComponent buildContent() {
         hostedAppsListView.getComponent().setPreferredSize(new Dimension(100, 200));
         JComponent north = borderLayout()
                 .west(dec(deployView.getComponent(), "New deployment", 0, MARGIN, MARGIN / 2, MARGIN / 2))
@@ -75,7 +75,7 @@ public class GuiBuilder {
                 .build();
 
         return cardLayout(CardMenuBuilders.BorderedOrange()
-                .menuBarCustomizer(menu -> borderLayout().center(menu).east(buildLoginButton(f)).build()))
+                .menuBarCustomizer(this::customizeMenuBar))
                 .addTab("Applications", appsTab)
                 .addTab("For admins", adminView.getComponent())
                 .addTab("My error log", selfLogView.getComponent())
@@ -85,10 +85,30 @@ public class GuiBuilder {
                 .build();
     }
 
-    private JComponent buildLoginButton(RichFrame parent) {
-        return decorate(hyperlinkButton("Login", () -> loginForm.show(parent)))
-                .withEmptyBorder(0, 0, 0, 8)
-                .get();
+    private JComponent customizeMenuBar(JComponent menu) {
+        JLabel userInfo = label(getUserInfoString());
+        eventBus.whenLoginChanged(s -> userInfo.setText(getUserInfoString()));
+        return borderLayout()
+                .center(menu)
+                .east(
+                        hBox(8,
+                                userInfo,
+                                hyperlinkButton("Login", this::showLogin)
+                        )
+                )
+                .build();
+    }
+
+    private String getUserInfoString() {
+        return "Hello " + loginData.getUsername() + ", your role is: " + loginData.getRoles();
+    }
+
+    private void showLogin() {
+        getOverlay().addNonmodal(loginForm.getComponent(), SnapToCorner.TOP_RIGHT);
+    }
+
+    private void closeLogin() {
+        getOverlay().removeNonmodal(loginForm.getComponent());
     }
 
     private JComponent dec(JComponent component, String title, int top, int left, int bottom, int right) {

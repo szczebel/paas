@@ -6,13 +6,16 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import paas.desktop.gui.infra.EventBus;
 import paas.desktop.gui.infra.MustBeInBackground;
+import paas.desktop.gui.infra.security.LoginManager.UserInfo.AuthorityInfo;
 import paas.desktop.remoting.RestCall;
 import swingutils.background.BackgroundOperation;
 import swingutils.components.progress.ProgressIndicator;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Consumer;
 
+import static java.util.stream.Collectors.toList;
 import static paas.shared.Links.WHOAMI;
 
 @Component
@@ -26,6 +29,7 @@ public class LoginManager implements LoginData, LoginController {
     private String serverUrl;
     private String username = "user";
     private String password = "user";
+    private Optional<List<AuthorityInfo>> roles = Optional.empty();
 
     @Override
     public String getServerUrl() {
@@ -48,7 +52,7 @@ public class LoginManager implements LoginData, LoginController {
                          ProgressIndicator progressIndicator) {
         BackgroundOperation.execute(
                 () -> callServer(serverUrl, username, password),
-                () -> loginSuccess(serverUrl, username, password, onSuccess),
+                userInfo -> loginSuccess(serverUrl, username, password, userInfo.getAuthorities(), onSuccess),
                 exceptionHandler,
                 progressIndicator
         );
@@ -56,20 +60,33 @@ public class LoginManager implements LoginData, LoginController {
 
     @SuppressWarnings("WeakerAccess")
     @MustBeInBackground
-    protected void callServer(String serverUrl, String username, String password) {
-        //UserInfo principalJson =
+    protected UserInfo callServer(String serverUrl, String username, String password) {
+        return
                 RestCall.restGet(serverUrl + WHOAMI, UserInfo.class)
-                .httpBasic(username, password)
-                .execute();
-        //System.out.println(principalJson.getAuthorities());
+                        .httpBasic(username, password)
+                        .execute();
     }
 
-    private void loginSuccess(String serverUrl, String username, String password, Runnable onSuccess) {
+    private void loginSuccess(String serverUrl, String username, String password, List<AuthorityInfo> roles, Runnable onSuccess) {
         this.serverUrl = serverUrl;
         this.username = username;
         this.password = password;
+        this.roles = Optional.of(roles);
         onSuccess.run();
         eventBus.loginChanged(this.serverUrl);
+    }
+
+    @Override
+    public String getRoles() {
+        return roles.map(this::join).orElse("[unknown]");
+    }
+
+    private String join(List<AuthorityInfo> roles) {
+        return String.join(",",
+                roles.stream().map(AuthorityInfo::getAuthority)
+                        .map(roleString -> roleString.substring(5))//strip ROLE_ prefix
+                        .collect(toList())
+        );
     }
 
     static class UserInfo {
