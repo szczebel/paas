@@ -66,7 +66,11 @@ public class HostedAppDetailsView extends LazyInitRichAbstractView {
                 .south(
                         borderLayout()
                                 .center(tailErrors)
-                                .west(hBox(4, button("Refresh logs", e -> refreshLogs()), autorefresh))
+                                .west(
+                                        hBox(4,
+                                                button("Refresh logs", e -> refreshLogs()),
+                                                autorefresh)
+                                )
                                 .build()
                 )
                 .build();
@@ -114,7 +118,6 @@ public class HostedAppDetailsView extends LazyInitRichAbstractView {
         tailErrors.setText("Refreshing tail failed. " + e.getMessage());
         LoggerFactory.getLogger(getClass()).warn("Refreshing tail failed", e);
     }
-
 
     void dispose() {
         if (timer != null) stopTimer();

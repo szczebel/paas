@@ -60,7 +60,7 @@ public class MainFrame extends RichFrame implements LoginPresenter, NewVersionNo
     @Autowired
     private LoginData loginData;
 
-    private MDI overlayMDI = MDI.overlay(getOverlay());
+    private MDI overlayMDI = MDI.create(getOverlay());
 
     public void buildAndShow() {
         setTitle("Tiniest PaaS desktop client - " + loginData.getServerUrl());
@@ -121,12 +121,12 @@ public class MainFrame extends RichFrame implements LoginPresenter, NewVersionNo
     @Override
     public void showRegistration() {
         overlayMDI.remove(loginForm);
-        overlayMDI.add(registrationForm, SnapToCorner.TOP_RIGHT);
+        overlayMDI.add(null, registrationForm, SnapToCorner.TOP_RIGHT);
     }
 
     @Override
     public void showLogin() {
-        overlayMDI.add(loginForm, SnapToCorner.TOP_RIGHT);
+        overlayMDI.add(null, loginForm, SnapToCorner.TOP_RIGHT);
     }
 
     @Override
@@ -139,7 +139,7 @@ public class MainFrame extends RichFrame implements LoginPresenter, NewVersionNo
                         .withGradientHeader("New version available", closeAction, null)
                         .opaque(true)
                         .get());
-        overlayMDI.add(downloadMessageBox, closeAction, SnapToCorner.BOTTOM_RIGHT);
+        overlayMDI.add(null, downloadMessageBox, closeAction::delegate, SnapToCorner.BOTTOM_RIGHT);
     }
 
     private void download() {
