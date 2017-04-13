@@ -22,6 +22,7 @@ public class LoginEndpoint {
 
     @PostMapping(REGISTER)
     public void register(@RequestParam String username, @RequestParam String password) {
+        //todo: implement
         throw new RuntimeException("Not implemented yet, use guest account for now");
     }
 }

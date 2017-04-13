@@ -79,8 +79,7 @@ public class HostedAppDetailsViewsContainer extends LazyInitRichAbstractView {
             String key = String.valueOf(appId);
             cardPanel.addCard(key,
                     decorate(hostedAppDetailsView.getComponent())
-                            .withGradientHeader("Manage application of ID : " + key, () -> closeView(appId), null)
-//todo:                            .withTitledSeparator("Manage application of ID : " + key, () -> closeView(appId), null)
+                            .withTitledSeparator("Manage application of ID : " + key, () -> closeView(appId), null)
                             .withEmptyBorder(2, 4, 4, 4)
                             .get());
             cardPanel.showCard(key);

@@ -1,13 +1,10 @@
 package paas.desktop.gui;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
+import paas.desktop.DesktopClient;
 import paas.desktop.gui.infra.EventBus;
 import paas.desktop.gui.infra.security.LoginData;
-import paas.desktop.gui.infra.security.LoginPresenter;
-import paas.desktop.gui.infra.security.RegistrationPresenter;
-import paas.desktop.gui.infra.version.NewVersionNotifier;
 import paas.desktop.gui.infra.version.VersionChecker;
 import paas.desktop.gui.views.AdminView;
 import paas.shared.Links;
@@ -31,11 +28,8 @@ import static swingutils.layout.LayoutBuilders.borderLayout;
 import static swingutils.layout.LayoutBuilders.hBox;
 import static swingutils.layout.cards.CardLayoutBuilder.cardLayout;
 
-//todo: splash screen
-
 @Component
-@Qualifier("owner")
-public class MainFrame extends RichFrame implements LoginPresenter, NewVersionNotifier, RegistrationPresenter {
+public class MainFrame extends RichFrame {
 
     private static final int MARGIN = 4;
 
@@ -63,8 +57,11 @@ public class MainFrame extends RichFrame implements LoginPresenter, NewVersionNo
     private MDI overlayMDI = MDI.create(getOverlay());
 
     public void buildAndShow() {
-        setTitle("Tiniest PaaS desktop client - " + loginData.getServerUrl());
         eventBus.whenLoginChanged(() -> setTitle("Tiniest PaaS desktop client - " + loginData.getServerUrl()));
+        eventBus.whenViewRequested((request) -> request.visit(this));
+
+        setIconImage(new ImageIcon(getClass().getResource("/splash.png")).getImage());
+        setTitle("Tiniest PaaS desktop client - " + loginData.getServerUrl());
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         getOverlay().setNonModalLayout(new SnapToCorner(8));
         add(buildContent());
@@ -73,6 +70,9 @@ public class MainFrame extends RichFrame implements LoginPresenter, NewVersionNo
         setVisible(true);
         showLogin();
         versionChecker.checkVersion();
+
+        DesktopClient.splash.dispose();
+        DesktopClient.splash = null;
     }
 
     private JComponent buildContent() {
@@ -118,19 +118,16 @@ public class MainFrame extends RichFrame implements LoginPresenter, NewVersionNo
         return "Hello " + loginData.getUsername() + ", your role is: " + loginData.getRoles();
     }
 
-    @Override
-    public void showRegistration() {
+    void showRegistration() {
         overlayMDI.remove(loginForm);
         overlayMDI.add(null, registrationForm, SnapToCorner.TOP_RIGHT);
     }
 
-    @Override
-    public void showLogin() {
+    void showLogin() {
         overlayMDI.add(null, loginForm, SnapToCorner.TOP_RIGHT);
     }
 
-    @Override
-    public void tellUserAboutNewVersion() {
+    void tellUserAboutNewVersion() {
         RunnableProxy closeAction = new RunnableProxy();
         JButton downloadButton = hyperlinkButton("Download it!", this::download);
         FadingPanel downloadMessageBox = new FadingPanel(

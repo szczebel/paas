@@ -10,6 +10,7 @@ import swingutils.SysoutInterceptor;
 import swingutils.components.ComponentFactory;
 
 import javax.swing.*;
+import java.awt.*;
 import java.io.IOException;
 
 //todo: remember last host&username
@@ -18,8 +19,10 @@ import java.io.IOException;
 public class DesktopClient {
 
     public static final SysoutInterceptor sysoutInterceptor = new SysoutInterceptor();
+    public static Window splash;
 
     public static void main(String[] args) throws IOException {
+        splash = ComponentFactory.splash(new ImageIcon(DesktopClient.class.getResource("/splash.png")), "Loading...");
         sysoutInterceptor.interceptSystemOutAndErr();
         ComponentFactory.initLAF();
         new SpringApplicationBuilder(DesktopClient.class).headless(false).run(args);

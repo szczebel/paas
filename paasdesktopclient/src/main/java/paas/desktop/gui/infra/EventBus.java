@@ -1,6 +1,7 @@
 package paas.desktop.gui.infra;
 
 import org.springframework.stereotype.Component;
+import paas.desktop.gui.ViewRequest;
 import paas.shared.dto.HostedAppInfo;
 
 import java.util.ArrayList;
@@ -10,6 +11,19 @@ import java.util.function.Consumer;
 
 @Component
 public class EventBus {
+
+    private List<Consumer<ViewRequest>> viewRequestListeners = new ArrayList<>();
+
+    public void whenViewRequested(Consumer<ViewRequest> l) {
+        viewRequestListeners.add(l);
+    }
+
+    @MustBeInEDT
+    public void requestView(ViewRequest request) {
+        viewRequestListeners.forEach(l -> l.accept(request));
+    }
+
+
     private List<Runnable> loginDataObservers = new ArrayList<>();
 
     public void whenLoginChanged(Runnable listener) {

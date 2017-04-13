@@ -14,6 +14,7 @@ import javax.annotation.PostConstruct;
 import java.io.File;
 import java.net.URL;
 
+import static paas.desktop.gui.ViewRequest.NEW_VERSION;
 import static paas.desktop.remoting.RestCall.restGet;
 
 @Component
@@ -25,8 +26,6 @@ public class VersionChecker {
     private EventBus eventBus;
     @Autowired
     private LoginData loginData;
-    @Autowired
-    private NewVersionNotifier mainFrame;
 
     private Long selfLastModified;
 
@@ -41,7 +40,7 @@ public class VersionChecker {
                 this::isNewerVersionAvailable,
                 yes -> {
                     if (yes) {
-                        mainFrame.tellUserAboutNewVersion();
+                        eventBus.requestView(NEW_VERSION);
                     } else {
                         logger.info("No new version detected");
                     }

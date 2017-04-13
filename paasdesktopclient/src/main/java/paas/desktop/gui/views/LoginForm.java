@@ -5,13 +5,13 @@ import org.springframework.stereotype.Component;
 import paas.desktop.gui.infra.EventBus;
 import paas.desktop.gui.infra.security.LoginData;
 import paas.desktop.gui.infra.security.LoginExecutor;
-import paas.desktop.gui.infra.security.RegistrationPresenter;
 import swingutils.components.LazyInitSelfClosableAbstractView;
 
 import javax.swing.*;
 
 import static java.awt.Font.BOLD;
 import static javax.swing.SwingConstants.LEFT;
+import static paas.desktop.gui.ViewRequest.REGISTRATION;
 import static swingutils.components.ComponentFactory.*;
 import static swingutils.layout.forms.FormLayoutBuilders.simpleForm;
 
@@ -24,8 +24,6 @@ public class LoginForm extends LazyInitSelfClosableAbstractView {
     private LoginData loginData;
     @Autowired
     private EventBus eventBus;
-    @Autowired
-    private RegistrationPresenter mainFrame;
 
     @Override
     protected JComponent wireAndLayout() {
@@ -43,7 +41,7 @@ public class LoginForm extends LazyInitSelfClosableAbstractView {
                         .addRow("Username:", username)
                         .addRow("Password:", password)
                         .addRow("", button("Login", () -> loginClick(serverUrl.getText(), username.getText(), String.valueOf(password.getPassword()))))
-                        .addRow("", button("Register...", () -> mainFrame.showRegistration()))
+                        .addRow("", button("Register...", () -> eventBus.requestView(REGISTRATION)))
                         .build())
                 .withEmptyBorder(32, 32, 32, 32)
                 .withGradientHeader("Login", this::close, null)
