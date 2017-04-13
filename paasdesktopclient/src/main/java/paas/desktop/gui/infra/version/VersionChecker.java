@@ -7,11 +7,14 @@ import org.springframework.stereotype.Component;
 import paas.desktop.gui.infra.EventBus;
 import paas.desktop.gui.infra.MustBeInBackground;
 import paas.desktop.gui.infra.security.LoginData;
+import paas.shared.Links;
 import swingutils.background.BackgroundOperation;
 
 import javax.annotation.PostConstruct;
 import java.io.File;
 import java.net.URL;
+
+import static paas.desktop.remoting.RestCall.restGet;
 
 @Component
 public class VersionChecker {
@@ -55,11 +58,10 @@ public class VersionChecker {
     @SuppressWarnings("WeakerAccess") //private won't let AOP ensure that this @MustBeInBackground
     @MustBeInBackground
     protected boolean isNewerVersionAvailable() throws Exception {
-        return true;
-//        String serverUrl = loginData.getServerUrl();
-//        if (selfLastModified == null) throw new Exception("Self last modified not available");
-//        long fromServer = restGet(serverUrl + Links.DESKTOP_CLIENT_LAST_MODIFIED, Long.class).execute();
-//        return fromServer > selfLastModified;
+        String serverUrl = loginData.getServerUrl();
+        if (selfLastModified == null) throw new Exception("Self last modified not available");
+        long fromServer = restGet(serverUrl + Links.DESKTOP_CLIENT_LAST_MODIFIED, Long.class).execute();
+        return fromServer > selfLastModified;
     }
     //todo: try to base it on buildNumber
 

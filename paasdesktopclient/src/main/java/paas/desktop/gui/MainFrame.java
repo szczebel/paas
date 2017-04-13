@@ -126,6 +126,7 @@ public class MainFrame extends RichFrame implements LoginPresenter, NewVersionNo
 
     @Override
     public void showLogin() {
+        //todo: closing interaction between loginForm and mainFrame should be part of swingutils
         getOverlay().addNonmodal(loginForm.getComponent(), SnapToCorner.TOP_RIGHT);
     }
 
