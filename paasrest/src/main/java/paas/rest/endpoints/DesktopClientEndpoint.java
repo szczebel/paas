@@ -14,8 +14,10 @@ import paas.shared.Links;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.jar.JarFile;
 
 import static paas.rest.service.FileSystemStorageService.DESKTOP_CLIENT_JAR_NAME;
+import static paas.shared.BuildTime.readBuildTime;
 
 @RestController
 public class DesktopClientEndpoint {
@@ -35,12 +37,11 @@ public class DesktopClientEndpoint {
         else throw new IllegalStateException("Call admin and tell him to upload desktop client");
     }
 
-    @GetMapping(Links.DESKTOP_CLIENT_LAST_MODIFIED)
-    public long getDesktopClientLastModified() {
-        File desktopClientJar = fileSystemStorageService.getDesktopClientJar();
-        if(desktopClientJar.exists())
-            return desktopClientJar.lastModified();
-        else throw new IllegalStateException("Call admin and tell him to upload desktop client");
+    @GetMapping(Links.DESKTOP_CLIENT_BUILD_TIMESTAMP)
+    public long getDesktopClientLastModified() throws IOException {
+        try(JarFile jarFile = new JarFile(fileSystemStorageService.getDesktopClientJar())) {
+            return readBuildTime(jarFile.getManifest());
+        }
     }
 
     @PostMapping(Links.ADMIN_UPLOAD_DESKTOP_CLIENT)

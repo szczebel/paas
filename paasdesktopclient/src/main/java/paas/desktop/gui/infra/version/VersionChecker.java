@@ -11,11 +11,12 @@ import paas.shared.Links;
 import swingutils.background.BackgroundOperation;
 
 import javax.annotation.PostConstruct;
-import java.io.File;
-import java.net.URL;
+import java.io.InputStream;
+import java.util.jar.Manifest;
 
 import static paas.desktop.gui.ViewRequest.NEW_VERSION;
 import static paas.desktop.remoting.RestCall.restGet;
+import static paas.shared.BuildTime.readBuildTime;
 
 @Component
 public class VersionChecker {
@@ -27,11 +28,12 @@ public class VersionChecker {
     @Autowired
     private LoginData loginData;
 
-    private Long selfLastModified;
+    private Long myBuildTimestamp;
 
     @PostConstruct
     void initialize() {
-        this.selfLastModified = findSelfLastModified();
+        this.myBuildTimestamp = getMyBuildTimestamp();
+        logger.info("My build timestamp : " + myBuildTimestamp);
         eventBus.whenLoginChanged(this::checkVersion);
     }
 
@@ -58,20 +60,17 @@ public class VersionChecker {
     @MustBeInBackground
     protected boolean isNewerVersionAvailable() throws Exception {
         String serverUrl = loginData.getServerUrl();
-        if (selfLastModified == null) throw new Exception("Self last modified not available");
-        long fromServer = restGet(serverUrl + Links.DESKTOP_CLIENT_LAST_MODIFIED, Long.class).execute();
-        return fromServer > selfLastModified;
+        if (myBuildTimestamp == null) {
+            logger.error("My build timestamp not available");
+            return false;
+        }
+        long fromServer = restGet(serverUrl + Links.DESKTOP_CLIENT_BUILD_TIMESTAMP, Long.class).execute();
+        return fromServer > myBuildTimestamp;
     }
-    //todo: try to base it on buildNumber
 
-    private Long findSelfLastModified() {
-        try {
-            URL jarLocation = VersionChecker.class.getProtectionDomain().getCodeSource().getLocation();
-            String jarLocationString = jarLocation.toString();
-            String jarFileName = jarLocationString.substring("jar:file:".length(), jarLocationString.indexOf("!"));
-            File file = new File(jarFileName);
-            if (!file.exists() || !file.isFile()) throw new Exception("Not a file: " + jarFileName);
-            return file.lastModified();
+    private Long getMyBuildTimestamp() {
+        try (InputStream manifestStream = getClass().getResourceAsStream("/META-INF/MANIFEST.MF")) {
+            return readBuildTime(new Manifest(manifestStream));
         } catch (Exception e) {
             logger.error("Checking self last modified failed : ", e);
             return null;
