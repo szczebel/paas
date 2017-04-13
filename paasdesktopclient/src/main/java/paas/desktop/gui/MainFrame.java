@@ -95,7 +95,7 @@ public class MainFrame extends RichFrame implements LoginPresenter, NewVersionNo
                 .addTab("For admins", adminView.getComponent())
                 .addTab("My error log", selfLogView.getComponent())
                 .onCardChange((prevCard, newCard) -> {
-                    if ("Server shell console".equals(newCard)) adminView.focus();
+                    if ("For admins".equals(newCard)) adminView.focus();
                 })
                 .build();
     }
