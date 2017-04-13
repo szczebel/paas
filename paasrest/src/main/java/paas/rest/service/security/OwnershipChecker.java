@@ -11,7 +11,7 @@ public class OwnershipChecker {
     @Autowired
     private HostedAppDescriptorRepository hostedAppDescriptorRepository;
 
-    public boolean isPrincipalOwnerOfAppId(Authentication principal, long appId) {
+    public boolean isCurrentUserOwnerOfAppId(Authentication principal, long appId) {
         return hostedAppDescriptorRepository
                 .findOne(appId)
                 .getOwner()
