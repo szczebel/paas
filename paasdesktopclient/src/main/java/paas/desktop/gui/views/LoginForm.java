@@ -2,13 +2,11 @@ package paas.desktop.gui.views;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import paas.desktop.gui.ComponentOwner;
 import paas.desktop.gui.infra.EventBus;
 import paas.desktop.gui.infra.security.LoginData;
 import paas.desktop.gui.infra.security.LoginExecutor;
 import paas.desktop.gui.infra.security.RegistrationPresenter;
-import swingutils.components.IsComponent;
-import swingutils.components.LazyInitRichAbstractView;
+import swingutils.components.LazyInitSelfClosableAbstractView;
 
 import javax.swing.*;
 
@@ -18,7 +16,7 @@ import static swingutils.components.ComponentFactory.*;
 import static swingutils.layout.forms.FormLayoutBuilders.simpleForm;
 
 @Component
-public class LoginForm extends LazyInitRichAbstractView implements IsComponent {
+public class LoginForm extends LazyInitSelfClosableAbstractView {
 
     @Autowired
     private LoginExecutor loginController;
@@ -28,8 +26,6 @@ public class LoginForm extends LazyInitRichAbstractView implements IsComponent {
     private EventBus eventBus;
     @Autowired
     private RegistrationPresenter mainFrame;
-    @Autowired
-    private ComponentOwner owner;
 
     @Override
     protected JComponent wireAndLayout() {
@@ -64,9 +60,5 @@ public class LoginForm extends LazyInitRichAbstractView implements IsComponent {
                 this::onException,
                 getProgressIndicator()
         );
-    }
-
-    private void close() {
-        owner.close(this);
     }
 }

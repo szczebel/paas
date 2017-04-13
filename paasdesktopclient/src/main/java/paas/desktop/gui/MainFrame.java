@@ -17,6 +17,8 @@ import swingutils.components.fade.FadingPanel;
 import swingutils.frame.RichFrame;
 import swingutils.layout.SnapToCorner;
 import swingutils.layout.cards.CardMenuBuilders;
+import swingutils.mdi.MDI;
+import swingutils.mdi.SelfCloseable;
 
 import javax.swing.*;
 import java.awt.*;
@@ -33,7 +35,7 @@ import static swingutils.layout.cards.CardLayoutBuilder.cardLayout;
 
 @Component
 @Qualifier("owner")
-public class MainFrame extends RichFrame implements LoginPresenter, NewVersionNotifier, RegistrationPresenter, ComponentOwner {
+public class MainFrame extends RichFrame implements LoginPresenter, NewVersionNotifier, RegistrationPresenter {
 
     private static final int MARGIN = 4;
 
@@ -52,11 +54,13 @@ public class MainFrame extends RichFrame implements LoginPresenter, NewVersionNo
     @Autowired
     private VersionChecker versionChecker;
     @Autowired
-    private IsComponent loginForm;
+    private SelfCloseable loginForm;
     @Autowired
-    private IsComponent registrationForm;
+    private SelfCloseable registrationForm;
     @Autowired
     private LoginData loginData;
+
+    private MDI overlayMDI = MDI.overlay(getOverlay());
 
     public void buildAndShow() {
         setTitle("Tiniest PaaS desktop client - " + loginData.getServerUrl());
@@ -70,12 +74,6 @@ public class MainFrame extends RichFrame implements LoginPresenter, NewVersionNo
         showLogin();
         versionChecker.checkVersion();
     }
-
-    @Override
-    public void close(IsComponent c) {
-        getOverlay().removeNonmodal(c.getComponent());
-    }
-
 
     private JComponent buildContent() {
         hostedAppsListView.getComponent().setPreferredSize(new Dimension(100, 200));
@@ -122,17 +120,16 @@ public class MainFrame extends RichFrame implements LoginPresenter, NewVersionNo
 
     @Override
     public void showRegistration() {
-        close(loginForm);
-        getOverlay().addNonmodal(registrationForm.getComponent(), SnapToCorner.TOP_RIGHT);
+        overlayMDI.remove(loginForm);
+        overlayMDI.add(registrationForm, SnapToCorner.TOP_RIGHT);
     }
 
     @Override
     public void showLogin() {
-        //todo: closing interaction between loginForm and mainFrame should be part of swingutils
-        getOverlay().addNonmodal(loginForm.getComponent(), SnapToCorner.TOP_RIGHT);
+        overlayMDI.add(loginForm, SnapToCorner.TOP_RIGHT);
     }
 
-    @Override //todo: can look better
+    @Override
     public void tellUserAboutNewVersion() {
         RunnableProxy closeAction = new RunnableProxy();
         JButton downloadButton = hyperlinkButton("Download it!", this::download);
@@ -142,8 +139,7 @@ public class MainFrame extends RichFrame implements LoginPresenter, NewVersionNo
                         .withGradientHeader("New version available", closeAction, null)
                         .opaque(true)
                         .get());
-        closeAction.delegate(() -> downloadMessageBox.fadeOut(() -> getOverlay().removeNonmodal(downloadMessageBox)));
-        getOverlay().addNonmodal(downloadMessageBox, SnapToCorner.BOTTOM_RIGHT);
+        overlayMDI.add(downloadMessageBox, closeAction, SnapToCorner.BOTTOM_RIGHT);
     }
 
     private void download() {
