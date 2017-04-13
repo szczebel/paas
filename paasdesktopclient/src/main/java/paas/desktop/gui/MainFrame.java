@@ -29,6 +29,8 @@ import static swingutils.layout.LayoutBuilders.borderLayout;
 import static swingutils.layout.LayoutBuilders.hBox;
 import static swingutils.layout.cards.CardLayoutBuilder.cardLayout;
 
+//todo: splash screen
+
 @Component
 @Qualifier("owner")
 public class MainFrame extends RichFrame implements LoginPresenter, NewVersionNotifier, RegistrationPresenter, ComponentOwner {
