@@ -1,4 +1,4 @@
-package paas.desktop.gui.infra;
+package paas.desktop.gui.infra.events;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -15,21 +15,21 @@ import static java.util.stream.Collectors.toList;
 @SuppressWarnings({"WeakerAccess", "unused"})
 public class GenericEventBus {
 
-    public <T> void subscribe(Class<T> eventType, Consumer<T> listener) {
+    public <T> void when(Class<T> eventType, Consumer<T> listener) {
         getConsumerMap().add(eventType, listener);
     }
 
-    public void post(Object event) {
+    public void dispatch(Object event) {
         Collection<Consumer<Object>> consumers = getConsumerMap().getConsumersOf(event.getClass());
         if(consumers.isEmpty()) deadLetterPosted(event);
         consumers.forEach(c -> c.accept(event));
     }
 
-    public void subscribe(String eventName, Runnable command) {
+    public void when(String eventName, Runnable command) {
         getRunnableMap().add(eventName, command);
     }
 
-    public void trigger(String eventName) {
+    public void dispatchEvent(String eventName) {
         Collection<Runnable> commands = getRunnableMap().getFor(eventName);
         if(commands.isEmpty()) deadLetterPosted(eventName);
         commands.forEach(Runnable::run);
@@ -120,17 +120,17 @@ public class GenericEventBus {
     static class Tester {
         public static void main(String[] args) {
             GenericEventBus bus = new GenericEventBus();
-            bus.subscribe("CMD1", Tester::command1);
-            bus.subscribe("CMD2", Tester::command2);
-            bus.subscribe(Integer.class, Tester::paramCommand1);
-            bus.subscribe(Bean.class, Tester::paramCommand2);
-            bus.subscribe(SubBean.class, Tester::paramCommand3);
+            bus.when("CMD1", Tester::command1);
+            bus.when("CMD2", Tester::command2);
+            bus.when(Integer.class, Tester::paramCommand1);
+            bus.when(Bean.class, Tester::paramCommand2);
+            bus.when(SubBean.class, Tester::paramCommand3);
 
-            bus.trigger("CMD1");
-            bus.trigger("CMD2");
-            bus.post(4);
-            bus.post(new Bean());//paramCommand2 should receive
-            bus.post(new SubBean());//paramCommand2 and paramCommand3 should receive
+            bus.dispatchEvent("CMD1");
+            bus.dispatchEvent("CMD2");
+            bus.dispatch(4);
+            bus.dispatch(new Bean());//paramCommand2 should receive
+            bus.dispatch(new SubBean());//paramCommand2 and paramCommand3 should receive
 
         }
 

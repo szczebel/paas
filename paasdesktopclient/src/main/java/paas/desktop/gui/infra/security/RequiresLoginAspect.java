@@ -5,7 +5,7 @@ import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import paas.desktop.gui.infra.EventBus;
+import paas.desktop.gui.infra.events.EventBus;
 
 import javax.swing.*;
 
@@ -21,7 +21,7 @@ public class RequiresLoginAspect {
     @Before("@annotation(paas.desktop.gui.infra.security.RequiresLogin)")
     public void isLoggedIn(JoinPoint joinPoint) throws Throwable {
         if(!loginData.isLoggedIn()) {
-            SwingUtilities.invokeLater(() -> eventBus.requestView(LOGIN));
+            SwingUtilities.invokeLater(() -> eventBus.dispatch(LOGIN));
             throw new SecurityException("Not logged in");
         }
     }

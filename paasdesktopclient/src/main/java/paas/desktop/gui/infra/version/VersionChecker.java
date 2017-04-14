@@ -4,8 +4,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import paas.desktop.gui.infra.EventBus;
 import paas.desktop.gui.infra.MustBeInBackground;
+import paas.desktop.gui.infra.events.EventBus;
+import paas.desktop.gui.infra.events.Events;
 import paas.desktop.gui.infra.security.LoginData;
 import paas.shared.Links;
 import swingutils.background.BackgroundOperation;
@@ -34,7 +35,7 @@ public class VersionChecker {
     void initialize() {
         this.myBuildTimestamp = getMyBuildTimestamp();
         logger.info("My build timestamp : " + myBuildTimestamp);
-        eventBus.whenLoginChanged(this::checkVersion);
+        eventBus.when(Events.LOGIN_CHANGED, this::checkVersion);
     }
 
     public void checkVersion() {
@@ -42,7 +43,7 @@ public class VersionChecker {
                 this::isNewerVersionAvailable,
                 yes -> {
                     if (yes) {
-                        eventBus.requestView(NEW_VERSION);
+                        eventBus.dispatch(NEW_VERSION);
                     } else {
                         logger.info("No new version detected");
                     }

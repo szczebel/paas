@@ -2,7 +2,8 @@ package paas.desktop.gui.views;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import paas.desktop.gui.infra.EventBus;
+import paas.desktop.gui.infra.events.EventBus;
+import paas.desktop.gui.infra.events.Events;
 import paas.desktop.gui.infra.security.LoginData;
 import paas.desktop.gui.infra.security.LoginExecutor;
 import swingutils.components.LazyInitSelfClosableAbstractView;
@@ -29,7 +30,8 @@ public class LoginForm extends LazyInitSelfClosableAbstractView {
     protected JComponent wireAndLayout() {
 
         JLabel notLoggedIn = label("<html>You are not logged in.<br/>Guest's password is 'guest'.", LEFT, BOLD);
-        eventBus.whenLoginChanged(() -> notLoggedIn.setVisible(false));
+        Runnable listener = () -> notLoggedIn.setVisible(false);
+        eventBus.when(Events.LOGIN_CHANGED, listener);
         JTextField serverUrl = new JTextField(loginData.getServerUrl());
         JTextField username = new JTextField(loginData.getUsername());
         JPasswordField password = new JPasswordField(loginData.getPassword());
@@ -41,7 +43,7 @@ public class LoginForm extends LazyInitSelfClosableAbstractView {
                         .addRow("Username:", username)
                         .addRow("Password:", password)
                         .addRow("", button("Login", () -> loginClick(serverUrl.getText(), username.getText(), String.valueOf(password.getPassword()))))
-                        .addRow("", button("Register...", () -> eventBus.requestView(REGISTRATION)))
+                        .addRow("", button("Register...", () -> eventBus.dispatch(REGISTRATION)))
                         .build())
                 .withEmptyBorder(32, 32, 32, 32)
                 .withGradientHeader("Login", this::close, null)

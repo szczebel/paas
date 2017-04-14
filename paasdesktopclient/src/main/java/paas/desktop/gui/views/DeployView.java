@@ -3,7 +3,8 @@ package paas.desktop.gui.views;
 import com.jgoodies.forms.builder.FormBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import paas.desktop.gui.infra.EventBus;
+import paas.desktop.gui.infra.events.EventBus;
+import paas.desktop.gui.infra.events.Events;
 import paas.desktop.remoting.PaasRestClient;
 import paas.shared.dto.HostedAppDesc;
 import paas.shared.dto.HostedAppRequestedProvisions;
@@ -130,7 +131,7 @@ public class DeployView extends LazyInitRichAbstractView {
     }
 
     private void deployed(String statusMessage) {
-        eventBus.appUpdated();
+        eventBus.dispatchEvent(Events.APP_UPDATED);
     }
 
     static class DeployFormObject {

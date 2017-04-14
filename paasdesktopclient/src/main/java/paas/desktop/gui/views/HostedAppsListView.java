@@ -3,7 +3,8 @@ package paas.desktop.gui.views;
 import ca.odell.glazedlists.EventList;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import paas.desktop.gui.infra.EventBus;
+import paas.desktop.gui.infra.events.EventBus;
+import paas.desktop.gui.infra.events.Events;
 import paas.desktop.remoting.PaasRestClient;
 import paas.shared.dto.HostedAppInfo;
 import swingutils.EventListHelper;
@@ -33,8 +34,8 @@ public class HostedAppsListView extends LazyInitRichAbstractView {
 
     @Override
     protected JComponent wireAndLayout() {
-        eventBus.whenLoginChanged(this::clearAndRefresh);
-        eventBus.whenAppUpdated(this::refreshApps);
+        eventBus.when(Events.LOGIN_CHANGED, this::clearAndRefresh);
+        eventBus.when(Events.APP_UPDATED, this::refreshApps);
 
         Columns<HostedAppInfo> columns = Columns.create(HostedAppInfo.class)
                 .column("App ID", Long.class, HostedAppInfo::getId)
@@ -49,7 +50,8 @@ public class HostedAppsListView extends LazyInitRichAbstractView {
         tablePanel.getTable().setDefaultRenderer(Date.class, new DateRenderer());
         tablePanel.getTable().getSelectionModel().addListSelectionListener(e -> {
             HostedAppInfo selection = tablePanel.getSelection();
-            if (selection != null && !e.getValueIsAdjusting()) eventBus.showDetails(selection);
+            if (selection != null && !e.getValueIsAdjusting())
+                eventBus.dispatch(Events.showDetails(selection));
         });
 
         return tablePanel.getComponent();
@@ -66,7 +68,7 @@ public class HostedAppsListView extends LazyInitRichAbstractView {
 
     private void appsFetched(List<HostedAppInfo> apps) {
         EventListHelper.replaceContent(this.apps, apps);
-        eventBus.currentAppsChanged(apps);
+        eventBus.dispatch(Events.appsChanged(apps));
     }
 
 

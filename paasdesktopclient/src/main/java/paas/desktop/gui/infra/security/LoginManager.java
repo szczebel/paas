@@ -4,8 +4,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import paas.desktop.gui.infra.EventBus;
 import paas.desktop.gui.infra.MustBeInBackground;
+import paas.desktop.gui.infra.events.EventBus;
+import paas.desktop.gui.infra.events.Events;
 import paas.desktop.gui.infra.security.LoginManager.UserInfo.AuthorityInfo;
 import paas.desktop.remoting.RestCall;
 import swingutils.background.BackgroundOperation;
@@ -75,7 +76,7 @@ public class LoginManager implements LoginData, LoginExecutor {
         this.roles = Optional.of(roles);
         this.loggedIn = true;
         onSuccess.run();
-        eventBus.loginChanged();
+        eventBus.dispatchEvent(Events.LOGIN_CHANGED);
     }
 
     @Override

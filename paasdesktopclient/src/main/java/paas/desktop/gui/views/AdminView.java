@@ -3,7 +3,7 @@ package paas.desktop.gui.views;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import paas.desktop.dto.DatedMessage;
-import paas.desktop.gui.infra.EventBus;
+import paas.desktop.gui.infra.events.EventBus;
 import paas.desktop.remoting.PaasRestClient;
 import swingutils.components.LazyInitRichAbstractView;
 import swingutils.components.RollingConsole;

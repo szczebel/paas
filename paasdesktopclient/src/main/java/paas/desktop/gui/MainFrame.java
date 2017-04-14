@@ -3,7 +3,7 @@ package paas.desktop.gui;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import paas.desktop.DesktopClient;
-import paas.desktop.gui.infra.EventBus;
+import paas.desktop.gui.infra.events.EventBus;
 import paas.desktop.gui.infra.security.LoginData;
 import paas.desktop.gui.infra.version.VersionChecker;
 import paas.desktop.gui.views.AdminView;
@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
+import static paas.desktop.gui.infra.events.Events.LOGIN_CHANGED;
 import static swingutils.components.ComponentFactory.*;
 import static swingutils.layout.LayoutBuilders.borderLayout;
 import static swingutils.layout.LayoutBuilders.hBox;
@@ -57,8 +58,8 @@ public class MainFrame extends RichFrame {
     private MDI overlayMDI = MDI.create(getOverlay());
 
     public void buildAndShow() {
-        eventBus.whenLoginChanged(() -> setTitle("Tiniest PaaS desktop client - " + loginData.getServerUrl()));
-        eventBus.whenViewRequested((request) -> request.visit(this));
+        eventBus.when(LOGIN_CHANGED, () -> setTitle("Tiniest PaaS desktop client - " + loginData.getServerUrl()));
+        eventBus.when(ViewRequest.class, (request) -> request.visit(this));
 
         setIconImage(new ImageIcon(getClass().getResource("/splash.png")).getImage());
         setTitle("Tiniest PaaS desktop client - " + loginData.getServerUrl());
@@ -102,7 +103,8 @@ public class MainFrame extends RichFrame {
 
     private JComponent customizeMenuBar(JComponent menu) {
         JLabel userInfo = label("");
-        eventBus.whenLoginChanged(() -> userInfo.setText(getUserInfoString()));
+        Runnable listener = () -> userInfo.setText(getUserInfoString());
+        eventBus.when(LOGIN_CHANGED, listener);
         return borderLayout()
                 .center(menu)
                 .east(

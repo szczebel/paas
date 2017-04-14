@@ -2,7 +2,10 @@ package paas.desktop.gui.views;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import paas.desktop.gui.infra.EventBus;
+import paas.desktop.gui.infra.events.EventBus;
+import paas.desktop.gui.infra.events.Events;
+import paas.desktop.gui.infra.events.Events.AppsChanged;
+import paas.desktop.gui.infra.events.Events.ShowDetails;
 import paas.desktop.gui.infra.security.LoginData;
 import paas.desktop.remoting.PaasRestClient;
 import paas.shared.Links;
@@ -11,7 +14,6 @@ import swingutils.components.LazyInitRichAbstractView;
 import swingutils.layout.cards.CardPanel;
 
 import javax.swing.*;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,9 +37,9 @@ public class HostedAppDetailsViewsContainer extends LazyInitRichAbstractView {
 
     @Override
     protected JComponent wireAndLayout() {
-        eventBus.whenDetailsRequested(this::openDetailsView);
-        eventBus.whenLoginChanged(this::closeAll);
-        eventBus.whenCurrentAppsChanged(this::currentAppsChanged);
+        eventBus.when(ShowDetails.class, this::openDetailsView);
+        eventBus.when(AppsChanged.class, this::updateViews);
+        eventBus.when(Events.LOGIN_CHANGED, this::closeAll);
 
         cardPanel = new CardPanel();
         cardPanel.addCard("EMPTY", decorate(new JPanel())
@@ -47,8 +49,8 @@ public class HostedAppDetailsViewsContainer extends LazyInitRichAbstractView {
         return cardPanel.getComponent();
     }
 
-    private void currentAppsChanged(Collection<HostedAppInfo> currentApps) {
-        List<Long> currentAppIds = currentApps.stream()
+    private void updateViews(AppsChanged e) {
+        List<Long> currentAppIds = e.apps.stream()
                 .map(HostedAppInfo::getId)
                 .collect(toList());
         for (Long appId : tabsMap.keySet().stream().collect(toList())) {
@@ -68,7 +70,8 @@ public class HostedAppDetailsViewsContainer extends LazyInitRichAbstractView {
         tabsMap.keySet().stream().collect(toList()).forEach(this::closeView);
     }
 
-    private void openDetailsView(HostedAppInfo appInfo) {
+    private void openDetailsView(ShowDetails e) {
+        HostedAppInfo appInfo = e.app;
         long appId = getId(appInfo);
         if (tabsMap.containsKey(appId)) {
             cardPanel.showCard(String.valueOf(appId));

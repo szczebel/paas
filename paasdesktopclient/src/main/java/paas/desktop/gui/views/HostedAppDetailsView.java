@@ -2,7 +2,8 @@ package paas.desktop.gui.views;
 
 import org.slf4j.LoggerFactory;
 import paas.desktop.dto.DatedMessage;
-import paas.desktop.gui.infra.EventBus;
+import paas.desktop.gui.infra.events.EventBus;
+import paas.desktop.gui.infra.events.Events;
 import paas.desktop.remoting.PaasRestClient;
 import paas.shared.Links;
 import paas.shared.dto.HostedAppInfo;
@@ -168,7 +169,7 @@ public class HostedAppDetailsView extends LazyInitRichAbstractView {
         }
 
         private void updateApp(Callable<String> task) {
-            inBackground(task, res -> eventBus.appUpdated());
+            inBackground(task, res -> eventBus.dispatchEvent(Events.APP_UPDATED));
         }
     }
 }
