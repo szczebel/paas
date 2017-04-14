@@ -49,14 +49,18 @@ public class HostingService {
         return hostedAppDescriptor.getId();
     }
 
-    @RolesAllowed("USER")
+    @PreAuthorize("hasRole('USER') AND @ownershipChecker.isCurrentUserOwnerOfAppId(authentication, #appId)")
     public long redeploy(long appId, MultipartFile newJarFile, String commandLineArgs, HostedAppRequestedProvisions requestedProvisions) throws IOException, InterruptedException {
         HostedAppDescriptor hostedAppDescriptor = hostedAppDescriptorRepository.findOne(appId);
         return redeploy(hostedAppDescriptor, newJarFile, commandLineArgs, requestedProvisions);
     }
 
-    @PreAuthorize("(#hostedAppDescriptor.owner == authentication.name)")
-    protected long redeploy(HostedAppDescriptor hostedAppDescriptor, MultipartFile newJarFile, String commandLineArgs, HostedAppRequestedProvisions requestedProvisions) throws InterruptedException, IOException {
+//The below did not work... security was allowing userA redeploy app owned by userB, and I don't know why :((((
+//    @PreAuthorize("hasRole('USER') AND (#hostedAppDescriptor.owner == authentication.name)")
+    protected long redeploy(HostedAppDescriptor hostedAppDescriptor,
+                            MultipartFile newJarFile,
+                            String commandLineArgs,
+                            HostedAppRequestedProvisions requestedProvisions) throws InterruptedException, IOException {
         processManager.stopAndRemoveIfExists(hostedAppDescriptor.getId());
 
         if(newJarFile != null) {
@@ -67,10 +71,9 @@ public class HostingService {
             hostedAppDescriptor.setOriginalJarName(newJarFile.getOriginalFilename());
         }
 
-        hostedAppDescriptor.setCommandLineArgs(commandLineArgs);
-        hostedAppDescriptor.setRequestedProvisions(from(requestedProvisions));
+        if(commandLineArgs!=null) hostedAppDescriptor.setCommandLineArgs(commandLineArgs);
+        if(requestedProvisions!=null) hostedAppDescriptor.setRequestedProvisions(from(requestedProvisions));
         hostedAppDescriptorRepository.save(hostedAppDescriptor);
-
 
         createAndStart(hostedAppDescriptor);
         return hostedAppDescriptor.getId();

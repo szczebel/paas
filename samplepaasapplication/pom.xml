@@ -28,6 +28,12 @@
                 <groupId>com.epam.sandbox.paas</groupId>
                 <artifactId>paas-maven-plugin</artifactId>
                 <version>1.0</version>
+                <configuration>
+                    <paasServerUrl>http://localhost:8080/paas</paasServerUrl>
+                    <appId>65</appId>
+                    <username>guest</username>
+                    <password>guest</password>
+                </configuration>
             </plugin>
         </plugins>
     </build>

@@ -19,7 +19,7 @@ import java.io.IOException;
 public class DesktopClient {
 
     public static final SysoutInterceptor sysoutInterceptor = new SysoutInterceptor();
-    public static Window splash;
+    public static Window splash;//pimp it up, set progress string to beans being loaded
 
     public static void main(String[] args) throws IOException {
         splash = ComponentFactory.splash(new ImageIcon(DesktopClient.class.getResource("/splash.png")), "Loading...");

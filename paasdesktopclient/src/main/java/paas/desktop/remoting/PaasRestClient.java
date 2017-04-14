@@ -10,16 +10,17 @@ import paas.desktop.gui.infra.security.RequiresLogin;
 import paas.shared.Links;
 import paas.shared.dto.HostedAppInfo;
 import paas.shared.dto.HostedAppRequestedProvisions;
+import restcall.RestCall;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.util.List;
 
 import static java.util.Arrays.asList;
-import static paas.desktop.remoting.RestCall.restGetList;
-import static paas.desktop.remoting.RestCall.restPost;
 import static paas.shared.Links.*;
+import static restcall.RestCall.restGetList;
+import static restcall.RestCall.restPost;
+import static restcall.UploadableFile.forUpload;
 
 @Component
 public class PaasRestClient {
@@ -32,9 +33,9 @@ public class PaasRestClient {
 
     @MustBeInBackground
     @RequiresLogin
-    public String uploadDesktopClientJar(File jarFile) throws IOException, InterruptedException {
+    public String uploadDesktopClientJar(File jarFile) throws IOException {
         return restPost(getServerUrl() + Links.ADMIN_UPLOAD_DESKTOP_CLIENT, String.class)
-                .param("jarFile", new UploadableFile(jarFile.getName(), Files.readAllBytes(jarFile.toPath())))
+                .param("jarFile", forUpload(jarFile))
                 .contentType(MediaType.MULTIPART_FORM_DATA)
                 .httpBasic(loginData.getUsername(), loginData.getPassword())
                 .execute();
@@ -50,9 +51,9 @@ public class PaasRestClient {
 
     @MustBeInBackground
     @RequiresLogin
-    public String deploy(File jarFile, String commandLineArgs, HostedAppRequestedProvisions requestedProvisions) throws IOException, InterruptedException {
+    public String deploy(File jarFile, String commandLineArgs, HostedAppRequestedProvisions requestedProvisions) throws IOException {
         return restPost(getServerUrl() + DEPLOY, String.class)
-                .param("jarFile", new UploadableFile(jarFile.getName(), Files.readAllBytes(jarFile.toPath())))
+                .param("jarFile", forUpload(jarFile))
                 .param("commandLineArgs", commandLineArgs)
                 .param("wantsDB", requestedProvisions.isWantsDB())
                 .param("wantsFileStorage", requestedProvisions.isWantsFileStorage())
@@ -65,7 +66,7 @@ public class PaasRestClient {
 
     @MustBeInBackground
     @RequiresLogin
-    public String redeploy(long appId, File newJarFile, String commandLineArgs, HostedAppRequestedProvisions requestedProvisions) throws IOException, InterruptedException {
+    public String redeploy(long appId, File newJarFile, String commandLineArgs, HostedAppRequestedProvisions requestedProvisions) throws IOException {
         RestCall<String> post = restPost(getServerUrl() + REDEPLOY, String.class)
                 .param("appId", appId)
                 .param("commandLineArgs", commandLineArgs)
@@ -76,7 +77,7 @@ public class PaasRestClient {
                 .httpBasic(loginData.getUsername(), loginData.getPassword())
                 .contentType(MediaType.MULTIPART_FORM_DATA);
         if(newJarFile != null)
-            post.param("jarFile", new UploadableFile(newJarFile.getName(), Files.readAllBytes(newJarFile.toPath())));
+            post.param("jarFile", forUpload(newJarFile));
 
         return post.execute();
     }

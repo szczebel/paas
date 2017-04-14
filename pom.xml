@@ -9,11 +9,11 @@
     <version>1.0</version>
     <modules>
         <module>paasprocessmanagement</module>
-        <module>paasdesktopclient</module>
-        <module>paasrest</module>
         <module>paasdto</module>
-        <module>samplepaasapplication</module>
+        <module>paasrest</module>
+        <module>paasdesktopclient</module>
         <module>paas-maven-plugin</module>
+        <module>samplepaasapplication</module>
     </modules>
     <packaging>pom</packaging>
 

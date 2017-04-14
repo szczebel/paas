@@ -8,10 +8,6 @@ import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
 
-//todo: separate project
-//todo: register listeners with annotation
-//todo: annotation to install bean processor to register listeners and create EventBus bean
-
 @SuppressWarnings({"WeakerAccess", "unused"})
 public class GenericEventBus {
 

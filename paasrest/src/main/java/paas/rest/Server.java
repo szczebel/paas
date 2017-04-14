@@ -20,7 +20,7 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 import paas.procman.JavaProcessManager;
 
-//todo maven plugin for automated deployment
+//todo: put paas-maven-plugin in artifactory
 
 @SpringBootApplication
 public class Server extends SpringBootServletInitializer {

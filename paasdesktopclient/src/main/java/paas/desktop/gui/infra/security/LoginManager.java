@@ -8,7 +8,7 @@ import paas.desktop.gui.infra.MustBeInBackground;
 import paas.desktop.gui.infra.events.EventBus;
 import paas.desktop.gui.infra.events.Events;
 import paas.desktop.gui.infra.security.LoginManager.UserInfo.AuthorityInfo;
-import paas.desktop.remoting.RestCall;
+import restcall.RestCall;
 import swingutils.background.BackgroundOperation;
 import swingutils.components.progress.ProgressIndicator;
 

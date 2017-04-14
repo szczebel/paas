@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import paas.desktop.gui.infra.security.LoginData;
 import paas.desktop.gui.infra.security.LoginExecutor;
-import paas.desktop.remoting.RestCall;
+import restcall.RestCall;
 import swingutils.components.LazyInitSelfClosableAbstractView;
 
 import javax.swing.*;

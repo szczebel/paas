@@ -25,6 +25,7 @@ public class HostedAppDescriptor {
     private String commandLineArgs;
 
     @Embedded
+    @NotNull
     private RequestedProvisions requestedProvisions;
 
     public HostedAppDescriptor(String owner, String localJarName, String originalJarName, String commandLineArgs, RequestedProvisions requestedProvisions) {

@@ -40,6 +40,16 @@ public class HostingEndpoint {
                 new HostedAppRequestedProvisions(wantsDB, wantsFileStorage, wantsLogstash, wantsLogging));
     }
 
+
+
+    @PostMapping("/redeploy-jar")
+    public String redeployJarOnly(
+            @RequestParam long appId,
+            @RequestParam(value = "jarFile", required = false) MultipartFile file) throws IOException, InterruptedException {
+        hostingService.redeploy(appId, file, null, null);
+        return "Redeployed jar";
+    }
+
     @PostMapping(Links.REDEPLOY)
     public String redeploy(
             @RequestParam long appId,
@@ -50,8 +60,9 @@ public class HostingEndpoint {
             @RequestParam boolean wantsLogstash,
             @RequestParam boolean wantsLogging
     ) throws IOException, InterruptedException {
-        return "Redeployed. App ID:" + hostingService.redeploy(appId, file, commandLineArgs,
+        hostingService.redeploy(appId, file, commandLineArgs,
                 new HostedAppRequestedProvisions(wantsDB, wantsFileStorage, wantsLogstash, wantsLogging));
+        return "Redeployed";
     }
 
     @PostMapping(Links.UNDEPLOY)

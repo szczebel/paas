@@ -16,8 +16,8 @@ import java.io.InputStream;
 import java.util.jar.Manifest;
 
 import static paas.desktop.gui.ViewRequest.NEW_VERSION;
-import static paas.desktop.remoting.RestCall.restGet;
 import static paas.shared.BuildTime.readBuildTime;
+import static restcall.RestCall.restGet;
 
 @Component
 public class VersionChecker {
