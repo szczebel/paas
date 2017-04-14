@@ -4,67 +4,65 @@ import org.springframework.stereotype.Component;
 import paas.desktop.gui.ViewRequest;
 import paas.shared.dto.HostedAppInfo;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.function.Consumer;
 
 @Component
-public class EventBus {
+public class EventBus extends GenericEventBus{
 
-    private List<Consumer<ViewRequest>> viewRequestListeners = new ArrayList<>();
+
 
     public void whenViewRequested(Consumer<ViewRequest> l) {
-        viewRequestListeners.add(l);
+        subscribe(ViewRequest.class, l);
     }
 
     @MustBeInEDT
     public void requestView(ViewRequest request) {
-        viewRequestListeners.forEach(l -> l.accept(request));
+        post(request);
     }
 
-
-    private List<Runnable> loginDataObservers = new ArrayList<>();
-
     public void whenLoginChanged(Runnable listener) {
-        loginDataObservers.add(listener);
+        subscribe("LOGIN_CHANGED", listener);
     }
 
     @MustBeInEDT
     public void loginChanged() {
-        loginDataObservers.forEach(Runnable::run);
+        trigger("LOGIN_CHANGED");
     }
 
-    private List<Runnable> appUpdatedListeners = new ArrayList<>();
 
     public void whenAppUpdated(Runnable listener) {
-        appUpdatedListeners.add(listener);
+        subscribe("APP_UPDATED", listener);
     }
 
     @MustBeInEDT
     public void appUpdated() {
-        appUpdatedListeners.forEach(Runnable::run);
+        trigger("APP_UPDATED");
     }
 
-    private List<Consumer<HostedAppInfo>> showDetailsListeners = new ArrayList<>();
-
     public void whenDetailsRequested(Consumer<HostedAppInfo> consumer) {
-        showDetailsListeners.add(consumer);
+        subscribe(HostedAppInfo.class, consumer);
     }
 
     @MustBeInEDT
     public void showDetails(HostedAppInfo hostedAppInfo) {
-        showDetailsListeners.forEach(l -> l.accept(hostedAppInfo));
+        post(hostedAppInfo);
     }
 
-    private List<Consumer<Collection<HostedAppInfo>>> currentAppsChangeListeners = new ArrayList<>();
-
     public void whenCurrentAppsChanged(Consumer<Collection<HostedAppInfo>> listener) {
-        currentAppsChangeListeners.add(listener);
+        subscribe(HostedAppInfos.class, p -> listener.accept(p.apps));
     }
 
     @MustBeInEDT
     public void currentAppsChanged(Collection<HostedAppInfo> apps) {
-        currentAppsChangeListeners.forEach(l -> l.accept(apps));
+        post(new HostedAppInfos(apps));
+    }
+
+    static class HostedAppInfos {
+        public HostedAppInfos(Collection<HostedAppInfo> apps) {
+            this.apps = apps;
+        }
+
+        Collection<HostedAppInfo> apps;
     }
 }
