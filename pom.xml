@@ -13,6 +13,7 @@
         <module>paasrest</module>
         <module>paasdto</module>
         <module>samplepaasapplication</module>
+        <module>paas-maven-plugin</module>
     </modules>
     <packaging>pom</packaging>
 
