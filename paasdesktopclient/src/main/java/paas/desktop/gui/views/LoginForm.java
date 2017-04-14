@@ -29,13 +29,15 @@ public class LoginForm extends LazyInitSelfClosableAbstractView {
     @Override
     protected JComponent wireAndLayout() {
 
-        JLabel notLoggedIn = label("<html>You are not logged in.<br/>Guest's password is 'guest'.", LEFT, BOLD);
+        JLabel notLoggedIn = label("<html>You are not logged in.", LEFT, BOLD);
         Runnable listener = () -> notLoggedIn.setVisible(false);
         eventBus.when(Events.LOGIN_CHANGED, listener);
         JTextField serverUrl = new JTextField(loginData.getServerUrl());
         JTextField username = new JTextField(loginData.getUsername());
-        JPasswordField password = new JPasswordField(loginData.getPassword());
+        JPasswordField password = new JPasswordField(20);
 
+        JButton registerButton = hyperlinkButton("Registration", () -> eventBus.dispatch(REGISTRATION));
+        registerButton.setHorizontalAlignment(SwingConstants.RIGHT);
         return decorate(
                 simpleForm()
                         .addRow("", notLoggedIn)
@@ -43,9 +45,10 @@ public class LoginForm extends LazyInitSelfClosableAbstractView {
                         .addRow("Username:", username)
                         .addRow("Password:", password)
                         .addRow("", button("Login", () -> loginClick(serverUrl.getText(), username.getText(), String.valueOf(password.getPassword()))))
-                        .addRow("", button("Register...", () -> eventBus.dispatch(REGISTRATION)))
+                        .addRow("", button("Login as guest", () -> loginClick(serverUrl.getText(),"guest", "guest")))
+                        .addRow("", registerButton)
                         .build())
-                .withEmptyBorder(32, 32, 32, 32)
+                .withEmptyBorder(32, 32, 32, 64)
                 .withGradientHeader("Login", this::close, null)
                 .opaque(true)
                 .get();

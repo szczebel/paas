@@ -28,7 +28,7 @@ public class LoginManager implements LoginData, LoginExecutor {
 
     @Value("${server.url}")
     private String serverUrl;
-    private String username = "guest";
+    private String username = "";
     private String password = "";
     private Optional<List<AuthorityInfo>> roles = Optional.empty();
     private boolean loggedIn = false;

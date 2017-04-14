@@ -72,7 +72,7 @@ public class MainFrame extends RichFrame {
         showLogin();
         versionChecker.checkVersion();
 
-        DesktopClient.splash.dispose();
+        DesktopClient.splash.close();
         DesktopClient.splash = null;
     }
 
@@ -126,6 +126,7 @@ public class MainFrame extends RichFrame {
     }
 
     void showLogin() {
+        overlayMDI.remove(registrationForm);
         overlayMDI.add(null, loginForm, SnapToCorner.TOP_RIGHT);
     }
 
