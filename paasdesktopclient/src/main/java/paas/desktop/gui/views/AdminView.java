@@ -12,6 +12,7 @@ import swingutils.components.progress.ProgressIndicatingContainer;
 import swingutils.components.progress.ProgressIndicator;
 
 import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.util.List;
 
@@ -77,6 +78,7 @@ public class AdminView extends LazyInitRichAbstractView {
 
     private void upload() {
         JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setFileFilter(new FileNameExtensionFilter("Java artifacts", "jar", "war"));
         if(JFileChooser.APPROVE_OPTION == fileChooser.showOpenDialog(getComponent())) {
             inBackground(
                     () -> paasRestClient.uploadDesktopClientJar(fileChooser.getSelectedFile()),
