@@ -107,6 +107,15 @@ public class PaasRestClient {
 
     @MustBeInBackground
     @RequiresLogin
+    public String stop(long appId) {
+        return restPost(getServerUrl() + STOP, String.class)
+                .param("appId", String.valueOf(appId))//ClassCast was thrown without this explicit conversion
+                .httpBasic(loginData.getUsername(), loginData.getPassword())
+                .execute();
+    }
+
+    @MustBeInBackground
+    @RequiresLogin
     public String undeploy(long appId) {
         return restPost(getServerUrl() + UNDEPLOY, String.class)
                 .param("appId", String.valueOf(appId))//ClassCast was thrown without this explicit conversion

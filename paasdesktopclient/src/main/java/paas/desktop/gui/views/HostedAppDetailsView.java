@@ -137,6 +137,7 @@ public class HostedAppDetailsView extends LazyInitRichAbstractView {
                     .north(vBox(4,
                             button("Browse logs in Kibana (if ELK provisioned)", HostedAppDetailsView.this::openKibana),
                             button("Restart", this::restart),
+                            button("Stop", this::stop),
                             button("Undeploy", this::undeploy)
                             )
                     )
@@ -162,6 +163,10 @@ public class HostedAppDetailsView extends LazyInitRichAbstractView {
 
         private void restart() {
             updateApp(() -> paasRestClient.restart(getId(appInfo)));
+        }
+
+        private void stop() {
+            updateApp(() -> paasRestClient.stop(getId(appInfo)));
         }
 
         private void undeploy() {

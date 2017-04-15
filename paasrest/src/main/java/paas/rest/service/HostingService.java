@@ -22,6 +22,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
@@ -30,10 +31,14 @@ import static paas.rest.persistence.entities.RequestedProvisions.from;
 @Component
 public class HostingService {
 
-    @Autowired private Provisioner provisioner;
-    @Autowired private FileSystemStorageService fileSystemStorageService;
-    @Autowired private JavaProcessManager processManager;
-    @Autowired private HostedAppDescriptorRepository hostedAppDescriptorRepository;
+    @Autowired
+    private Provisioner provisioner;
+    @Autowired
+    private FileSystemStorageService fileSystemStorageService;
+    @Autowired
+    private JavaProcessManager processManager;
+    @Autowired
+    private HostedAppDescriptorRepository hostedAppDescriptorRepository;
 
     @RolesAllowed("USER")
     public long newDeployment(String owner, MultipartFile file, String commandLineArgs, HostedAppRequestedProvisions requestedProvisions)
@@ -55,15 +60,16 @@ public class HostingService {
         return redeploy(hostedAppDescriptor, newJarFile, commandLineArgs, requestedProvisions);
     }
 
-//The below did not work... security was allowing userA redeploy app owned by userB, and I don't know why :((((
+    //The below did not work... security was allowing userA redeploy app owned by userB, and I don't know why :((((
+    //And it was public, so that any CGLib magic was able to intercept it
 //    @PreAuthorize("hasRole('USER') AND (#hostedAppDescriptor.owner == authentication.name)")
-    protected long redeploy(HostedAppDescriptor hostedAppDescriptor,
-                            MultipartFile newJarFile,
-                            String commandLineArgs,
-                            HostedAppRequestedProvisions requestedProvisions) throws InterruptedException, IOException {
+    private long redeploy(HostedAppDescriptor hostedAppDescriptor,
+                          MultipartFile newJarFile,
+                          String commandLineArgs,
+                          HostedAppRequestedProvisions requestedProvisions) throws InterruptedException, IOException {
         processManager.stopAndRemoveIfExists(hostedAppDescriptor.getId());
 
-        if(newJarFile != null) {
+        if (newJarFile != null) {
             String oldJarFile = hostedAppDescriptor.getLocalJarName();
             fileSystemStorageService.deleteUpload(oldJarFile);
             File uploaded = fileSystemStorageService.saveUpload(newJarFile, false);
@@ -71,8 +77,8 @@ public class HostingService {
             hostedAppDescriptor.setOriginalJarName(newJarFile.getOriginalFilename());
         }
 
-        if(commandLineArgs!=null) hostedAppDescriptor.setCommandLineArgs(commandLineArgs);
-        if(requestedProvisions!=null) hostedAppDescriptor.setRequestedProvisions(from(requestedProvisions));
+        if (commandLineArgs != null) hostedAppDescriptor.setCommandLineArgs(commandLineArgs);
+        if (requestedProvisions != null) hostedAppDescriptor.setRequestedProvisions(from(requestedProvisions));
         hostedAppDescriptorRepository.save(hostedAppDescriptor);
 
         createAndStart(hostedAppDescriptor);
@@ -121,11 +127,20 @@ public class HostingService {
         }
     }
 
+    @PreAuthorize("hasRole('ADMIN') OR (#hostedAppDescriptor.owner == authentication.name)")
+    public void stop(long appId) throws InterruptedException {
+        processManager.stopAndRemoveIfExists(appId);
+    }
+
     @PreAuthorize("hasRole('USER') AND @ownershipChecker.isCurrentUserOwnerOfAppId(authentication, #appId)")
     public void restart(long appId) throws InterruptedException, IOException {
-        JavaProcess app = processManager.getApp(appId);
-        app.stop();
-        app.start();
+        Optional<JavaProcess> appProcess = processManager.findById(appId);
+        if (appProcess.isPresent()) {
+            appProcess.get().stop();
+            appProcess.get().start();
+        } else {
+            createAndStart(hostedAppDescriptorRepository.findOne(appId));
+        }
     }
 
     @PreAuthorize("hasRole('USER') AND @ownershipChecker.isCurrentUserOwnerOfAppId(authentication, #appId)")
@@ -133,7 +148,7 @@ public class HostingService {
         return processManager.getApp(appId).tailSysout(timestamp);
     }
 
-    @PreAuthorize ("hasRole('USER') OR hasRole('ADMIN')")
+    @PreAuthorize("hasRole('USER') OR hasRole('ADMIN')")
     @PostFilter("hasRole('ADMIN') OR (filterObject.hostedAppDesc.owner == authentication.name)")
     public List<HostedAppInfo> getApplications() {
         return hostedAppDescriptorRepository.findAll()

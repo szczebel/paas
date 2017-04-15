@@ -77,6 +77,12 @@ public class HostingEndpoint {
         return "Restarted app with ID: " + appId;
     }
 
+    @PostMapping(Links.STOP)
+    public String stop(@RequestParam long appId) throws IOException, InterruptedException {
+        hostingService.stop(appId);
+        return "Restarted app with ID: " + appId;
+    }
+
     @GetMapping(Links.TAIL_SYSOUT)
     public List<DatedMessage> tailSysout(@RequestParam long appId, @RequestParam(required = false) long timestamp) throws IOException {
         return hostingService.tailSysout(appId, timestamp);

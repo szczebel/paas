@@ -13,14 +13,15 @@ public class JavaProcessManager {
     private List<JavaProcess> apps = new ArrayList<>();
 
     public JavaProcess getApp(long id) {
-        return apps.stream().filter(ha -> id == ha.getAppId()).findAny().orElseThrow(() -> new IllegalArgumentException("Unknown appId:" + id));
+        return findById(id).orElseThrow(() -> new IllegalArgumentException("Unknown appId:" + id));
     }
 
     public Optional<HostedAppStatus> getStatus(long id) {
         return apps.stream().filter(ha -> id == ha.getAppId()).map(JavaProcess::getStatus).findAny();
     }
 
-    public JavaProcess create(long id, File jarFile, File appWorkDir, List<String> commandLine, BiConsumer<Long, String> processOutputConsumer) {
+    public synchronized JavaProcess create(long id, File jarFile, File appWorkDir, List<String> commandLine, BiConsumer<Long, String> processOutputConsumer) {
+        findById(id).ifPresent(p -> {throw new IllegalStateException("Process for appId:"+id+" already running");});
         if (!jarFile.exists()) throw new IllegalArgumentException(jarFile.getAbsolutePath() + " does not exist!");
         JavaProcess app = new JavaProcess(id, jarFile, appWorkDir, commandLine, processOutputConsumer);
         apps.add(app);
@@ -31,7 +32,7 @@ public class JavaProcessManager {
         stopAndRemoveIfExists(findById(appId));
     }
 
-    private void stopAndRemoveIfExists(Optional<JavaProcess> existingApp) throws InterruptedException {
+    private synchronized void stopAndRemoveIfExists(Optional<JavaProcess> existingApp) throws InterruptedException {
         if (existingApp.isPresent()) {
             JavaProcess javaProcess = existingApp.get();
             javaProcess.stop();
@@ -39,11 +40,7 @@ public class JavaProcessManager {
         }
     }
 
-    private Optional<JavaProcess> findByJarName(String jarFileName) {
-        return apps.stream().filter(ha -> jarFileName.equals(ha.getJarFile().getName())).findAny();
-    }
-
-    private Optional<JavaProcess> findById(long appId) {
+    public Optional<JavaProcess> findById(long appId) {
         return apps.stream().filter(ha -> appId == ha.getAppId()).findAny();
     }
 

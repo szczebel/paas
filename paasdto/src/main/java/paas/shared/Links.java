@@ -16,6 +16,7 @@ public class Links {
     public static final String REDEPLOY = "/redeploy";
     public static final String UNDEPLOY = "/undeploy";
     public static final String RESTART = "/restart";
+    public static final String STOP = "/stop";
     public static final String TAIL_SYSOUT = "/tailSysout";
     public static final String WHOAMI = "/whoami";
 
