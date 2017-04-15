@@ -17,9 +17,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static javax.swing.SwingConstants.RIGHT;
 import static swingutils.components.ComponentFactory.button;
-import static swingutils.components.ComponentFactory.label;
 
 @Component
 public class DeployView extends LazyInitRichAbstractView {
@@ -54,7 +52,7 @@ public class DeployView extends LazyInitRichAbstractView {
         wantsLogging = new JCheckBox("I want my System.out logs published to ELK");
 
         return FormBuilder.create()
-                .columns("pref:none, ${label-component-gap}, pref:grow, ${label-component-gap}, pref:none")
+                .columns("right:pref:none, ${label-component-gap}, pref:grow, ${label-component-gap}, pref:none")
                 .rows("pref:none, $lg, " +
                         "pref:none, $lg, " +
                         "pref:none, $lg, " +
@@ -63,12 +61,12 @@ public class DeployView extends LazyInitRichAbstractView {
                         "pref:none, $lg, " +
                         "pref:none, $lg, " +
                         "pref:none")
-                .add(label("Jar to deploy:", RIGHT)).xy(1, 1)
+                .add("Jar to deploy:").xy(1, 1)
                 .add(fileName).xy(3, 1)
                 .add(button("Change...", this::selectFile)).xy(5, 1)
-                .add(label("Command line:", RIGHT)).xy(1, 3)
+                .add("Command line:").xy(1, 3)
                 .add(commandLine).xyw(3, 3, 3)
-                .add(label("Provisions:")).xyw(1, 5, 5)
+                .add("Provisions:").xyw(1, 5, 5)
                 .add(wantsDb).xyw(1, 7, 5)
                 .add(wantsStorage).xyw(1, 9, 5)
                 .add(wantsLogstash).xyw(1, 11, 5)
@@ -100,7 +98,7 @@ public class DeployView extends LazyInitRichAbstractView {
 
     void populateView(HostedAppDesc desc) {
         fileChooser.setSelectedFile(null);
-        fileName.setText(desc.getJarFile());
+        fileName.setText("<unchanged>");
         commandLine.setText(desc.getCommandLineArgs());
         wantsDb.setSelected(desc.getRequestedProvisions().isWantsDB());
         wantsStorage.setSelected(desc.getRequestedProvisions().isWantsFileStorage());
@@ -146,7 +144,6 @@ public class DeployView extends LazyInitRichAbstractView {
         }
     }
 
-    //todo extract framework to SwingUtils
     static class ValidationErrors {
 
         static ValidationErrors empty() {
