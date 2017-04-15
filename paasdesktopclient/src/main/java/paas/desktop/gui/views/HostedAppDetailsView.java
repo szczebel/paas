@@ -17,23 +17,29 @@ import java.awt.*;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.Callable;
 
+import static java.awt.Font.BOLD;
+import static javax.swing.SwingConstants.LEFT;
 import static paas.shared.dto.HostedAppInfo.getId;
 import static swingutils.components.ComponentFactory.*;
 import static swingutils.layout.LayoutBuilders.*;
 
 public class HostedAppDetailsView extends LazyInitRichAbstractView {
     private final EventBus eventBus;
-    private final HostedAppInfo appInfo;
     private final PaasRestClient paasRestClient;
     private final String KIBANA_URL;
     private final RollingConsole sysout = new RollingConsole(1000);
+    private HostedAppInfo appInfo;
     private long lastMessageTimestamp = 0;
     private JCheckBox autorefresh;
     private JLabel tailErrors;
     private Timer timer;
+    private ControlPanel controlPanel;
 
     HostedAppDetailsView(EventBus eventBus, HostedAppInfo appInfo, PaasRestClient paasRestClient, String kibanaUrl) {
         this.eventBus = eventBus;
@@ -56,6 +62,7 @@ public class HostedAppDetailsView extends LazyInitRichAbstractView {
 
     @Override
     protected JComponent wireAndLayout() {
+        controlPanel = new ControlPanel();
         tailErrors = label("");
         autorefresh = new JCheckBox("Autorefresh (a.k.a. tail -f)");
         autorefresh.addActionListener(e -> {
@@ -77,7 +84,7 @@ public class HostedAppDetailsView extends LazyInitRichAbstractView {
                 .build();
 
         return borderLayout()
-                .west(decorate(controlPanel()).withEmptyBorder(4, 4, 4, 4).get())
+                .west(decorate(controlPanel.getComponent()).withEmptyBorder(4, 4, 4, 4).get())
                 .center(decorate(logs).withEmptyBorder(4, 4, 4, 4).get())
                 .build();
     }
@@ -92,11 +99,17 @@ public class HostedAppDetailsView extends LazyInitRichAbstractView {
         }
     }
 
-    private JComponent controlPanel() {
-        return new RedeployForm().getComponent();
+    void appUpdated(HostedAppInfo appInfo) {
+        long updatedAppId = HostedAppInfo.getId(appInfo);
+        long myAppId = HostedAppInfo.getId(this.appInfo);
+        if (updatedAppId != myAppId)
+            throw new IllegalArgumentException("My app id: " + myAppId + ", updates app id: " + updatedAppId);
+        //else
+        this.appInfo = appInfo;
+        controlPanel.appUpdated();
     }
 
-    void refreshLogs() {
+    private void refreshLogs() {
         BackgroundOperation.execute(
                 () -> paasRestClient.tailNewerThan(appInfo.getHostedAppDesc().getId(), lastMessageTimestamp),
                 this::newTailReceived,
@@ -124,17 +137,29 @@ public class HostedAppDetailsView extends LazyInitRichAbstractView {
         if (timer != null) stopTimer();
     }
 
-    class RedeployForm extends DeployView {
-        RedeployForm() {
-            super(eventBus, paasRestClient);
+    class ControlPanel extends LazyInitRichAbstractView {
+        private final DateFormat df = new SimpleDateFormat("yyyy-MMM-dd HH:mm:ss");
+
+        private JLabel appStatus = label(getStatusText(), LEFT, BOLD);
+        private RedeployForm redeployForm = new RedeployForm();
+
+        private String getStatusText() {
+            Date started = appInfo.getHostedAppStatus().getStarted();
+            return "Running " + (appInfo.getHostedAppStatus().isRunning() ? "since " + df.format(started) : ": no");
+        }
+
+        void appUpdated() {
+            appStatus.setText(getStatusText());
+            redeployForm.populateView(appInfo.getHostedAppDesc());
         }
 
         @Override
         protected JComponent wireAndLayout() {
-            JComponent redeployComponent = super.wireAndLayout();
-            populateView(appInfo.getHostedAppDesc());
+            JComponent redeployComponent = redeployForm.wireAndLayout();
+            redeployForm.populateView(appInfo.getHostedAppDesc());
             return borderLayout()
                     .north(vBox(4,
+                            appStatus,
                             button("Browse logs in Kibana (if ELK provisioned)", HostedAppDetailsView.this::openKibana),
                             button("Restart", this::restart),
                             button("Stop", this::stop),
@@ -143,22 +168,6 @@ public class HostedAppDetailsView extends LazyInitRichAbstractView {
                     )
                     .center(decorate(redeployComponent).withTitledSeparator("Reconfigure deployment:").get())
                     .build();
-        }
-
-
-        @Override
-        protected ValidationErrors validate(DeployFormObject fo) {
-            return ValidationErrors.empty();//allow no file selected
-        }
-
-        @Override
-        protected String deploy(DeployFormObject fo) throws IOException, InterruptedException {
-            return paasRestClient.redeploy(appInfo.getHostedAppDesc().getId(), fo.jarFile, fo.commandLineArgs, fo.requestedProvisions);
-        }
-
-        @Override
-        String getDeployLabel() {
-            return "Redeploy";
         }
 
         private void restart() {
@@ -175,6 +184,27 @@ public class HostedAppDetailsView extends LazyInitRichAbstractView {
 
         private void updateApp(Callable<String> task) {
             inBackground(task, res -> eventBus.dispatchEvent(Events.APP_UPDATED));
+        }
+    }
+
+    class RedeployForm extends DeployView {
+        RedeployForm() {
+            super(eventBus, paasRestClient);
+        }
+
+        @Override
+        protected ValidationErrors validate(DeployFormObject fo) {
+            return ValidationErrors.empty();//allow no file selected
+        }
+
+        @Override
+        protected String deploy(DeployFormObject fo) throws IOException, InterruptedException {
+            return paasRestClient.redeploy(appInfo.getHostedAppDesc().getId(), fo.jarFile, fo.commandLineArgs, fo.requestedProvisions);
+        }
+
+        @Override
+        String getDeployLabel() {
+            return "Redeploy";
         }
     }
 }

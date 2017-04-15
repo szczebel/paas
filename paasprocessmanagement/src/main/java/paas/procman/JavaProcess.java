@@ -64,10 +64,13 @@ public class JavaProcess {
         process = spawn();
     }
 
-    public void stop() throws InterruptedException {
+    public void stop() {
         if (isRunning()) {
             process.destroyForcibly();
-            process.waitFor();
+            try {
+                process.waitFor();
+            } catch (InterruptedException ignored) {
+            }
         }
         process = null;
     }
@@ -76,12 +79,8 @@ public class JavaProcess {
         return outputBuffer.getOutputNewerThan(timestamp);
     }
 
-    public long getAppId() {
+    long getAppId() {
         return appId;
-    }
-
-    File getJarFile() {
-        return jarFile;
     }
 
     public boolean isRunning() {

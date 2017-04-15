@@ -43,7 +43,8 @@ public class DeployView extends LazyInitRichAbstractView {
     protected JComponent wireAndLayout() {
         fileChooser = new JFileChooser();
         fileChooser.setFileFilter(new FileNameExtensionFilter("Java artifacts", "jar", "war"));
-        fileName = new JTextField(10);
+        fileName = new JTextField("<unchanged>");
+
         fileName.setEditable(false);
         commandLine = new JTextField(10);
         wantsDb = new JCheckBox("I want a database (H2)");
@@ -97,8 +98,6 @@ public class DeployView extends LazyInitRichAbstractView {
     }
 
     void populateView(HostedAppDesc desc) {
-        fileChooser.setSelectedFile(null);
-        fileName.setText("<unchanged>");
         commandLine.setText(desc.getCommandLineArgs());
         wantsDb.setSelected(desc.getRequestedProvisions().isWantsDB());
         wantsStorage.setSelected(desc.getRequestedProvisions().isWantsFileStorage());

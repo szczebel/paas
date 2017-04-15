@@ -130,7 +130,7 @@ public class HostingService {
 
     @PreAuthorize("hasRole('ADMIN') OR (#hostedAppDescriptor.owner == authentication.name)")
     public void stop(long appId) throws InterruptedException {
-        processManager.stopAndRemoveIfExists(appId);
+        processManager.findById(appId).ifPresent(JavaProcess::stop);
     }
 
     @PreAuthorize("hasRole('USER') AND @ownershipChecker.isCurrentUserOwnerOfAppId(authentication, #appId)")

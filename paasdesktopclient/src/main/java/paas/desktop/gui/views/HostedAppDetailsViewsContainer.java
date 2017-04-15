@@ -50,13 +50,19 @@ public class HostedAppDetailsViewsContainer extends LazyInitRichAbstractView {
     }
 
     private void updateViews(AppsChanged e) {
+        List<Long> openedViews = tabsMap.keySet().stream().collect(toList());
         List<Long> currentAppIds = e.apps.stream()
                 .map(HostedAppInfo::getId)
                 .collect(toList());
-        for (Long appId : tabsMap.keySet().stream().collect(toList())) {
-            if (!currentAppIds.contains(appId)) {
-                closeView(appId);
+        
+        for (Long appIdWithOpenedDetails : openedViews) {
+            if (!currentAppIds.contains(appIdWithOpenedDetails)) {
+                closeView(appIdWithOpenedDetails);
             }
+        }
+        for (HostedAppInfo app : e.apps) {
+            HostedAppDetailsView view = tabsMap.get(HostedAppInfo.getId(app));
+            if(view != null) view.appUpdated(app);
         }
     }
 
@@ -86,7 +92,6 @@ public class HostedAppDetailsViewsContainer extends LazyInitRichAbstractView {
                             .withEmptyBorder(2, 4, 4, 4)
                             .get());
             cardPanel.showCard(key);
-            hostedAppDetailsView.refreshLogs();
         }
     }
 
