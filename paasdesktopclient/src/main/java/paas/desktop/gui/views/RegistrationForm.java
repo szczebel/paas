@@ -3,15 +3,16 @@ package paas.desktop.gui.views;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import paas.desktop.gui.ViewRequest;
+import paas.desktop.gui.infra.MustBeInBackground;
 import paas.desktop.gui.infra.events.EventBus;
 import paas.desktop.gui.infra.security.LoginData;
 import paas.desktop.gui.infra.security.LoginExecutor;
-import restcall.RestCall;
 import swingutils.components.LazyInitSelfClosableAbstractView;
 
 import javax.swing.*;
 
 import static paas.shared.Links.REGISTER;
+import static restcall.RestCall.restPostVoid;
 import static swingutils.components.ComponentFactory.*;
 import static swingutils.layout.forms.FormLayoutBuilders.simpleForm;
 
@@ -50,24 +51,31 @@ public class RegistrationForm extends LazyInitSelfClosableAbstractView {
     }
 
     private void registerClick(String username, String password, String repeated) {
-        if(!password.equals(repeated)) {
+        if (!password.equals(repeated)) {
             showMessage("Passwords don't match");
             return;
         }
         inBackground(
-                () -> {
-                    RestCall.restPostVoid(loginData.getServerUrl() + REGISTER)
-                            .param("username", username)
-                            .param("password", password)//todo send hashed?
-                            .execute();
-                },
-                () -> loginController.tryLogin(
-                        loginData.getServerUrl(),
-                        username,
-                        password,
-                        this::close,
-                        this::onException,
-                        getProgressIndicator()
-                ));
+                () -> register(username, password),
+                () -> onRegistrationSuccess(username, password));
+    }
+
+    private void onRegistrationSuccess(String username, String password) {
+        loginController.tryLogin(
+                loginData.getServerUrl(),
+                username,
+                password,
+                this::close,
+                this::onException,
+                getProgressIndicator()
+        );
+    }
+
+    @MustBeInBackground
+    protected void register(String username, String password) {
+        restPostVoid(loginData.getServerUrl() + REGISTER)
+                .param("username", username)
+                .param("password", password)//todo send hashed?
+                .execute();
     }
 }
