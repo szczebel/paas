@@ -12,10 +12,6 @@ public class JavaProcessManager {
 
     private List<JavaProcess> apps = new ArrayList<>();
 
-    public JavaProcess getApp(long id) {
-        return findById(id).orElseThrow(() -> new IllegalArgumentException("Unknown appId:" + id));
-    }
-
     public Optional<HostedAppStatus> getStatus(long id) {
         return apps.stream().filter(ha -> id == ha.getAppId()).map(JavaProcess::getStatus).findAny();
     }
@@ -45,11 +41,7 @@ public class JavaProcessManager {
     }
 
     public void shutdown() {
-        for (JavaProcess app : apps) {
-            try {
-                app.stop();
-            } catch (InterruptedException ignored) {
-            }
-        }
+        apps.forEach(JavaProcess::stop);
+        apps = null;
     }
 }
