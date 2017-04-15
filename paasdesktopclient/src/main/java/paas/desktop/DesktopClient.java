@@ -19,6 +19,8 @@ import java.io.IOException;
 
 import static swingutils.Splash.showSplash;
 
+//todo: home page with public stats of the server (number of hosted apps,
+
 @SpringBootApplication
 public class DesktopClient {
 
@@ -47,7 +49,10 @@ public class DesktopClient {
         int counter = 0;
         @Override
         public Object postProcessBeforeInitialization(Object o, String s) throws BeansException {
-            SwingUtilities.invokeLater(() -> splash.setProgressText("Initializing " + o.getClass().getSimpleName(), ++counter));
+            String toShow = o.getClass().getSimpleName();
+            if(toShow.contains("$$EnhancerBySpringCGLIB$$"))  toShow = toShow.substring(0, toShow.indexOf("$$EnhancerBySpringCGLIB$$"));
+            final String finalToShow = toShow;
+            SwingUtilities.invokeLater(() -> splash.setProgressText("Initializing " + finalToShow, ++counter));
             return o;
         }
 
