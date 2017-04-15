@@ -21,6 +21,7 @@ import javax.annotation.security.RolesAllowed;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -145,7 +146,11 @@ public class HostingService {
 
     @PreAuthorize("hasRole('USER') AND @ownershipChecker.isCurrentUserOwnerOfAppId(authentication, #appId)")
     public List<DatedMessage> tailSysout(long appId, long timestamp) {
-        return processManager.getApp(appId).tailSysout(timestamp);
+        Optional<JavaProcess> p = processManager.findById(appId);
+        if (p.isPresent())
+            return p.get().tailSysout(timestamp);
+        else
+            return Collections.emptyList();
     }
 
     @PreAuthorize("hasRole('USER') OR hasRole('ADMIN')")
