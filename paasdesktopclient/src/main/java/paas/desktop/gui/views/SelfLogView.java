@@ -3,7 +3,7 @@ package paas.desktop.gui.views;
 import org.springframework.stereotype.Component;
 import paas.desktop.DesktopClient;
 import swingutils.components.LazyInitRichAbstractView;
-import swingutils.components.RollingConsole;
+import swingutils.components.console.RollingConsole;
 
 import javax.swing.*;
 

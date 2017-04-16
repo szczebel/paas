@@ -9,7 +9,7 @@ import paas.shared.Links;
 import paas.shared.dto.HostedAppInfo;
 import swingutils.background.BackgroundOperation;
 import swingutils.components.LazyInitRichAbstractView;
-import swingutils.components.RollingConsole;
+import swingutils.components.console.RollingConsole;
 import swingutils.components.progress.ProgressIndicator;
 
 import javax.swing.*;

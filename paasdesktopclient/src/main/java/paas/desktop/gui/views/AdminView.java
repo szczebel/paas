@@ -6,86 +6,58 @@ import paas.desktop.dto.DatedMessage;
 import paas.desktop.gui.infra.events.EventBus;
 import paas.desktop.remoting.PaasRestClient;
 import swingutils.components.LazyInitRichAbstractView;
-import swingutils.components.RollingConsole;
-import swingutils.components.progress.BusyFactory;
-import swingutils.components.progress.ProgressIndicatingContainer;
+import swingutils.components.console.AsyncCommandConsole;
 import swingutils.components.progress.ProgressIndicator;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
-import java.awt.*;
 import java.util.List;
 
-import static swingutils.components.ComponentFactory.*;
+import static java.util.stream.Collectors.toList;
+import static javax.swing.SwingConstants.RIGHT;
+import static swingutils.components.ComponentFactory.button;
 import static swingutils.layout.LayoutBuilders.borderLayout;
-import static swingutils.layout.LayoutBuilders.hBox;
+import static swingutils.layout.LayoutBuilders.flowLayout;
 
 @Component
 public class AdminView extends LazyInitRichAbstractView {
 
-    @Autowired private EventBus eventBus;
-    @Autowired private PaasRestClient paasRestClient;
+    @Autowired
+    private EventBus eventBus;
+    @Autowired
+    private PaasRestClient paasRestClient;
 
-    private RollingConsole output;
-    private ProgressIndicator commandProgressIndicator;
+    private AsyncCommandConsole shellConsole;
     private long lastMessageTimestamp = 0;
-    private JTextField commandField;
 
     @Override
     protected JComponent wireAndLayout() {
-        output = new RollingConsole(1000);
+        shellConsole = new AsyncCommandConsole("  Shell command  > ", 1000, this::executeCommand);
 
         return borderLayout()
-                .center(output.getComponent())
+                .center(shellConsole.getComponent())
                 .south(commandBar())
                 .build();
     }
 
-    private JComponent commandTextField() {
-        ProgressIndicatingContainer c = BusyFactory.progressBarOverlay();
-        commandProgressIndicator = c;
-        commandField = new JTextField(20);
-        commandField.setFont(output.getFont());
-        commandField.setBackground(Color.black);
-        commandField.setForeground(Color.green);
-        commandField.setCaretColor(Color.green);
-        commandField.setCaret(blockCaret());
-        commandField.addActionListener(e -> sendCommand(commandField.getText()));
-        c.getContentPane().add(commandField);
-        return c.getComponent();
-    }
-
     private JComponent commandBar() {
-        return borderLayout()
-                .west(greenOnBlack(label("   Shell command >   ")))
-                .center(commandTextField())
-                .east(
-                        hBox(4,
-                                button("Refresh output", this::refresh),
-                                button("Clear output", this::clear),
-                                button("Upload PaasDesktopClient.jar", this::upload)
-                        )
-                )
-                .build();
-    }
-
-    private JComponent greenOnBlack(JLabel label) {
-        label.setOpaque(true);
-        label.setBackground(Color.black);
-        label.setForeground(Color.green);
-        return label;
+        return flowLayout(RIGHT,
+                button("Refresh output", this::refresh),
+                button("Clear output", this::clear),
+                button("Upload PaasDesktopClient.jar", this::upload)
+        );
     }
 
     private void upload() {
         JFileChooser fileChooser = new JFileChooser();
         fileChooser.setFileFilter(new FileNameExtensionFilter("Java artifacts", "jar", "war"));
-        if(JFileChooser.APPROVE_OPTION == fileChooser.showOpenDialog(getComponent())) {
+        if (JFileChooser.APPROVE_OPTION == fileChooser.showOpenDialog(getComponent())) {
             inBackground(
                     () -> paasRestClient.uploadDesktopClientJar(fileChooser.getSelectedFile()),
-                    s -> {}
+                    s -> {
+                    }
             );
         }
-
         focus();
     }
 
@@ -99,30 +71,27 @@ public class AdminView extends LazyInitRichAbstractView {
     }
 
     private void clear() {
-        output.clear();
+        shellConsole.getOutput().clear();
         focus();
     }
 
     private void newOutputReceived(List<DatedMessage> newOutput) {
         if (newOutput.isEmpty()) return;
         lastMessageTimestamp = newOutput.get(newOutput.size() - 1).getTimestamp();
-        newOutput.stream().map(DatedMessage::getMessage).forEach(output::appendLine);
+        newOutput.stream().map(DatedMessage::getMessage).forEach(m -> shellConsole.getOutput().appendLine(m));
     }
 
-    private void sendCommand(String command) {
-        inBackground(
-                () -> paasRestClient.executeShellCommand(command),
-                this::commandSent,
-                commandProgressIndicator
-        );
+    private String executeCommand(String command) {
+        paasRestClient.executeShellCommand(command);
+        List<DatedMessage> newOutput = paasRestClient.getShellOutputNewerThan(lastMessageTimestamp);
+        if (newOutput.isEmpty()) return null;
+        lastMessageTimestamp = newOutput.get(newOutput.size() - 1).getTimestamp();
+        List<String> strings = newOutput.stream().map(DatedMessage::getMessage).collect(toList());
+        return String.join(System.lineSeparator(), strings);
     }
 
-    private void commandSent(String response) {
-        commandField.setText("");
-        refresh();
-    }
 
     public void focus() {
-        commandField.requestFocus();
+        shellConsole.focus();
     }
 }
