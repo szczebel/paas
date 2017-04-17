@@ -29,9 +29,8 @@ public class LoginForm extends LazyInitSelfClosableAbstractView {
     @Override
     protected JComponent wireAndLayout() {
 
-        JLabel notLoggedIn = label("<html>You are not logged in.", LEFT, BOLD);
-        Runnable listener = () -> notLoggedIn.setVisible(false);
-        eventBus.when(Events.LOGIN_CHANGED, listener);
+        JLabel notLoggedIn = label("You are not logged in.", LEFT, BOLD);
+        eventBus.when(Events.LOGIN_CHANGED, () -> notLoggedIn.setVisible(false));
         JTextField serverUrl = new JTextField(loginData.getServerUrl());
         JTextField username = new JTextField(loginData.getUsername());
         JPasswordField password = new JPasswordField(20);
