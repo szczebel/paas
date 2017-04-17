@@ -3,7 +3,7 @@ package paas.desktop.gui.views;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import paas.desktop.gui.ViewRequest;
-import paas.desktop.gui.infra.MustBeInBackground;
+import paas.desktop.gui.infra.MustNotBeInEDT;
 import paas.desktop.gui.infra.events.EventBus;
 import paas.desktop.gui.infra.security.LoginData;
 import paas.desktop.gui.infra.security.LoginExecutor;
@@ -71,7 +71,7 @@ public class RegistrationForm extends LazyInitSelfClosableAbstractView {
         );
     }
 
-    @MustBeInBackground
+    @MustNotBeInEDT
     protected void register(String username, String password) {
         restPostVoid(loginData.getServerUrl() + REGISTER)
                 .param("username", username)

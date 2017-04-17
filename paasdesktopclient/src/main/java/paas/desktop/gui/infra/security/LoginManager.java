@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import paas.desktop.gui.infra.MustBeInBackground;
+import paas.desktop.gui.infra.MustNotBeInEDT;
 import paas.desktop.gui.infra.events.EventBus;
 import paas.desktop.gui.infra.events.Events;
 import paas.desktop.gui.infra.security.LoginManager.UserInfo.AuthorityInfo;
@@ -61,7 +61,7 @@ public class LoginManager implements LoginData, LoginExecutor {
     }
 
     @SuppressWarnings("WeakerAccess")
-    @MustBeInBackground
+    @MustNotBeInEDT
     protected UserInfo whoAmI(String serverUrl, String username, String password) {
         return
                 RestCall.restGet(serverUrl + WHOAMI, UserInfo.class)

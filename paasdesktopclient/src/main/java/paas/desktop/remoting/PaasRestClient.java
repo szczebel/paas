@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import paas.desktop.dto.DatedMessage;
-import paas.desktop.gui.infra.MustBeInBackground;
+import paas.desktop.gui.infra.MustNotBeInEDT;
 import paas.desktop.gui.infra.security.LoginData;
 import paas.desktop.gui.infra.security.RequiresLogin;
 import paas.shared.Links;
@@ -31,7 +31,7 @@ public class PaasRestClient {
         return loginData.getServerUrl();
     }
 
-    @MustBeInBackground
+    @MustNotBeInEDT
     @RequiresLogin
     public String uploadDesktopClientJar(File jarFile) throws IOException {
         return restPost(getServerUrl() + Links.ADMIN_UPLOAD_DESKTOP_CLIENT, String.class)
@@ -41,7 +41,7 @@ public class PaasRestClient {
                 .execute();
     }
 
-    @MustBeInBackground
+    @MustNotBeInEDT
     @RequiresLogin
     public List<HostedAppInfo> getHostedApplications() {
         return asList(restGetList(getServerUrl() + APPLICATIONS, HostedAppInfo[].class)
@@ -49,7 +49,7 @@ public class PaasRestClient {
                 .execute());
     }
 
-    @MustBeInBackground
+    @MustNotBeInEDT
     @RequiresLogin
     public String deploy(File jarFile, String commandLineArgs, HostedAppRequestedProvisions requestedProvisions) throws IOException {
         return restPost(getServerUrl() + DEPLOY, String.class)
@@ -64,7 +64,7 @@ public class PaasRestClient {
                 .execute();
     }
 
-    @MustBeInBackground
+    @MustNotBeInEDT
     @RequiresLogin
     public String redeploy(long appId, File newJarFile, String commandLineArgs, HostedAppRequestedProvisions requestedProvisions) throws IOException {
         RestCall<String> post = restPost(getServerUrl() + REDEPLOY, String.class)
@@ -83,7 +83,7 @@ public class PaasRestClient {
     }
 
 
-    @MustBeInBackground
+    @MustNotBeInEDT
     @RequiresLogin
     public List<DatedMessage> tailNewerThan(long appID, long timestamp) {
         return asList(
@@ -96,7 +96,7 @@ public class PaasRestClient {
         );
     }
 
-    @MustBeInBackground
+    @MustNotBeInEDT
     @RequiresLogin
     public String restart(long appId) {
         return restPost(getServerUrl() + RESTART, String.class)
@@ -105,7 +105,7 @@ public class PaasRestClient {
                 .execute();
     }
 
-    @MustBeInBackground
+    @MustNotBeInEDT
     @RequiresLogin
     public String stop(long appId) {
         return restPost(getServerUrl() + STOP, String.class)
@@ -114,7 +114,7 @@ public class PaasRestClient {
                 .execute();
     }
 
-    @MustBeInBackground
+    @MustNotBeInEDT
     @RequiresLogin
     public String undeploy(long appId) {
         return restPost(getServerUrl() + UNDEPLOY, String.class)
@@ -123,7 +123,7 @@ public class PaasRestClient {
                 .execute();
     }
 
-    @MustBeInBackground
+    @MustNotBeInEDT
     @RequiresLogin
     public String executeShellCommand(String cmd) {
         return restPost(getServerUrl() + ADMIN_EXECUTE_SHELL_COMMAND, String.class)
@@ -132,7 +132,7 @@ public class PaasRestClient {
                 .execute();
     }
 
-    @MustBeInBackground
+    @MustNotBeInEDT
     @RequiresLogin
     public List<DatedMessage> getShellOutputNewerThan(long timestamp) {
         return asList(

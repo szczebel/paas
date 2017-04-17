@@ -4,7 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import paas.desktop.gui.infra.MustBeInBackground;
+import paas.desktop.gui.infra.MustNotBeInEDT;
 import paas.desktop.gui.infra.events.EventBus;
 import paas.desktop.gui.infra.events.Events;
 import paas.desktop.gui.infra.security.LoginData;
@@ -57,8 +57,8 @@ public class VersionChecker {
     }
 
 
-    @SuppressWarnings("WeakerAccess") //private won't let AOP ensure that this @MustBeInBackground
-    @MustBeInBackground
+    @SuppressWarnings("WeakerAccess") //private won't let AOP ensure that this @MustNotBeInEDT
+    @MustNotBeInEDT
     protected boolean isNewerVersionAvailable() throws Exception {
         String serverUrl = loginData.getServerUrl();
         if (myBuildTimestamp == null) {

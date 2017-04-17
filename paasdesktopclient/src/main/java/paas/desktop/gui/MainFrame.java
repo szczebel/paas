@@ -2,7 +2,6 @@ package paas.desktop.gui;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import paas.desktop.DesktopClient;
 import paas.desktop.gui.infra.events.EventBus;
 import paas.desktop.gui.infra.security.LoginData;
 import paas.desktop.gui.infra.version.VersionChecker;
@@ -16,6 +15,7 @@ import swingutils.layout.SnapToCorner;
 import swingutils.layout.cards.CardMenuBuilders;
 import swingutils.mdi.MDI;
 import swingutils.mdi.SelfCloseable;
+import swingutils.spring.application.SwingEntryPoint;
 
 import javax.swing.*;
 import java.awt.*;
@@ -30,7 +30,7 @@ import static swingutils.layout.LayoutBuilders.hBox;
 import static swingutils.layout.cards.CardLayoutBuilder.cardLayout;
 
 @Component
-public class MainFrame extends RichFrame {
+public class MainFrame extends RichFrame implements SwingEntryPoint {
 
     private static final int MARGIN = 4;
 
@@ -57,7 +57,7 @@ public class MainFrame extends RichFrame {
 
     private MDI overlayMDI = MDI.create(getOverlay());
 
-    public void buildAndShow() {
+    public void startInEdt() {
         eventBus.when(LOGIN_CHANGED, () -> setTitle("Tiniest PaaS desktop client - " + loginData.getServerUrl()));
         eventBus.when(ViewRequest.class, (request) -> request.visit(this));
 
@@ -71,9 +71,6 @@ public class MainFrame extends RichFrame {
         setVisible(true);
         showLogin();
         versionChecker.checkVersion();
-
-        DesktopClient.splash.close();
-        DesktopClient.splash = null;
     }
 
     private JComponent buildContent() {

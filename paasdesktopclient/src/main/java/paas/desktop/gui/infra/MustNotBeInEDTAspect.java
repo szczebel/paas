@@ -9,11 +9,11 @@ import javax.swing.*;
 
 @Aspect
 @Component
-public class MustBeInBackgroundAspect {
+public class MustNotBeInEDTAspect {
 
-    @Before("@annotation(paas.desktop.gui.infra.MustBeInBackground)")
+    @Before("@annotation(paas.desktop.gui.infra.MustNotBeInEDT)")
     public void checkIfOnEDT(JoinPoint joinPoint) throws Throwable {
         if (SwingUtilities.isEventDispatchThread())
-            throw new IllegalStateException("Methods annotated with @MustBeInBackground must not be called on EDT, " + joinPoint.getSignature());
+            throw new IllegalStateException("Methods annotated with @MustNotBeInEDT must not be called on EDT, " + joinPoint.getSignature());
     }
 }

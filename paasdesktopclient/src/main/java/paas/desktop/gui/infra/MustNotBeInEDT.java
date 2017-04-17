@@ -6,6 +6,6 @@ import java.lang.annotation.*;
 @Target(ElementType.METHOD)
 @Inherited
 @Documented
-public @interface MustBeInBackground {
+public @interface MustNotBeInEDT {
 }
 
