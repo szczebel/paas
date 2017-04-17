@@ -18,11 +18,7 @@ public class SelfLogView extends LazyInitRichAbstractView {
     protected JComponent wireAndLayout() {
         RollingConsole rollingConsole = new RollingConsole(1000);
         rollingConsole.getComponent();
-        SwingUtilities.invokeLater(() ->
-            sysoutInterceptor.registerSwingConsumer(rollingConsole::append)
-        );
+        sysoutInterceptor.registerSwingConsumer(rollingConsole::append);
         return rollingConsole.getComponent();
     }
-
-
 }
