@@ -12,6 +12,7 @@ import swingutils.components.progress.ProgressIndicator;
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.util.List;
+import java.util.function.Consumer;
 
 import static java.util.stream.Collectors.toList;
 import static javax.swing.SwingConstants.RIGHT;
@@ -81,13 +82,14 @@ public class AdminView extends LazyInitRichAbstractView {
         newOutput.stream().map(DatedMessage::getMessage).forEach(m -> shellConsole.getOutput().appendLine(m));
     }
 
-    private String executeCommand(String command) {
+    private void executeCommand(String command, Consumer<String> console) {
+        if(command.isEmpty()) return;
         paasRestClient.executeShellCommand(command);
         List<DatedMessage> newOutput = paasRestClient.getShellOutputNewerThan(lastMessageTimestamp);
-        if (newOutput.isEmpty()) return null;
+        if (newOutput.isEmpty()) return;
         lastMessageTimestamp = newOutput.get(newOutput.size() - 1).getTimestamp();
         List<String> strings = newOutput.stream().map(DatedMessage::getMessage).collect(toList());
-        return String.join(System.lineSeparator(), strings);
+        console.accept(String.join(System.lineSeparator(), strings));
     }
 
 
