@@ -68,6 +68,10 @@
                     <groupId>org.springframework</groupId>
                     <artifactId>spring-context</artifactId>
                 </exclusion>
+                <exclusion>
+                    <groupId>org.aspectj</groupId>
+                    <artifactId>aspectjweaver</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
 

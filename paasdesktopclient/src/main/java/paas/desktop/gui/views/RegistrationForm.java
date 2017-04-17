@@ -3,22 +3,22 @@ package paas.desktop.gui.views;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import paas.desktop.gui.ViewRequest;
-import paas.desktop.gui.infra.MustNotBeInEDT;
 import paas.desktop.gui.infra.events.EventBus;
 import paas.desktop.gui.infra.security.LoginData;
 import paas.desktop.gui.infra.security.LoginExecutor;
+import paas.desktop.remoting.AuthService;
 import swingutils.components.LazyInitSelfClosableAbstractView;
 
 import javax.swing.*;
 
-import static paas.shared.Links.REGISTER;
-import static restcall.RestCall.restPostVoid;
 import static swingutils.components.ComponentFactory.*;
 import static swingutils.layout.forms.FormLayoutBuilders.simpleForm;
 
 @Component
 public class RegistrationForm extends LazyInitSelfClosableAbstractView {
 
+    @Autowired
+    private AuthService authService;
     @Autowired
     private LoginExecutor loginController;
     @Autowired
@@ -56,7 +56,7 @@ public class RegistrationForm extends LazyInitSelfClosableAbstractView {
             return;
         }
         inBackground(
-                () -> register(username, password),
+                () -> authService.register(username, password, loginData.getServerUrl()),
                 () -> onRegistrationSuccess(username, password));
     }
 
@@ -69,13 +69,5 @@ public class RegistrationForm extends LazyInitSelfClosableAbstractView {
                 this::onException,
                 getProgressIndicator()
         );
-    }
-
-    @MustNotBeInEDT
-    protected void register(String username, String password) {
-        restPostVoid(loginData.getServerUrl() + REGISTER)
-                .param("username", username)
-                .param("password", password)//todo send hashed?
-                .execute();
     }
 }

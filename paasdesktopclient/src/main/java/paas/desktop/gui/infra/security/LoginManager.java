@@ -4,11 +4,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import paas.desktop.gui.infra.MustNotBeInEDT;
 import paas.desktop.gui.infra.events.EventBus;
 import paas.desktop.gui.infra.events.Events;
-import paas.desktop.gui.infra.security.LoginManager.UserInfo.AuthorityInfo;
-import restcall.RestCall;
+import paas.desktop.remoting.AuthService;
+import paas.desktop.remoting.AuthService.UserInfo.AuthorityInfo;
 import swingutils.background.BackgroundOperation;
 import swingutils.components.progress.ProgressIndicator;
 
@@ -17,7 +16,6 @@ import java.util.Optional;
 import java.util.function.Consumer;
 
 import static java.util.stream.Collectors.toList;
-import static paas.shared.Links.WHOAMI;
 
 @Component
 @Qualifier("loginController, loginData")
@@ -25,6 +23,8 @@ public class LoginManager implements LoginData, LoginExecutor {
 
     @Autowired
     private EventBus eventBus;
+    @Autowired
+    private AuthService authService;
 
     @Value("${server.url}")
     private String serverUrl;
@@ -53,20 +53,11 @@ public class LoginManager implements LoginData, LoginExecutor {
                          Runnable onSuccess, Consumer<Exception> exceptionHandler,
                          ProgressIndicator progressIndicator) {
         BackgroundOperation.execute(
-                () -> whoAmI(serverUrl, username, password),
+                () -> authService.whoAmI(serverUrl, username, password),
                 userInfo -> loginSuccess(serverUrl, username, password, userInfo.getAuthorities(), onSuccess),
                 exceptionHandler,
                 progressIndicator
         );
-    }
-
-    @SuppressWarnings("WeakerAccess")
-    @MustNotBeInEDT
-    protected UserInfo whoAmI(String serverUrl, String username, String password) {
-        return
-                RestCall.restGet(serverUrl + WHOAMI, UserInfo.class)
-                        .httpBasic(username, password)
-                        .execute();
     }
 
     private void loginSuccess(String serverUrl, String username, String password, List<AuthorityInfo> roles, Runnable onSuccess) {
@@ -95,34 +86,5 @@ public class LoginManager implements LoginData, LoginExecutor {
     @Override
     public boolean isLoggedIn() {
         return loggedIn;
-    }
-
-    static class UserInfo {
-        List<AuthorityInfo> authorities;
-
-        List<AuthorityInfo> getAuthorities() {
-            return authorities;
-        }
-
-        public void setAuthorities(List<AuthorityInfo> authorities) {
-            this.authorities = authorities;
-        }
-
-        static class AuthorityInfo {
-            String authority;
-
-            public String getAuthority() {
-                return authority;
-            }
-
-            public void setAuthority(String authority) {
-                this.authority = authority;
-            }
-
-            @Override
-            public String toString() {
-                return authority;
-            }
-        }
     }
 }

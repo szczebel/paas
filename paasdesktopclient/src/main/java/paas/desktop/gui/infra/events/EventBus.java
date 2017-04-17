@@ -1,7 +1,7 @@
 package paas.desktop.gui.infra.events;
 
 import org.springframework.stereotype.Component;
-import paas.desktop.gui.infra.MustBeInEDT;
+import swingutils.spring.edt.MustBeInEDT;
 
 @Component
 public class EventBus extends GenericEventBus {

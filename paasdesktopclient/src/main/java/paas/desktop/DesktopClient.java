@@ -4,15 +4,15 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import swingutils.spring.application.SwingApplication;
 import swingutils.spring.application.SwingApplicationBootstrap;
+import swingutils.spring.edt.EnableEDTAspects;
 
 import java.io.IOException;
 
 //todo: home page with public stats of the server (number of hosted apps,
 
-//todo: move EDT aspects and annotations to swing utils
-
 @SpringBootApplication
 @SwingApplication
+@EnableEDTAspects
 public class DesktopClient {
 
     public static void main(String[] args) throws IOException {

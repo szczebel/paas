@@ -4,11 +4,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import paas.desktop.gui.infra.MustNotBeInEDT;
 import paas.desktop.gui.infra.events.EventBus;
 import paas.desktop.gui.infra.events.Events;
-import paas.desktop.gui.infra.security.LoginData;
-import paas.shared.Links;
+import paas.desktop.remoting.PaasRestClient;
 import swingutils.background.BackgroundOperation;
 
 import javax.annotation.PostConstruct;
@@ -17,7 +15,6 @@ import java.util.jar.Manifest;
 
 import static paas.desktop.gui.ViewRequest.NEW_VERSION;
 import static paas.shared.BuildTime.readBuildTime;
-import static restcall.RestCall.restGet;
 
 @Component
 public class VersionChecker {
@@ -27,10 +24,11 @@ public class VersionChecker {
     @Autowired
     private EventBus eventBus;
     @Autowired
-    private LoginData loginData;
+    private PaasRestClient paasRestClient;
 
     private Long myBuildTimestamp;
 
+    @SuppressWarnings("unused")
     @PostConstruct
     void initialize() {
         this.myBuildTimestamp = getMyBuildTimestamp();
@@ -56,16 +54,12 @@ public class VersionChecker {
         );
     }
 
-
-    @SuppressWarnings("WeakerAccess") //private won't let AOP ensure that this @MustNotBeInEDT
-    @MustNotBeInEDT
-    protected boolean isNewerVersionAvailable() throws Exception {
-        String serverUrl = loginData.getServerUrl();
+    private boolean isNewerVersionAvailable() throws Exception {
         if (myBuildTimestamp == null) {
             logger.error("My build timestamp not available");
             return false;
         }
-        long fromServer = restGet(serverUrl + Links.DESKTOP_CLIENT_BUILD_TIMESTAMP, Long.class).execute();
+        long fromServer = paasRestClient.getDesktopClientBuildTime();
         return fromServer > myBuildTimestamp;
     }
 

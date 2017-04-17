@@ -4,13 +4,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import paas.desktop.dto.DatedMessage;
-import paas.desktop.gui.infra.MustNotBeInEDT;
 import paas.desktop.gui.infra.security.LoginData;
 import paas.desktop.gui.infra.security.RequiresLogin;
 import paas.shared.Links;
 import paas.shared.dto.HostedAppInfo;
 import paas.shared.dto.HostedAppRequestedProvisions;
 import restcall.RestCall;
+import swingutils.spring.edt.MustNotBeInEDT;
 
 import java.io.File;
 import java.io.IOException;
@@ -18,8 +18,7 @@ import java.util.List;
 
 import static java.util.Arrays.asList;
 import static paas.shared.Links.*;
-import static restcall.RestCall.restGetList;
-import static restcall.RestCall.restPost;
+import static restcall.RestCall.*;
 import static restcall.UploadableFile.forUpload;
 
 @Component
@@ -140,5 +139,10 @@ public class PaasRestClient {
                         .param("timestamp", timestamp)
                         .httpBasic(loginData.getUsername(), loginData.getPassword())
                         .execute());
+    }
+
+    @MustNotBeInEDT
+    public long getDesktopClientBuildTime() {
+        return restGet(loginData.getServerUrl() + Links.DESKTOP_CLIENT_BUILD_TIMESTAMP, Long.class).execute();
     }
 }
