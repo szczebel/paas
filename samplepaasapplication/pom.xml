@@ -8,7 +8,6 @@
     <artifactId>samplepaasapplication</artifactId>
     <version>1.0</version>
 
-
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
@@ -27,10 +26,10 @@
             <plugin>
                 <groupId>com.epam.sandbox.paas</groupId>
                 <artifactId>paas-maven-plugin</artifactId>
-                <version>1.0</version>
+                <version>1.0-SNAPSHOT</version>
                 <configuration>
-                    <paasServerUrl>http://localhost:8080/paas</paasServerUrl>
-                    <appId>65</appId>
+                    <paasServerUrl>http://ecsc00300356.epam.com:8080/paas</paasServerUrl>
+                    <appId>1</appId>
                     <username>guest</username>
                     <password>guest</password>
                 </configuration>
@@ -63,5 +62,26 @@
             <version>4.9</version>
         </dependency>
     </dependencies>
+
+    <repositories>
+        <repository>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+            <id>EPAM</id>
+            <url>https://artifactory.epam.com/artifactory/list/libs-snapshots-local</url>
+        </repository>
+    </repositories>
+
+    <pluginRepositories>
+        <pluginRepository>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+            <id>EPAM</id>
+            <url>https://artifactory.epam.com/artifactory/list/libs-snapshots-local</url>
+        </pluginRepository>
+    </pluginRepositories>
+
 
 </project>
