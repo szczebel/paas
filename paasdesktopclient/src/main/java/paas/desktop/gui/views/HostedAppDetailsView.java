@@ -155,7 +155,7 @@ public class HostedAppDetailsView extends LazyInitRichAbstractView {
 
         @Override
         protected JComponent wireAndLayout() {
-            JComponent redeployComponent = redeployForm.wireAndLayout();
+            JComponent redeployComponent = redeployForm.getComponent();
             redeployForm.populateView(appInfo.getHostedAppDesc());
             return borderLayout()
                     .north(vBox(4,

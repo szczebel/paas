@@ -30,8 +30,10 @@
                 <version>2.2</version>
                 <configuration>
                     <path>/paas</path>
-                    <server>ecsc00300356.epam.com</server>
-                    <url>http://ecsc00300356.epam.com:8080/manager/text</url>
+                    <!--<server>ecsc00300356.epam.com</server>-->
+                    <!--<url>http://ecsc00300356.epam.com:8080/manager/text</url>-->
+                    <server>ecsc00300446.epam.com</server>
+                    <url>http://ecsc00300446.epam.com:8080/manager/text</url>
                 </configuration>
             </plugin>
         </plugins>
