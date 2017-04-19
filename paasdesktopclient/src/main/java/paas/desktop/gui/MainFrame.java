@@ -6,22 +6,14 @@ import paas.desktop.gui.infra.events.EventBus;
 import paas.desktop.gui.infra.security.LoginData;
 import paas.desktop.gui.infra.version.VersionChecker;
 import paas.desktop.gui.views.AdminView;
-import paas.shared.Links;
-import swingutils.RunnableProxy;
 import swingutils.components.IsComponent;
-import swingutils.components.fade.FadingPanel;
 import swingutils.frame.RichFrame;
 import swingutils.layout.SnapToCorner;
 import swingutils.layout.cards.CardMenuBuilders;
-import swingutils.mdi.MDI;
-import swingutils.mdi.SelfCloseable;
 import swingutils.spring.application.SwingEntryPoint;
 
 import javax.swing.*;
 import java.awt.*;
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
 
 import static paas.desktop.gui.infra.events.Events.LOGIN_CHANGED;
 import static swingutils.components.ComponentFactory.*;
@@ -35,6 +27,8 @@ public class MainFrame extends RichFrame implements SwingEntryPoint {
     private static final int MARGIN = 4;
 
     @Autowired
+    private IsComponent docsView;
+    @Autowired
     private IsComponent hostedAppsListView;
     @Autowired
     private IsComponent deployView;
@@ -45,21 +39,14 @@ public class MainFrame extends RichFrame implements SwingEntryPoint {
     @Autowired
     private AdminView adminView;
     @Autowired
-    private EventBus eventBus;
-    @Autowired
     private VersionChecker versionChecker;
     @Autowired
-    private SelfCloseable loginForm;
-    @Autowired
-    private SelfCloseable registrationForm;
+    private EventBus eventBus;
     @Autowired
     private LoginData loginData;
 
-    private MDI overlayMDI = MDI.create(getOverlay());
-
     public void startInEdt() {
         eventBus.when(LOGIN_CHANGED, () -> setTitle("Tiniest PaaS desktop client - " + loginData.getServerUrl()));
-        eventBus.when(ViewRequest.class, (request) -> request.visit(this));
 
         setIconImage(new ImageIcon(getClass().getResource("/splash.png")).getImage());
         setTitle("Tiniest PaaS desktop client - " + loginData.getServerUrl());
@@ -70,7 +57,12 @@ public class MainFrame extends RichFrame implements SwingEntryPoint {
         setLocationRelativeTo(null);
         setVisible(true);
         showLogin();
-        versionChecker.checkVersion();
+
+        versionChecker.checkVersion();//todo: this does not belong here
+    }
+
+    private void showLogin() {
+        eventBus.dispatch(ViewRequest.LOGIN);
     }
 
     private JComponent buildContent() {
@@ -90,6 +82,7 @@ public class MainFrame extends RichFrame implements SwingEntryPoint {
         return cardLayout(CardMenuBuilders.BorderedOrange()
                 .menuBarCustomizer(this::customizeMenuBar))
                 .addTab("Applications", appsTab)
+                .addTab("Documentation", docsView.getComponent())
                 .addTab("For admins", adminView.getComponent())
                 .addTab("My error log", selfLogView.getComponent())
                 .onCardChange((prevCard, newCard) -> {
@@ -100,8 +93,7 @@ public class MainFrame extends RichFrame implements SwingEntryPoint {
 
     private JComponent customizeMenuBar(JComponent menu) {
         JLabel userInfo = label("");
-        Runnable listener = () -> userInfo.setText(getUserInfoString());
-        eventBus.when(LOGIN_CHANGED, listener);
+        eventBus.when(LOGIN_CHANGED, () -> userInfo.setText(getUserInfoString()));
         return borderLayout()
                 .center(menu)
                 .east(
@@ -115,35 +107,6 @@ public class MainFrame extends RichFrame implements SwingEntryPoint {
 
     private String getUserInfoString() {
         return "Hello " + loginData.getUsername() + ", your role is: " + loginData.getRoles();
-    }
-
-    void showRegistration() {
-        overlayMDI.remove(loginForm);
-        overlayMDI.add(null, registrationForm, SnapToCorner.TOP_RIGHT);
-    }
-
-    void showLogin() {
-        overlayMDI.remove(registrationForm);
-        overlayMDI.add(null, loginForm, SnapToCorner.TOP_RIGHT);
-    }
-
-    void tellUserAboutNewVersion() {
-        RunnableProxy closeAction = new RunnableProxy();
-        JButton downloadButton = hyperlinkButton("Download it!", this::download);
-        FadingPanel downloadMessageBox = new FadingPanel(
-                decorate(downloadButton)
-                        .withEmptyBorder(16, 16, 24, 16)
-                        .withGradientHeader("New version available", closeAction, null)
-                        .opaque(true)
-                        .get());
-        overlayMDI.add(null, downloadMessageBox, closeAction::delegate, SnapToCorner.BOTTOM_RIGHT);
-    }
-
-    private void download() {
-        try {
-            Desktop.getDesktop().browse(new URI(loginData.getServerUrl() + Links.PAAS_DESKTOP_CLIENT_JAR));
-        } catch (IOException | URISyntaxException ignored) {
-        }
     }
 
     private JComponent dec(JComponent component, String title, int top, int left, int bottom, int right) {

@@ -67,7 +67,7 @@ public class VersionChecker {
         try (InputStream manifestStream = getClass().getResourceAsStream("/META-INF/MANIFEST.MF")) {
             return readBuildTime(new Manifest(manifestStream));
         } catch (Exception e) {
-            logger.error("Checking self last modified failed : ", e);
+            logger.error("Checking my build timestamp failed : ", e);
             return null;
         }
     }

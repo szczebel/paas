@@ -29,7 +29,7 @@
                 <version>1.0-SNAPSHOT</version>
                 <configuration>
                     <paasServerUrl>http://ecsc00300356.epam.com:8080/paas</paasServerUrl>
-                    <appId>1</appId>
+                    <appId>1</appId><!--application ID to redeploy with new jar-->
                     <username>guest</username>
                     <password>guest</password>
                 </configuration>
@@ -41,11 +41,6 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-tomcat</artifactId>
-            <scope>provided</scope>
         </dependency>
 
         <dependency>
@@ -78,7 +73,7 @@
             <snapshots>
                 <enabled>true</enabled>
             </snapshots>
-            <id>EPAM</id>
+            <id>EPAM</id><!--.m2/settings.xml declares a server with this ID and with my EPAM credentials-->
             <url>https://artifactory.epam.com/artifactory/list/libs-snapshots-local</url>
         </pluginRepository>
     </pluginRepositories>

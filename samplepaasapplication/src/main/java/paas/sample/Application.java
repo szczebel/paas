@@ -27,6 +27,15 @@ public class Application {
         SpringApplication.run(Application.class, args);
     }
 
+    @RestController
+    static class Endpoint {
+
+        @GetMapping("/")
+        String helloWorld() {
+            return "Hello world";
+        }
+    }
+
     @Component
     static class Inspector implements CommandLineRunner {
 
@@ -55,15 +64,6 @@ public class Application {
             stream(applicationContext.getBeanDefinitionNames())
                     .filter(s -> !s.contains("."))
                     .forEach(LOGGER::info);
-        }
-    }
-
-    @RestController
-    static class Endpoint {
-
-        @GetMapping("/")
-        String helloWorld() {
-            return "Hello world";
         }
     }
 }
