@@ -141,7 +141,12 @@ public class HostedAppDetailsView extends LazyInitRichAbstractView {
         private final DateFormat df = new SimpleDateFormat("yyyy-MMM-dd HH:mm:ss");
 
         private JLabel appStatus = label(getStatusText(), LEFT, BOLD);
-        private RedeployForm redeployForm = new RedeployForm();
+        private RedeployForm redeployForm = new RedeployForm() {
+            @Override
+            protected ProgressIndicator getProgressIndicator() {
+                return ControlPanel.this.getProgressIndicator();
+            }
+        };
 
         private String getStatusText() {
             Date started = appInfo.getHostedAppStatus().getStarted();
