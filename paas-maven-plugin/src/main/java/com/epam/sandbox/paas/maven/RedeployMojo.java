@@ -13,6 +13,8 @@ import java.io.IOException;
 import static restcall.RestCall.restPost;
 import static restcall.UploadableFile.forUpload;
 
+//todo: credentials from settings.xml
+
 @Mojo(name = "redeploy")
 public class RedeployMojo extends AbstractMojo {
 
