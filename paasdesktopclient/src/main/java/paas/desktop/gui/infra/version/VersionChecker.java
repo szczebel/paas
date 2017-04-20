@@ -10,11 +10,9 @@ import paas.desktop.remoting.PaasRestClient;
 import swingutils.background.BackgroundOperation;
 
 import javax.annotation.PostConstruct;
-import java.io.InputStream;
-import java.util.jar.Manifest;
 
 import static paas.desktop.gui.ViewRequest.NEW_VERSION;
-import static paas.shared.BuildTime.readBuildTime;
+import static paas.shared.BuildTime.parseBuildTime;
 
 @Component
 public class VersionChecker {
@@ -64,8 +62,10 @@ public class VersionChecker {
     }
 
     private Long getMyBuildTimestamp() {
-        try (InputStream manifestStream = getClass().getResourceAsStream("/META-INF/MANIFEST.MF")) {
-            return readBuildTime(new Manifest(manifestStream));
+        try {
+            String implementationVersion = getClass().getPackage().getImplementationVersion();
+            logger.info("Implementation version : {}", implementationVersion);
+            return parseBuildTime(implementationVersion);
         } catch (Exception e) {
             logger.error("Checking my build timestamp failed : ", e);
             return null;

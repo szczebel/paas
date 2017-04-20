@@ -26,7 +26,7 @@ public class LoginManager implements LoginData, LoginExecutor {
     @Autowired
     private AuthService authService;
 
-    @Value("${server.url}")
+    @Value("${server.url:<unknown server>}")
     private String serverUrl;
     private String username = "";
     private String password = "";

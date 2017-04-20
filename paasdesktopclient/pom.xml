@@ -31,11 +31,8 @@
                 <version>2.1</version>
                 <configuration>
                     <archive>
-                        <manifest>
-                            <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
-                        </manifest>
                         <manifestEntries>
-                            <Implementation-Build-Time>${maven.build.timestamp}</Implementation-Build-Time>
+                            <Implementation-Version>${maven.build.timestamp}</Implementation-Version>
                         </manifestEntries>
                     </archive>
                 </configuration>
