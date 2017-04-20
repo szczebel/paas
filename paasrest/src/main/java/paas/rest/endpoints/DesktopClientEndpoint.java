@@ -60,7 +60,7 @@ public class DesktopClientEndpoint {
         return "OK";
     }
 
-    //todo: add synchronization: noone should be able to download desktop jar while its being adjusted
+    //add synchronization: noone should be able to download desktop jar while its being adjusted
     private void addServerInfo(File desktopClientJar, String serverUrl) throws IOException {
         Path path = desktopClientJar.toPath();
         URI uri = URI.create("jar:" + path.toUri());

@@ -16,7 +16,7 @@ import java.util.List;
 import static java.awt.Font.BOLD;
 import static java.util.stream.Collectors.toList;
 import static javax.swing.SwingConstants.LEFT;
-import static paas.desktop.gui.ViewRequest.REGISTRATION;
+import static paas.desktop.gui.PopupRequest.REGISTRATION;
 import static swingutils.components.ComponentFactory.*;
 import static swingutils.layout.forms.FormLayoutBuilders.simpleForm;
 

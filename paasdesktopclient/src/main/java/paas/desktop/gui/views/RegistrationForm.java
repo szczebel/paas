@@ -2,7 +2,7 @@ package paas.desktop.gui.views;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import paas.desktop.gui.ViewRequest;
+import paas.desktop.gui.PopupRequest;
 import paas.desktop.gui.infra.events.EventBus;
 import paas.desktop.gui.infra.security.LoginData;
 import paas.desktop.gui.infra.security.LoginExecutor;
@@ -33,7 +33,7 @@ public class RegistrationForm extends LazyInitSelfClosableAbstractView {
         JPasswordField password = new JPasswordField();
         JPasswordField password2 = new JPasswordField();
 
-        JButton backToLogin = hyperlinkButton("Back to login", () -> eventBus.dispatch(ViewRequest.LOGIN));
+        JButton backToLogin = hyperlinkButton("Back to login", () -> eventBus.dispatch(PopupRequest.LOGIN));
         backToLogin.setHorizontalAlignment(SwingConstants.RIGHT);
 
         return decorate(

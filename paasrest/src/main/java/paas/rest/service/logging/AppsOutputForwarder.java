@@ -3,8 +3,6 @@ package paas.rest.service.logging;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-//todo: setup ELK on VM
-
 @Component
 public class AppsOutputForwarder {
 

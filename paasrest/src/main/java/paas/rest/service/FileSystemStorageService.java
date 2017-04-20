@@ -16,6 +16,8 @@ import java.nio.file.Paths;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 
+import static paas.rest.service.security.Role.ADMIN;
+
 @Component
 public class FileSystemStorageService {
 
@@ -74,7 +76,7 @@ public class FileSystemStorageService {
         return storageRoot.toPath().resolve(DESKTOP_CLIENT_JAR_NAME).toFile();
     }
 
-    @RolesAllowed("ADMIN")
+    @RolesAllowed(ADMIN)
     public void saveDesktopClientJar(MultipartFile file) throws IOException {
         Path target = storageRoot.toPath().resolve(DESKTOP_CLIENT_JAR_NAME);
         save(target, file, true);

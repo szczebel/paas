@@ -1,13 +1,18 @@
 package paas.rest.endpoints;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import paas.rest.service.security.UserService;
 
 import javax.annotation.security.RolesAllowed;
 import java.security.Principal;
 
+import static paas.rest.service.security.Role.ADMIN;
+import static paas.rest.service.security.Role.USER;
 import static paas.shared.Links.REGISTER;
 import static paas.shared.Links.WHOAMI;
 
@@ -15,14 +20,18 @@ import static paas.shared.Links.WHOAMI;
 public class LoginEndpoint {
 
     @GetMapping(WHOAMI)
-    @RolesAllowed({"USER", "ADMIN"})
+    @RolesAllowed({USER, ADMIN})
     public Principal login(Principal principal) {
         return principal;
     }
 
     @PostMapping(REGISTER)
     public void register(@RequestParam String username, @RequestParam String password) {
-        //todo: implement
-        throw new RuntimeException("Not implemented yet, use guest account for now");
+        userService.create(username, passwordEncoder.encode(password));
     }
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+    @Autowired
+    private UserService userService;
 }

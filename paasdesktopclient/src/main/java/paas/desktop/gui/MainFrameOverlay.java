@@ -41,8 +41,9 @@ public class MainFrameOverlay {
 
     @PostConstruct
     void init() {
+        mainFrame.getOverlay().setNonModalLayout(new SnapToCorner(8));
         overlayMDI = MDI.create(mainFrame.getOverlay());
-        eventBus.when(ViewRequest.class, (request) -> request.visit(this));
+        eventBus.when(PopupRequest.class, (request) -> request.visit(this));
     }
 
     void showRegistration() {

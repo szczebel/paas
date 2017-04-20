@@ -12,6 +12,8 @@ import javax.annotation.security.RolesAllowed;
 import java.io.IOException;
 import java.util.List;
 
+import static paas.rest.service.security.Role.ADMIN;
+
 @Component
 public class SecureShell {
 
@@ -21,12 +23,12 @@ public class SecureShell {
         shell = new Shell(System.getProperty("os.name").startsWith("Windows") ? "cmd" : "bash", fileSystemStorageService.getStorageRoot());
     }
 
-    @RolesAllowed("ADMIN")
+    @RolesAllowed(ADMIN)
     public void execute(String command) throws IOException, InterruptedException {
         shell.execute(command);
     }
 
-    @RolesAllowed("ADMIN")
+    @RolesAllowed(ADMIN)
     public List<DatedMessage> getOutputNewerThan(long timestamp) {
         return shell.getOutputNewerThan(timestamp);
     }

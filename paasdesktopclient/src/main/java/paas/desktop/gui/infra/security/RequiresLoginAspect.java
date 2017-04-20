@@ -9,7 +9,7 @@ import paas.desktop.gui.infra.events.EventBus;
 
 import javax.swing.*;
 
-import static paas.desktop.gui.ViewRequest.LOGIN;
+import static paas.desktop.gui.PopupRequest.LOGIN;
 
 @Aspect
 @Component

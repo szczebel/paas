@@ -4,13 +4,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import paas.desktop.gui.infra.events.EventBus;
 import paas.desktop.gui.infra.security.LoginData;
-import paas.desktop.gui.infra.version.VersionChecker;
 import paas.desktop.gui.views.AdminView;
 import swingutils.components.IsComponent;
 import swingutils.frame.RichFrame;
-import swingutils.layout.SnapToCorner;
 import swingutils.layout.cards.CardMenuBuilders;
-import swingutils.spring.application.SwingEntryPoint;
 
 import javax.swing.*;
 import java.awt.*;
@@ -22,7 +19,7 @@ import static swingutils.layout.LayoutBuilders.hBox;
 import static swingutils.layout.cards.CardLayoutBuilder.cardLayout;
 
 @Component
-public class MainFrame extends RichFrame implements SwingEntryPoint {
+public class MainFrame extends RichFrame {
 
     private static final int MARGIN = 4;
 
@@ -39,30 +36,25 @@ public class MainFrame extends RichFrame implements SwingEntryPoint {
     @Autowired
     private AdminView adminView;
     @Autowired
-    private VersionChecker versionChecker;
-    @Autowired
     private EventBus eventBus;
     @Autowired
     private LoginData loginData;
 
-    public void startInEdt() {
+    public void buildAndShow() {
         eventBus.when(LOGIN_CHANGED, () -> setTitle("Tiniest PaaS desktop client - " + loginData.getServerUrl()));
 
         setIconImage(new ImageIcon(getClass().getResource("/splash.png")).getImage());
         setTitle("Tiniest PaaS desktop client - " + loginData.getServerUrl());
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        getOverlay().setNonModalLayout(new SnapToCorner(8));
         add(buildContent());
         pack();
         setLocationRelativeTo(null);
         setVisible(true);
         showLogin();
-
-        versionChecker.checkVersion();//todo: this does not belong here
     }
 
     private void showLogin() {
-        eventBus.dispatch(ViewRequest.LOGIN);
+        eventBus.dispatch(PopupRequest.LOGIN);
     }
 
     private JComponent buildContent() {

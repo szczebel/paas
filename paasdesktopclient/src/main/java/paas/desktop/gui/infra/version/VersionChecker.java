@@ -11,7 +11,7 @@ import swingutils.background.BackgroundOperation;
 
 import javax.annotation.PostConstruct;
 
-import static paas.desktop.gui.ViewRequest.NEW_VERSION;
+import static paas.desktop.gui.PopupRequest.NEW_VERSION;
 import static paas.shared.BuildTime.parseBuildTime;
 
 @Component

@@ -25,7 +25,7 @@ public class AuthService {
     public void register(String username, String password, String serverUrl) {
         restPostVoid(serverUrl + REGISTER)
                 .param("username", username)
-                .param("password", password)//todo send hashed?
+                .param("password", password)
                 .execute();
     }
 
