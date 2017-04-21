@@ -22,7 +22,7 @@ public class HostingEndpoint {
     @Autowired private HostingService hostingService;
 
     @GetMapping(Links.APPLICATIONS)
-    List<HostedAppInfo> applications() throws IOException {
+    List<HostedAppInfo> getApplications() throws IOException {
         return hostingService.getApplications();
     }
 

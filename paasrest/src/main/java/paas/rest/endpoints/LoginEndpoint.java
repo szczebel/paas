@@ -21,7 +21,7 @@ public class LoginEndpoint {
 
     @GetMapping(WHOAMI)
     @RolesAllowed({USER, ADMIN})
-    public Principal login(Principal principal) {
+    public Principal whoamI(Principal principal) {
         return principal;
     }
 
