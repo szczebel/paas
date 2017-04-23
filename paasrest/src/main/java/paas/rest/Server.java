@@ -3,6 +3,9 @@ package paas.rest;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
+import org.springframework.boot.actuate.autoconfigure.ExportMetricWriter;
+import org.springframework.boot.actuate.metrics.jmx.JmxMetricWriter;
+import org.springframework.boot.actuate.metrics.writer.MetricWriter;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.support.SpringBootServletInitializer;
@@ -11,6 +14,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.jmx.export.MBeanExporter;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -24,6 +28,9 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 import paas.procman.JavaProcessManager;
 import paas.rest.service.security.Role;
 import paas.rest.service.security.UserService;
+
+
+//fixme: Tomcat session created for each rest call!!!
 
 @SpringBootApplication
 public class Server extends SpringBootServletInitializer {
@@ -40,6 +47,12 @@ public class Server extends SpringBootServletInitializer {
     @Bean(name = "processManager")
     JavaProcessManager procman() {
         return new JavaProcessManager();
+    }
+
+    @Bean
+    @ExportMetricWriter
+    MetricWriter metricWriter(MBeanExporter exporter) {
+        return new JmxMetricWriter(exporter);
     }
 
     @ControllerAdvice
