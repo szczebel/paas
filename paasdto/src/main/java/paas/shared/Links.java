@@ -4,8 +4,9 @@ public class Links {
     public static final String REGISTER = "/unrestricted/register";
 
     public static final String DESKTOP_CLIENT_BUILD_TIMESTAMP = "/unrestricted/desktopClientLastModified";
-    public static final String PAAS_DESKTOP_CLIENT_JAR = "/unrestricted/PaasDesktopClient.jar";
+    public static final String PAAS_DESKTOP_CLIENT_JAR = "/unrestricted/PaaSDesktopClient.jar";
     public static final String KIBANA = "/unrestricted/kibana/{appId}";
+    public static final String MONITOR = "/unrestricted/monitor/{appId}";
 
     public static final String ADMIN_EXECUTE_SHELL_COMMAND = "/admin/executeShellCommand";
     public static final String ADMIN_GET_SHELL_OUTPUT = "/admin/getShellOutput";

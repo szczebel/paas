@@ -33,6 +33,7 @@ public class HostedAppDetailsView extends LazyInitRichAbstractView {
     private final EventBus eventBus;
     private final PaasRestClient paasRestClient;
     private final String KIBANA_URL;
+    private final String MONITORING_URL;
     private final RollingConsole sysout = new RollingConsole(1000);
     private HostedAppInfo appInfo;
     private long lastMessageTimestamp = 0;
@@ -41,11 +42,12 @@ public class HostedAppDetailsView extends LazyInitRichAbstractView {
     private Timer timer;
     private ControlPanel controlPanel;
 
-    HostedAppDetailsView(EventBus eventBus, HostedAppInfo appInfo, PaasRestClient paasRestClient, String kibanaUrl) {
+    HostedAppDetailsView(EventBus eventBus, HostedAppInfo appInfo, PaasRestClient paasRestClient, String kibanaUrl, String monitoringUrl) {
         this.eventBus = eventBus;
         this.appInfo = appInfo;
         this.paasRestClient = paasRestClient;
         KIBANA_URL = kibanaUrl;
+        MONITORING_URL = monitoringUrl;
     }
 
     private void startTimer() {
@@ -90,12 +92,19 @@ public class HostedAppDetailsView extends LazyInitRichAbstractView {
     }
 
     private void openKibana() {
-        try {
+        openUrl(Links.substitute(KIBANA_URL, appInfo.getHostedAppDesc().getId()));
+    }
 
-            URI url = new URI(Links.substitute(KIBANA_URL, appInfo.getHostedAppDesc().getId()));
+    private void openMonitoring() {
+        openUrl(Links.substitute(MONITORING_URL, appInfo.getHostedAppDesc().getId()));
+    }
+
+    private void openUrl(String urlString) {
+        try {
+            URI url = new URI(urlString);
             Desktop.getDesktop().browse(url);
         } catch (URISyntaxException | IOException e) {
-            LoggerFactory.getLogger(getClass()).error("Can't open Kibana url", e);
+            LoggerFactory.getLogger(getClass()).error("Can't open url", e);
         }
     }
 
@@ -166,6 +175,7 @@ public class HostedAppDetailsView extends LazyInitRichAbstractView {
                     .north(vBox(4,
                             appStatus,
                             button("Browse logs in Kibana (if ELK provisioned)", HostedAppDetailsView.this::openKibana),
+                            button("Open monitoring (if provisioned)", HostedAppDetailsView.this::openMonitoring),
                             button("Restart", this::restart),
                             button("Stop", this::stop),
                             button("Undeploy", this::undeploy)

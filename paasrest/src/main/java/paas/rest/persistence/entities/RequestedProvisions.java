@@ -12,8 +12,8 @@ public class RequestedProvisions {
                 requestedProvisions.isWantsDB(),
                 requestedProvisions.isWantsFileStorage(),
                 requestedProvisions.isWantsLogstash(),
-                requestedProvisions.isWantsLogging()
-
+                requestedProvisions.isWantsLogging(),
+                requestedProvisions.isWantsMonitoring()
         );
     }
 
@@ -21,12 +21,14 @@ public class RequestedProvisions {
     private boolean wantsFileStorage;
     private boolean wantsLogstash;
     private boolean wantsLogging;
+    private boolean wantsMonitoring;
 
-    RequestedProvisions(boolean wantsDB, boolean wantsFileStorage, boolean wantsLogstash, boolean wantsLogging) {
+    RequestedProvisions(boolean wantsDB, boolean wantsFileStorage, boolean wantsLogstash, boolean wantsLogging, boolean wantsMonitoring) {
         this.wantsDB = wantsDB;
         this.wantsFileStorage = wantsFileStorage;
         this.wantsLogstash = wantsLogstash;
         this.wantsLogging = wantsLogging;
+        this.wantsMonitoring = wantsMonitoring;
     }
 
     protected RequestedProvisions() {
@@ -64,7 +66,15 @@ public class RequestedProvisions {
         this.wantsLogging = wantsLogging;
     }
 
+    public boolean isWantsMonitoring() {
+        return wantsMonitoring;
+    }
+
+    public void setWantsMonitoring(boolean wantsMonitoring) {
+        this.wantsMonitoring = wantsMonitoring;
+    }
+
     HostedAppRequestedProvisions toDto() {
-        return new HostedAppRequestedProvisions(wantsDB, wantsFileStorage, wantsLogstash, wantsLogging);
+        return new HostedAppRequestedProvisions(wantsDB, wantsFileStorage, wantsLogstash, wantsLogging, wantsMonitoring);
     }
 }

@@ -58,6 +58,7 @@ public class PaasRestClient {
                 .param("wantsFileStorage", requestedProvisions.isWantsFileStorage())
                 .param("wantsLogstash", requestedProvisions.isWantsLogstash())
                 .param("wantsLogging", requestedProvisions.isWantsLogging())
+                .param("wantsMonitoring", requestedProvisions.isWantsMonitoring())
                 .contentType(MediaType.MULTIPART_FORM_DATA)
                 .httpBasic(loginData.getUsername(), loginData.getPassword())
                 .execute();
@@ -73,6 +74,7 @@ public class PaasRestClient {
                 .param("wantsFileStorage", requestedProvisions.isWantsFileStorage())
                 .param("wantsLogstash", requestedProvisions.isWantsLogstash())
                 .param("wantsLogging", requestedProvisions.isWantsLogging())
+                .param("wantsMonitoring", requestedProvisions.isWantsMonitoring())
                 .httpBasic(loginData.getUsername(), loginData.getPassword())
                 .contentType(MediaType.MULTIPART_FORM_DATA);
         if(newJarFile != null)

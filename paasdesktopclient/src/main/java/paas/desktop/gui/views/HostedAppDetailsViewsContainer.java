@@ -82,7 +82,8 @@ public class HostedAppDetailsViewsContainer extends LazyInitRichAbstractView {
         if (tabsMap.containsKey(appId)) {
             cardPanel.showCard(String.valueOf(appId));
         } else {
-            HostedAppDetailsView hostedAppDetailsView = new HostedAppDetailsView(eventBus, appInfo, paasRestClient, getKibanaUrl());
+            HostedAppDetailsView hostedAppDetailsView =
+                    new HostedAppDetailsView(eventBus, appInfo, paasRestClient, getKibanaUrl(), getMonitoringUrl());
             tabsMap.put(appId, hostedAppDetailsView);
 
             String key = String.valueOf(appId);
@@ -97,5 +98,9 @@ public class HostedAppDetailsViewsContainer extends LazyInitRichAbstractView {
 
     private String getKibanaUrl() {
         return loginData.getServerUrl() + Links.KIBANA;
+    }
+
+    private String getMonitoringUrl() {
+        return loginData.getServerUrl() + Links.MONITOR;
     }
 }

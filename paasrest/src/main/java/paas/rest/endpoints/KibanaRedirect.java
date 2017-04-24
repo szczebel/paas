@@ -14,9 +14,9 @@ public class KibanaRedirect {
 
     @GetMapping(Links.KIBANA)
     public String kibanaRedirect(@PathVariable long appId) {
-                    String url= kibanaHost + "/app/kibana?#/discover?_g=(refreshInterval:(display:Off,pause:!f,value:0),time:(from:now-15m,mode:quick,to:now))&_a=(columns:!(level,message,logger_name),index:'logstash-*',interval:auto,query:(query_string:(analyze_wildcard:!t,query:'logger_name:HostedApp.appId." +
-                    appId +
-                    "')),sort:!('@timestamp',asc))";
-                    return "redirect:" + url;
+        String url = kibanaHost + "/app/kibana?#/discover?_g=(refreshInterval:(display:Off,pause:!f,value:0),time:(from:now-15m,mode:quick,to:now))&_a=(columns:!(level,message,logger_name),index:'logstash-*',interval:auto,query:(query_string:(analyze_wildcard:!t,query:'logger_name:HostedApp.appId." +
+                appId +
+                "')),sort:!('@timestamp',asc))";
+        return "redirect:" + url;
     }
 }

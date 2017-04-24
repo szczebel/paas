@@ -27,6 +27,11 @@ public class Provisioner {
     @Value("${logstash.endpoint}")
     private String logstashEndpoint;
 
+    @Value("${server.contextPath}")
+    private String contextPath;
+    @Value("${spring.boot.admin.context-path}")
+    private String monitoringPath;
+
 
     public Provisions createProvisionsFor(HostedAppDescriptor hostedAppDescriptor) throws IOException {
         File appWorkDir = fileSystemStorageService.createWorkDirFor(hostedAppDescriptor.getLocalJarName());
@@ -36,6 +41,7 @@ public class Provisioner {
         if (requestedProvisions.isWantsFileStorage()) storageDirectoryArg(appWorkDir, additionalCommandLine);
         if (requestedProvisions.isWantsDB()) dbArgs(appWorkDir, additionalCommandLine);
         if (requestedProvisions.isWantsLogstash()) logstashArg(additionalCommandLine);
+        if (requestedProvisions.isWantsMonitoring()) monitoringArg(additionalCommandLine, hostedAppDescriptor.getId());
 
         return new Provisions(
                 appWorkDir,
@@ -65,4 +71,13 @@ public class Provisioner {
     private void logstashArg(Collection<String> commandLine) {
         commandLine.add("--paas.logstash.url=" + logstashEndpoint);
     }
+
+    private void monitoringArg(Collection<String> commandLine, long appId) {
+        // todo: get rid of hardcoded host
+        String monitorUrl = "http://localhost:8080" + contextPath + monitoringPath;
+        commandLine.add("--spring.boot.admin.url=" + monitorUrl);
+        commandLine.add("--spring.application.name=PaaS.HostedApp."+ appId);
+        commandLine.add("--management.security.enabled=false");
+    }
+
 }

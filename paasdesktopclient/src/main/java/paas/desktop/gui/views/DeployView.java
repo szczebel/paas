@@ -32,6 +32,7 @@ public class DeployView extends LazyInitRichAbstractView {
     private JCheckBox wantsStorage;
     private JCheckBox wantsLogstash;
     private JCheckBox wantsLogging;
+    private JCheckBox wantsMonitoring;
 
     @Autowired
     public DeployView(EventBus eventBus, PaasRestClient paasRestClient) {
@@ -51,10 +52,12 @@ public class DeployView extends LazyInitRichAbstractView {
         wantsStorage = new JCheckBox("I want disk space");
         wantsLogstash = new JCheckBox("I want a Logstash url");
         wantsLogging = new JCheckBox("I want my System.out logs published to ELK");
+        wantsMonitoring = new JCheckBox("I want monitoring");
 
         return FormBuilder.create()
                 .columns("right:pref:none, ${label-component-gap}, pref:grow, ${label-component-gap}, pref:none")
                 .rows("pref:none, $lg, " +
+                        "pref:none, $lg, " +
                         "pref:none, $lg, " +
                         "pref:none, $lg, " +
                         "pref:none, $lg, " +
@@ -72,7 +75,8 @@ public class DeployView extends LazyInitRichAbstractView {
                 .add(wantsStorage).xyw(1, 9, 5)
                 .add(wantsLogstash).xyw(1, 11, 5)
                 .add(wantsLogging).xyw(1, 13, 5)
-                .add(button(getDeployLabel(), this::deployClick)).xyw(1, 15, 5)
+                .add(wantsMonitoring).xyw(1, 15, 5)
+                .add(button(getDeployLabel(), this::deployClick)).xyw(1, 17, 5)
                 .build();
     }
 
@@ -93,7 +97,8 @@ public class DeployView extends LazyInitRichAbstractView {
                         wantsDb.isSelected(),
                         wantsStorage.isSelected(),
                         wantsLogstash.isSelected(),
-                        wantsLogging.isSelected()
+                        wantsLogging.isSelected(),
+                        wantsMonitoring.isSelected()
                 ));
     }
 
@@ -103,6 +108,7 @@ public class DeployView extends LazyInitRichAbstractView {
         wantsStorage.setSelected(desc.getRequestedProvisions().isWantsFileStorage());
         wantsLogstash.setSelected(desc.getRequestedProvisions().isWantsLogstash());
         wantsLogging.setSelected(desc.getRequestedProvisions().isWantsLogging());
+        wantsMonitoring.setSelected(desc.getRequestedProvisions().isWantsMonitoring());
     }
 
     private void deployClick() {

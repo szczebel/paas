@@ -56,7 +56,7 @@ public class DesktopClientEndpoint {
         String jarFileName = file.getOriginalFilename();
         if(!DESKTOP_CLIENT_JAR_NAME.equals(jarFileName)) throw new IllegalArgumentException("Expected " + DESKTOP_CLIENT_JAR_NAME);
         fileSystemStorageService.saveDesktopClientJar(file);
-        addServerInfo(fileSystemStorageService.getDesktopClientJar(), getServerUrl(req));
+        addServerInfo(fileSystemStorageService.getDesktopClientJar(), ServerUrl.getServerUrl(req));
         return "OK";
     }
 
@@ -76,13 +76,4 @@ public class DesktopClientEndpoint {
             }
         }
     }
-
-    private String getServerUrl(HttpServletRequest request) {
-        String scheme = request.getScheme();
-        String serverName = request.getServerName();
-        int serverPort = request.getServerPort();
-        String contextPath = request.getContextPath();  // includes leading forward slash
-        return scheme + "://" + serverName + ":" + serverPort + contextPath;
-    }
-
 }

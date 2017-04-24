@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
+    <!--todo springProperty stopped working after adding spring-boot-admin -->
     <springProperty name="logstash.destination" source="logstash.endpoint"/>
     <appender name="STASH" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
-        <destination>${logstash.destination}</destination>
+        <!--<destination>${logstash.destination}</destination>-->
+        <destination>localhost:5001</destination>
 
         <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
             <providers>

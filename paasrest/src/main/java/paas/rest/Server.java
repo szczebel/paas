@@ -1,5 +1,6 @@
 package paas.rest;
 
+import de.codecentric.boot.admin.config.EnableAdminServer;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
@@ -29,10 +30,13 @@ import paas.procman.JavaProcessManager;
 import paas.rest.service.security.Role;
 import paas.rest.service.security.UserService;
 
-
 //fixme: Tomcat session created for each rest call!!!
+//todo: monitoring security
+//todo: management.security of monitored app
+//todo: monitoring notifications
 
 @SpringBootApplication
+@EnableAdminServer
 public class Server extends SpringBootServletInitializer {
 
     public static void main(String[] args) {

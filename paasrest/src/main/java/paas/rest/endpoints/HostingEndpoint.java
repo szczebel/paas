@@ -34,10 +34,11 @@ public class HostingEndpoint {
             @RequestParam boolean wantsFileStorage,
             @RequestParam boolean wantsLogstash,
             @RequestParam boolean wantsLogging,
+            @RequestParam boolean wantsMonitoring,
             Principal principal
             ) throws IOException, InterruptedException {
         return "Deployed. App ID:" + hostingService.newDeployment(principal.getName(), file, commandLineArgs,
-                new HostedAppRequestedProvisions(wantsDB, wantsFileStorage, wantsLogstash, wantsLogging));
+                new HostedAppRequestedProvisions(wantsDB, wantsFileStorage, wantsLogstash, wantsLogging, wantsMonitoring));
     }
 
 
@@ -58,10 +59,11 @@ public class HostingEndpoint {
             @RequestParam boolean wantsDB,
             @RequestParam boolean wantsFileStorage,
             @RequestParam boolean wantsLogstash,
-            @RequestParam boolean wantsLogging
-    ) throws IOException, InterruptedException {
+            @RequestParam boolean wantsLogging,
+            @RequestParam boolean wantsMonitoring
+            ) throws IOException, InterruptedException {
         hostingService.redeploy(appId, file, commandLineArgs,
-                new HostedAppRequestedProvisions(wantsDB, wantsFileStorage, wantsLogstash, wantsLogging));
+                new HostedAppRequestedProvisions(wantsDB, wantsFileStorage, wantsLogstash, wantsLogging, wantsMonitoring));
         return "Redeployed";
     }
 

@@ -6,12 +6,14 @@ public class HostedAppRequestedProvisions {
     private boolean wantsFileStorage;
     private boolean wantsLogstash;
     private boolean wantsLogging;
+    private boolean wantsMonitoring;
 
-    public HostedAppRequestedProvisions(boolean wantsDB, boolean wantsFileStorage, boolean wantsLogstash, boolean wantsLogging) {
+    public HostedAppRequestedProvisions(boolean wantsDB, boolean wantsFileStorage, boolean wantsLogstash, boolean wantsLogging, boolean wantsMonitoring) {
         this.wantsDB = wantsDB;
         this.wantsFileStorage = wantsFileStorage;
         this.wantsLogstash = wantsLogstash;
         this.wantsLogging = wantsLogging;
+        this.wantsMonitoring = wantsMonitoring;
     }
 
     public HostedAppRequestedProvisions() {
@@ -47,5 +49,13 @@ public class HostedAppRequestedProvisions {
 
     public void setWantsLogging(boolean wantsLogging) {
         this.wantsLogging = wantsLogging;
+    }
+
+    public boolean isWantsMonitoring() {
+        return wantsMonitoring;
+    }
+
+    public void setWantsMonitoring(boolean wantsMonitoring) {
+        this.wantsMonitoring = wantsMonitoring;
     }
 }

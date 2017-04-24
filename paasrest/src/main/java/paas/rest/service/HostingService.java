@@ -57,7 +57,7 @@ public class HostingService {
         return hostedAppDescriptor.getId();
     }
 
-    @PreAuthorize("hasRole('"+USER+"') AND @ownershipChecker.isCurrentUserOwnerOfAppId(authentication, #appId)")
+    @PreAuthorize("hasRole('" + USER + "') AND @ownershipChecker.isCurrentUserOwnerOfAppId(authentication, #appId)")
     public long redeploy(long appId, MultipartFile newJarFile, String commandLineArgs, HostedAppRequestedProvisions requestedProvisions) throws IOException, InterruptedException {
         HostedAppDescriptor hostedAppDescriptor = hostedAppDescriptorRepository.findOne(appId);
         return redeploy(hostedAppDescriptor, newJarFile, commandLineArgs, requestedProvisions);
@@ -110,7 +110,7 @@ public class HostingService {
         undeploy(hostedAppDescriptor);
     }
 
-    @PreAuthorize("hasRole('"+ADMIN+"') OR (#hostedAppDescriptor.owner == authentication.name)")
+    @PreAuthorize("hasRole('" + ADMIN + "') OR (#hostedAppDescriptor.owner == authentication.name)")
     protected void undeploy(HostedAppDescriptor hostedAppDescriptor) throws InterruptedException, IOException {
         processManager.stopAndRemoveIfExists(hostedAppDescriptor.getId());
         fileSystemStorageService.deleteUpload(hostedAppDescriptor.getLocalJarName());
@@ -130,12 +130,12 @@ public class HostingService {
         }
     }
 
-    @PreAuthorize("hasRole('"+ADMIN+"') OR @ownershipChecker.isCurrentUserOwnerOfAppId(authentication, #appId)")
+    @PreAuthorize("hasRole('" + ADMIN + "') OR @ownershipChecker.isCurrentUserOwnerOfAppId(authentication, #appId)")
     public void stop(long appId) throws InterruptedException {
         processManager.findById(appId).ifPresent(JavaProcess::stop);
     }
 
-    @PreAuthorize("hasRole('"+USER+"') AND @ownershipChecker.isCurrentUserOwnerOfAppId(authentication, #appId)")
+    @PreAuthorize("hasRole('" + USER + "') AND @ownershipChecker.isCurrentUserOwnerOfAppId(authentication, #appId)")
     public void restart(long appId) throws InterruptedException, IOException {
         Optional<JavaProcess> appProcess = processManager.findById(appId);
         if (appProcess.isPresent()) {
@@ -146,7 +146,7 @@ public class HostingService {
         }
     }
 
-    @PreAuthorize("hasRole('"+ADMIN+"') OR @ownershipChecker.isCurrentUserOwnerOfAppId(authentication, #appId)")
+    @PreAuthorize("hasRole('" + ADMIN + "') OR @ownershipChecker.isCurrentUserOwnerOfAppId(authentication, #appId)")
     public List<DatedMessage> tailSysout(long appId, long timestamp) {
         Optional<JavaProcess> p = processManager.findById(appId);
         if (p.isPresent())
@@ -155,8 +155,8 @@ public class HostingService {
             return Collections.emptyList();
     }
 
-    @PreAuthorize("hasRole('"+USER+"') OR hasRole('"+ADMIN+"')")
-    @PostFilter("hasRole('"+ADMIN+"') OR (filterObject.hostedAppDesc.owner == authentication.name)")
+    @PreAuthorize("hasRole('" + USER + "') OR hasRole('" + ADMIN + "')")
+    @PostFilter("hasRole('" + ADMIN + "') OR (filterObject.hostedAppDesc.owner == authentication.name)")
     public List<HostedAppInfo> getApplications() {
         return hostedAppDescriptorRepository.findAll()
                 .stream().map(this::info).collect(toList());
