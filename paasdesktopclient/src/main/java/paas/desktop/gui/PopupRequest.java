@@ -4,8 +4,7 @@ import java.util.function.Consumer;
 
 public enum PopupRequest {
     LOGIN(MainFrameOverlay::showLogin),
-    REGISTRATION(MainFrameOverlay::showRegistration),
-    NEW_VERSION(MainFrameOverlay::tellUserAboutNewVersion);
+    REGISTRATION(MainFrameOverlay::showRegistration);
 
     private final Consumer<MainFrameOverlay> invoker;
     PopupRequest(Consumer<MainFrameOverlay> invoker) {

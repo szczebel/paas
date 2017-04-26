@@ -1,6 +1,7 @@
 package paas.rest;
 
 import de.codecentric.boot.admin.config.EnableAdminServer;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
@@ -33,7 +34,7 @@ import paas.rest.service.security.UserService;
 //fixme: Tomcat session created for each rest call!!!
 //todo: monitoring security
 //todo: management.security of monitored app
-//todo: monitoring notifications
+//to do later: monitoring notifications -> email to owner -> requires identity management app
 
 @SpringBootApplication
 @EnableAdminServer
@@ -62,9 +63,11 @@ public class Server extends SpringBootServletInitializer {
     @ControllerAdvice
     static class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
+        private static final Logger LOGGER = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+
         @ExceptionHandler(value = {Exception.class})
         protected ResponseEntity<Object> onException(Exception ex, WebRequest request) {
-            LoggerFactory.getLogger(getClass()).debug("Webrequest " + request.getDescription(true) + " failed with exception", ex);
+            LOGGER.debug("Webrequest " + request.getDescription(true) + " failed with exception", ex);
             return handleExceptionInternal(ex, ex.getClass().getSimpleName() + " : " + ex.getMessage(),
                     new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
         }

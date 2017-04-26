@@ -2,7 +2,6 @@ package paas.shared;
 
 public class Links {
     public static final String REGISTER = "/unrestricted/register";
-
     public static final String DESKTOP_CLIENT_BUILD_TIMESTAMP = "/unrestricted/desktopClientLastModified";
     public static final String PAAS_DESKTOP_CLIENT_JAR = "/unrestricted/PaaSDesktopClient.jar";
     public static final String KIBANA = "/unrestricted/kibana/{appId}";
@@ -12,13 +11,14 @@ public class Links {
     public static final String ADMIN_GET_SHELL_OUTPUT = "/admin/getShellOutput";
     public static final String ADMIN_UPLOAD_DESKTOP_CLIENT = "/admin/uploadDesktopClient";
 
-    public static final String APPLICATIONS = "/applications";
-    public static final String DEPLOY = "/deploy";
-    public static final String REDEPLOY = "/redeploy";
-    public static final String UNDEPLOY = "/undeploy";
-    public static final String RESTART = "/restart";
-    public static final String STOP = "/stop";
-    public static final String TAIL_SYSOUT = "/tailSysout";
+    public static final String APPLICATIONS = "/hosting/applications";
+    public static final String DEPLOY = "/hosting/deploy";
+    public static final String REDEPLOY = "/hosting/redeploy";
+    public static final String UNDEPLOY = "/hosting/undeploy";
+    public static final String RESTART = "/hosting/restart";
+    public static final String STOP = "/hosting/stop";
+    public static final String TAIL_SYSOUT = "/hosting/tailSysout";
+
     public static final String WHOAMI = "/whoami";
 
     public static String substitute(String template, Object... actuals){

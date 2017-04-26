@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
+
+    <include resource="org/springframework/boot/logging/logback/defaults.xml" />
+    <property name="LOG_FILE" value="${LOG_FILE:-${LOG_PATH:-${LOG_TEMP:-${java.io.tmpdir:-/tmp}}/}spring.log}"/>
+    <include resource="org/springframework/boot/logging/logback/file-appender.xml" />
+    <include resource="org/springframework/boot/logging/logback/console-appender.xml" />
+
     <!--todo springProperty stopped working after adding spring-boot-admin -->
     <springProperty name="logstash.destination" source="logstash.endpoint"/>
     <appender name="STASH" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
@@ -25,18 +31,14 @@
         </encoder>
     </appender>
 
-    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
-        <encoder>
-            <pattern>[%thread] %-5level %logger{35} - %msg %n</pattern>
-        </encoder>
-    </appender>
-
     <root level="INFO">
-        <appender-ref ref="STDOUT"/>
-        <appender-ref ref="STASH"/>
+        <appender-ref ref="FILE" />
+        <!--comment out CONSOLE for prod-->
+        <!--<appender-ref ref="CONSOLE" />-->
     </root>
 
     <logger name="HostedAppLogger" level="INFO">
+        <appender-ref ref="STASH"/>
     </logger>
 
 </configuration>
