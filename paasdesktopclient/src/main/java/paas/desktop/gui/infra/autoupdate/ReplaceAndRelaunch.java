@@ -15,8 +15,8 @@ import static paas.desktop.gui.infra.autoupdate.Autoupdate.NEW_VERSION_FILENAME_
 public class ReplaceAndRelaunch {
 
     public static void replaceAndRelaunch() {
+        Splash splash = new ImageSplash(new ImageIcon(ReplaceAndRelaunch.class.getResource("/splash.png")), null);
         try {
-            Splash splash = new ImageSplash(new ImageIcon(ReplaceAndRelaunch.class.getResource("/splash.png")), null);
             splash.show();
             Path myJarPath = Paths.get(MyJar.getAbsolutePath());
             String filename = myJarPath.getFileName().toString();
@@ -32,6 +32,8 @@ public class ReplaceAndRelaunch {
             }
         } catch (Exception e) {
             JOptionPane.showMessageDialog(null, "Replacing the version failed with " + e.getClass() + " : " + e.getMessage());
+        } finally {
+            splash.close();
         }
     }
 }

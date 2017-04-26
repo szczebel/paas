@@ -1,5 +1,6 @@
 package paas.desktop;
 
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
@@ -40,9 +41,14 @@ public class DesktopClient {
     CommandLineRunner autoupdateCleanup() {
         return args -> {
             if (args.length == 1 && Autoupdate.AUTOUPDATE_CLEANUP.equals(args[0])) {
-                String toDelete = MyJar.getAbsolutePath() + Autoupdate.NEW_VERSION_FILENAME_SUFFIX;
-                LoggerFactory.getLogger(Autoupdate.class).info("Cleanup - will delete " + toDelete);
-                Files.deleteIfExists(Paths.get(toDelete));
+                Logger logger = LoggerFactory.getLogger(Autoupdate.class);
+                try {
+                    String toDelete = MyJar.getAbsolutePath() + Autoupdate.NEW_VERSION_FILENAME_SUFFIX;
+                    logger.info("Cleanup - will delete " + toDelete);
+                    Files.deleteIfExists(Paths.get(toDelete));
+                } catch (Exception e) {
+                    logger.warn("Cleanup failed", e);
+                }
             }
         };
     }
