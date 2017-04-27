@@ -176,10 +176,11 @@ public class HostedAppDetailsView extends LazyInitRichAbstractView {
                             appStatus,
                             button("Browse logs in Kibana (if ELK provisioned)", HostedAppDetailsView.this::openKibana),
                             button("Open monitoring (if provisioned)", HostedAppDetailsView.this::openMonitoring),
-                            button("Restart", this::restart),
-                            button("Stop", this::stop),
-                            button("Undeploy", this::undeploy)
-                            )
+                            gridLayout(1, 3,
+                                    button("Restart", this::restart),
+                                    button("Stop", this::stop),
+                                    button("Undeploy", this::undeploy)
+                            ))
                     )
                     .center(decorate(redeployComponent).withTitledSeparator("Reconfigure deployment:").get())
                     .build();

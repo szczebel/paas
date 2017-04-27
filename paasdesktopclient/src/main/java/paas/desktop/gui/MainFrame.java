@@ -58,23 +58,26 @@ public class MainFrame extends RichFrame {
     }
 
     private JComponent buildContent() {
-        hostedAppsListView.getComponent().setPreferredSize(new Dimension(100, 200));
+        hostedAppsListView.getComponent().setPreferredSize(new Dimension(800, 200));//to secure some width
         JComponent north = borderLayout()
                 .west(dec(deployView.getComponent(), "New deployment", 0, MARGIN, MARGIN / 2, MARGIN / 2))
                 .center(dec(hostedAppsListView.getComponent(), "Hosted applications", 0, MARGIN / 2, MARGIN / 2, MARGIN))
                 .build();
         JComponent container = hostedAppDetailsViewsContainer.getComponent();
-        container.setPreferredSize(new Dimension(1300, 600));
 
         JComponent appsTab = borderLayout()
                 .north(north)
                 .center(container)
                 .build();
 
+        JComponent docsViewComponent = docsView.getComponent();
+        //this guys stretches the window too tall, so will reduce it
+        docsViewComponent.setPreferredSize(new Dimension(1000, 800));
+
         return cardLayout(CardMenuBuilders.BorderedOrange()
                 .menuBarCustomizer(this::customizeMenuBar))
                 .addTab("Applications", appsTab)
-                .addTab("Documentation", docsView.getComponent())
+                .addTab("Documentation", docsViewComponent)
                 .addTab("For admins", adminView.getComponent())
                 .addTab("My error log", selfLogView.getComponent())
                 .onCardChange((prevCard, newCard) -> {
