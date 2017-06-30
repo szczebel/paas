@@ -44,7 +44,8 @@ public class JavaProcess {
 
     private Process spawn() throws IOException, InterruptedException {
         this.start = ZonedDateTime.now();
-        List<String> commands = new ArrayList<>(asList(JAVA_BIN, "-jar", jarFile.getAbsolutePath()));
+        String jvmOptions = "-Djava.security.egd=file:/dev/./urandom";//todo: make it configurable by deployment, add to deployment description
+        List<String> commands = new ArrayList<>(asList(JAVA_BIN, jvmOptions, "-jar", jarFile.getAbsolutePath()));
         commands.addAll(commandLineArgs);
         Process p = new ProcessBuilder()
                 .command(commands)

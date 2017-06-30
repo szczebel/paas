@@ -150,12 +150,7 @@ public class HostedAppDetailsView extends LazyInitRichAbstractView {
         private final DateFormat df = new SimpleDateFormat("yyyy-MMM-dd HH:mm:ss");
 
         private JLabel appStatus = label(getStatusText(), LEFT, BOLD);
-        private RedeployForm redeployForm = new RedeployForm() {
-            @Override
-            protected ProgressIndicator getProgressIndicator() {
-                return ControlPanel.this.getProgressIndicator();
-            }
-        };
+        private RedeployForm redeployForm = new RedeployForm();
 
         private String getStatusText() {
             Date started = appInfo.getHostedAppStatus().getStarted();
@@ -201,26 +196,31 @@ public class HostedAppDetailsView extends LazyInitRichAbstractView {
         private void updateApp(Callable<String> task) {
             inBackground(task, res -> eventBus.dispatchEvent(Events.APP_UPDATED));
         }
-    }
 
-    class RedeployForm extends DeployView {
-        RedeployForm() {
-            super(eventBus, paasRestClient);
-        }
+        class RedeployForm extends DeployView {
+            RedeployForm() {
+                super(eventBus, paasRestClient);
+            }
 
-        @Override
-        protected ValidationErrors validate(DeployFormObject fo) {
-            return ValidationErrors.empty();//allow no file selected
-        }
+            @Override
+            protected ProgressIndicator getProgressIndicator() {
+                return ControlPanel.this.getProgressIndicator();
+            }
 
-        @Override
-        protected String deploy(DeployFormObject fo) throws IOException, InterruptedException {
-            return paasRestClient.redeploy(appInfo.getHostedAppDesc().getId(), fo.jarFile, fo.commandLineArgs, fo.requestedProvisions);
-        }
+            @Override
+            protected ValidationErrors validate(DeployFormObject fo) {
+                return ValidationErrors.empty();//allow no file selected
+            }
 
-        @Override
-        String getDeployLabel() {
-            return "Redeploy";
+            @Override
+            protected String deploy(DeployFormObject fo) throws IOException, InterruptedException {
+                return paasRestClient.redeploy(appInfo.getHostedAppDesc().getId(), fo.jarFile, fo.commandLineArgs, fo.requestedProvisions);
+            }
+
+            @Override
+            String getDeployLabel() {
+                return "Redeploy";
+            }
         }
     }
 }
