@@ -47,7 +47,7 @@ public class Autoupdate {
     };
 
     @SuppressWarnings("unused")
-    @PostConstruct
+    @PostConstruct //todo consider controlled startup sequence instead (possible race condition and dead letters)
     void initialize() {
         this.myBuildTimestamp = getMyBuildTimestamp();
         logger.info("My build timestamp : " + myBuildTimestamp);

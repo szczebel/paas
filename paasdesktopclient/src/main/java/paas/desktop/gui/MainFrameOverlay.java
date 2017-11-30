@@ -15,7 +15,6 @@ import swingutils.layout.SnapToCorner;
 import swingutils.mdi.MDI;
 import swingutils.mdi.SelfCloseable;
 
-import javax.annotation.PostConstruct;
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
@@ -44,9 +43,7 @@ public class MainFrameOverlay {
 
     private MDI overlayMDI;
 
-
-    @PostConstruct
-    void init() {
+    public void init() {
         mainFrame.getOverlay().setNonModalLayout(new SnapToCorner(8));
         overlayMDI = MDI.create(mainFrame.getOverlay());
         eventBus.when(PopupRequest.class, (request) -> request.visit(this));

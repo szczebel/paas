@@ -9,6 +9,7 @@ import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.PropertySource;
 import paas.desktop.gui.MainFrame;
+import paas.desktop.gui.MainFrameOverlay;
 import paas.desktop.gui.infra.MyJar;
 import paas.desktop.gui.infra.autoupdate.Autoupdate;
 import swingutils.spring.application.SwingApplication;
@@ -54,8 +55,11 @@ public class DesktopClient {
     }
 
     @Bean
-    SwingEntryPoint swingEntryPoint(@Autowired MainFrame mainFrame, @Autowired Autoupdate autoupdate) {
+    SwingEntryPoint swingEntryPoint(@Autowired MainFrame mainFrame,
+                                    @Autowired Autoupdate autoupdate,
+                                    @Autowired MainFrameOverlay mainFrameOverlay) {
         return () -> {
+            mainFrameOverlay.init();
             mainFrame.buildAndShow();
             autoupdate.downloadIfAvailable();
         };
